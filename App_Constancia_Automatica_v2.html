@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Constancia de Responsabilidad</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        background-color: #e9ecef;
+        height: 100vh;
+      }
+      .sidebar {
+        width: 360px;
+        background: #f8f9fa;
+        padding: 24px 20px;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.12);
+        overflow-y: auto;
+        z-index: 10;
+        border-right: 1px solid #dee2e6;
+      }
+      .sidebar h2 {
+        font-size: 15px;
+        margin-top: 0;
+        color: #fff;
+        text-align: center;
+        background: linear-gradient(135deg, #0056b3, #007bff);
+        padding: 12px 10px;
+        border-radius: 8px;
+        margin-bottom: 18px;
+        letter-spacing: 0.5px;
+      }
+      .content {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        overflow-y: auto;
+      }
+      .document {
+        background: #fff;
+        width: 210mm; /* A4 width */
+        min-height: 297mm; /* A4 height */
+        padding: 25mm 20mm;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        box-sizing: border-box;
+      }
+      .header-img {
+        display: block;
+        width: 60%;
+        max-height: 100px;
+        object-fit: contain;
+        margin: 0 auto 30px auto;
+      }
+      h1 {
+        text-align: center;
+        font-size: 18px;
+        text-decoration: underline;
+        margin-bottom: 30px;
+        color: #000;
+      }
+      .document p {
+        line-height: 1.8;
+        text-align: justify;
+        font-size: 15px;
+        color: #000;
+        margin-bottom: 15px;
+      }
+      .bold {
+        font-weight: bold;
+      }
+      .signatures {
+        margin-top: 80px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .signature-block {
+        width: 40%;
+        text-align: center;
+      }
+      .line {
+        border-top: 1px solid #000;
+        margin-bottom: 10px;
+      }
+      .signature-block p {
+        text-align: center;
+        margin: 5px 0;
+        font-size: 14px;
+      }
+
+      /* Form Styles */
+      .form-group {
+        margin-bottom: 10px;
+      }
+      .section-title {
+        font-size: 11px;
+        font-weight: 700;
+        color: #fff;
+        background: #495057;
+        padding: 5px 10px;
+        border-radius: 4px;
+        margin: 14px 0 10px 0;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+      }
+      label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 4px;
+        font-size: 11px;
+        color: #495057;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+      }
+      input[type="text"] {
+        width: 100%;
+        padding: 9px 11px;
+        box-sizing: border-box;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 13px;
+        background: #fff;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        color: #212529;
+      }
+      input:focus {
+        border-color: #007bff;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+      }
+      .info-text {
+        font-size: 11px;
+        color: #28a745;
+        background: #e9f7ec;
+        border: 1px solid #c3e6cb;
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 14px;
+        font-style: italic;
+      }
+      .btn-print {
+        width: 100%;
+        padding: 13px;
+        background: linear-gradient(135deg, #1e7e34, #28a745);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 15px;
+        font-weight: bold;
+        margin-top: 22px;
+        box-shadow: 0 3px 8px rgba(40, 167, 69, 0.35);
+        letter-spacing: 0.5px;
+        transition:
+          background 0.2s,
+          box-shadow 0.2s,
+          transform 0.1s;
+      }
+      .btn-print:hover {
+        background: linear-gradient(135deg, #155724, #1e7e34);
+        box-shadow: 0 5px 12px rgba(40, 167, 69, 0.45);
+        transform: translateY(-1px);
+      }
+      .btn-print:active {
+        transform: translateY(0);
+      }
+
+      /* Print settings */
+      @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        body {
+          background: white;
+          height: auto;
+        }
+        .sidebar {
+          display: none;
+        }
+        .content {
+          padding: 0;
+          display: block;
+          overflow: visible;
+        }
+        .document {
+          box-shadow: none;
+          width: 100%;
+          padding: 25mm 20mm;
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sidebar">
+      <h2>📄 Datos de la Constancia</h2>
+
+      <div class="section-title">👤 Propietario / Cliente</div>
+
+      <div class="form-group">
+        <label>Nombre del Propietario</label>
+        <input
+          type="text"
+          id="in-ownerName"
+          value=""
+          placeholder="Nombre completo"
+        />
+      </div>
+      <div class="form-group">
+        <label>Número de Identidad</label>
+        <input
+          type="text"
+          id="in-ownerId"
+          value=""
+          placeholder="0000-0000-00000"
+        />
+      </div>
+
+      <div class="section-title">🏍️ Datos de la Motocicleta</div>
+
+      <div class="form-group">
+        <label>Marca / Modelo</label>
+        <input
+          type="text"
+          id="in-brand"
+          value=""
+          placeholder="Marca y modelo"
+        />
+      </div>
+      <div class="form-group">
+        <label>Número de Motor</label>
+        <input
+          type="text"
+          id="in-motor"
+          value=""
+          placeholder="Número de motor"
+        />
+      </div>
+      <div class="form-group">
+        <label>Número de Chasis</label>
+        <input
+          type="text"
+          id="in-chassis"
+          value=""
+          placeholder="Número de chasis"
+        />
+      </div>
+
+      <div class="section-title">🧑‍✈️ Responsable / Conductor</div>
+
+      <div class="form-group">
+        <label>Nombre del Conductor</label>
+        <input
+          type="text"
+          id="in-driverName"
+          value=""
+          placeholder="Nombre completo"
+        />
+      </div>
+      <div class="form-group">
+        <label>Número de Identidad</label>
+        <input
+          type="text"
+          id="in-driverId"
+          value=""
+          placeholder="0000-0000-00000"
+        />
+      </div>
+
+      <button class="btn-print" onclick="window.print()">
+        🖨️ IMPRIMIR CONSTANCIA
+      </button>
+    </div>
+
+    <div class="content">
+      <div class="document" id="printable-area">
+        <img
+          src="https://i.imgur.com/fafYb6c.png"
+          class="header-img"
+          alt="Encabezado de Constancia"
+        />
+        <h1>CONSTANCIA DE RESPONSABILIDAD</h1>
+
+        <p>
+          Mediante este documento legal yo,
+          <span class="bold" id="out-ownerName"></span>
+          con identidad
+          <span class="bold" id="out-ownerId"></span> hago constar que compre
+          una motocicleta con la empresa <span class="bold">MOLINEROS</span> en
+          la fecha <span class="bold" id="out-purchaseDate"></span> la cual
+          tiene la siguiente descripción:
+        </p>
+
+        <p style="margin-left: 40px; margin-top: 20px; margin-bottom: 20px">
+          <span class="bold">MARCA:</span>
+          <span id="out-brand"></span><br />
+          <span class="bold">MOTOR:</span>
+          <span id="out-motor"></span><br />
+          <span class="bold">CHASIS:</span>
+          <span id="out-chassis"></span>
+        </p>
+
+        <p>
+          Dicha motocicleta será manejada por el señor
+          <span class="bold" id="out-driverName"></span>
+          con número de identidad
+          <span class="bold" id="out-driverId"></span> por tal razón transfiero
+          la responsabilidad de este vehículo a la persona antes descrita.
+        </p>
+
+        <p>
+          Para dejar constancia y legalidad de lo antes descrito, firmo la
+          presente a los <span class="bold" id="out-signDay"></span> días del
+          mes de <span class="bold" id="out-signMonth"></span> del año
+          <span class="bold" id="out-signYear"></span>.
+        </p>
+
+        <div class="signatures">
+          <div class="signature-block">
+            <div class="line"></div>
+            <p>Firma Cliente</p>
+            <p># Identidad <span id="out-signClientId"></span></p>
+          </div>
+
+          <div class="signature-block">
+            <div class="line"></div>
+            <p>Responsable de</p>
+            <p># Identidad <span id="out-signRespId"></span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 1. Configurar Fecha Actual Automática
+      const today = new Date();
+      const day = today.getDate();
+      const months = [
+        "ENERO",
+        "FEBRERO",
+        "MARZO",
+        "ABRIL",
+        "MAYO",
+        "JUNIO",
+        "JULIO",
+        "AGOSTO",
+        "SEPTIEMBRE",
+        "OCTUBRE",
+        "NOVIEMBRE",
+        "DICIEMBRE",
+      ];
+      const month = months[today.getMonth()];
+      const year = today.getFullYear();
+
+      // Formato DD/MM/YYYY para la compra
+      const formattedDate = `${day < 10 ? "0" + day : day}/${today.getMonth() + 1 < 10 ? "0" + (today.getMonth() + 1) : today.getMonth() + 1}/${year}`;
+
+      document.getElementById("out-purchaseDate").textContent = formattedDate;
+      document.getElementById("out-signDay").textContent = day;
+      document.getElementById("out-signMonth").textContent = month;
+      document.getElementById("out-signYear").textContent = year;
+
+      // 2. Vincular Inputs con el texto (y con las firmas)
+      const mappings = {
+        "in-ownerName": ["out-ownerName"],
+        "in-ownerId": ["out-ownerId", "out-signClientId"], // La identidad del cliente se copia a la firma
+        "in-brand": ["out-brand"],
+        "in-motor": ["out-motor"],
+        "in-chassis": ["out-chassis"],
+        "in-driverName": ["out-driverName"],
+        "in-driverId": ["out-driverId", "out-signRespId"], // La identidad del conductor se copia a la firma responsable
+      };
+
+      for (let inputId in mappings) {
+        const input = document.getElementById(inputId);
+        input.addEventListener("input", function () {
+          mappings[inputId].forEach((outputId) => {
+            document.getElementById(outputId).textContent = this.value;
+          });
+        });
+      }
+    </script>
+  </body>
+</html>

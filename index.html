@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sistema Comercial Insular de los Fuertes</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
+        background: #f0f4f8;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        position: relative;
+        overflow-x: hidden;
+      }
+
+      /* Franja decorativa superior */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+        background: linear-gradient(90deg, #1a56db, #0ea5e9, #10b981);
+        z-index: 10;
+      }
+
+      /* Patron de fondo sutil */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          #c8d6e5 1px,
+          transparent 0
+        );
+        background-size: 28px 28px;
+        opacity: 0.45;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .brand {
+        text-align: center;
+        margin-bottom: 48px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .brand img {
+        max-height: 90px;
+        max-width: 300px;
+        object-fit: contain;
+        margin-bottom: 20px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.12));
+      }
+
+      .brand h1 {
+        color: #0f172a;
+        font-size: 22px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2.5px;
+        line-height: 1.4;
+      }
+
+      .brand p {
+        color: #64748b;
+        font-size: 12px;
+        margin-top: 6px;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
+      .divider {
+        width: 48px;
+        height: 3px;
+        background: linear-gradient(90deg, #1a56db, #0ea5e9);
+        border-radius: 99px;
+        margin: 16px auto 0;
+      }
+
+      /* Etiqueta de bienvenida */
+      .welcome-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #1a56db15, #0ea5e915);
+        border: 1px solid #1a56db30;
+        color: #1a56db;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        padding: 5px 14px;
+        border-radius: 99px;
+        margin-bottom: 14px;
+      }
+
+      .menu {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: center;
+        max-width: 940px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .menu-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        width: 220px;
+        padding: 32px 22px 28px;
+        text-align: center;
+        text-decoration: none;
+        color: #0f172a;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease,
+          border-color 0.2s ease;
+        cursor: pointer;
+        display: block;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Linea de acento superior en cada card */
+      .menu-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #1a56db, #0ea5e9);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+      }
+
+      .menu-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px rgba(26, 86, 219, 0.13);
+        border-color: #bfdbfe;
+      }
+
+      .menu-card:hover::before {
+        opacity: 1;
+      }
+
+      .menu-card:active {
+        transform: translateY(-2px);
+      }
+
+      .card-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 18px;
+        font-size: 20px;
+        font-weight: 800;
+        color: #1a56db;
+        letter-spacing: -1px;
+        transition: background 0.2s ease;
+      }
+
+      .menu-card:hover .card-icon {
+        background: linear-gradient(135deg, #1a56db, #0ea5e9);
+        color: #ffffff;
+      }
+
+      .card-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        margin-bottom: 8px;
+        color: #0f172a;
+      }
+
+      .card-desc {
+        font-size: 11.5px;
+        color: #64748b;
+        line-height: 1.65;
+        font-weight: 400;
+      }
+
+      /* Flecha de accion en hover */
+      .card-arrow {
+        display: inline-block;
+        margin-top: 16px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #1a56db;
+        letter-spacing: 0.5px;
+        opacity: 0;
+        transform: translateY(4px);
+        transition:
+          opacity 0.2s ease,
+          transform 0.2s ease;
+        text-transform: uppercase;
+      }
+
+      .menu-card:hover .card-arrow {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .footer-text {
+        margin-top: 50px;
+        color: #94a3b8;
+        font-size: 11px;
+        text-align: center;
+        letter-spacing: 0.5px;
+        position: relative;
+        z-index: 1;
+        font-weight: 500;
+      }
+
+      /* Navegacion interna via iframe */
+      #app-frame {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border: none;
+        z-index: 100;
+        background: #fff;
+      }
+
+      #btn-back {
+        display: none;
+        position: fixed;
+        top: 14px;
+        left: 14px;
+        z-index: 200;
+        background: #1a56db;
+        color: #fff;
+        border: none;
+        padding: 9px 20px;
+        font-size: 13px;
+        font-weight: 700;
+        border-radius: 8px;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 14px rgba(26, 86, 219, 0.35);
+        transition:
+          background 0.2s,
+          box-shadow 0.2s;
+        font-family: "Inter", "Segoe UI", Arial, sans-serif;
+      }
+
+      #btn-back:hover {
+        background: #1e40af;
+        box-shadow: 0 6px 18px rgba(26, 86, 219, 0.45);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menu-view">
+      <div class="brand">
+        <div class="welcome-badge">&#9679; Sistema Comercial</div>
+        <img
+          src="https://i.imgur.com/fafYb6c.png"
+          alt="Logo Comercial Insular"
+        />
+        <h1>Comercial Insular<br />de los Fuertes</h1>
+        <p>Roatan, Islas de la Bahia</p>
+        <div class="divider"></div>
+      </div>
+
+      <div class="menu">
+        <a
+          class="menu-card"
+          onclick="abrirApp('App_Constancia_Automatica_v2.html')"
+        >
+          <div class="card-icon">C</div>
+          <div class="card-title">Constancia</div>
+          <div class="card-desc">
+            Generar constancia de responsabilidad para motocicletas vendidas.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+        </a>
+
+        <a class="menu-card" onclick="abrirApp('dni.html')">
+          <div class="card-icon">ID</div>
+          <div class="card-title">Escaner DNI</div>
+          <div class="card-desc">
+            Digitalizar y exportar documento de identidad en tamano carta o PDF.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+        </a>
+
+        <a class="menu-card" onclick="abrirApp('Cotizacion.html')">
+          <div class="card-icon">Q</div>
+          <div class="card-title">Cotizacion</div>
+          <div class="card-desc">
+            Crear cotizaciones formales con productos, precios y totales
+            automaticos.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+        </a>
+
+        <a class="menu-card" onclick="abrirApp('precios.html')">
+          <div class="card-icon">$</div>
+          <div class="card-title">Precios</div>
+          <div class="card-desc">
+            Consultar la lista actualizada de precios y tarifas de productos.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+
+        </a> <a class="menu-card" onclick="abrirApp('gestion.html')">
+          <div class="card-icon">$</div>
+          <div class="card-title">Gestion de llamada</div>
+          <div class="card-desc">
+            Consultar la lista actualizada de precios y tarifas de productos.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+        </a>
+
+
+        <a class="menu-card" onclick="abrirApp('crediprecio.html')">
+          <div class="card-icon">CR</div>
+          <div class="card-title">Crediprecio</div>
+          <div class="card-desc">
+            Calcular y consultar planes de financiamiento y cuotas de crédito.
+          </div>
+          <span class="card-arrow">Abrir &rarr;</span>
+        </a>
+      </div>
+
+      <div class="footer-text">
+        Sistema de Documentos Internos &nbsp;&bull;&nbsp; Comercial Insular de
+        los Fuertes
+      </div>
+    </div>
+
+    <button id="btn-back" onclick="volverMenu()">&#8592; Volver al Menu</button>
+    <iframe id="app-frame" title="Aplicacion"></iframe>
+
+    <script>
+      function abrirApp(url) {
+        const frame = document.getElementById("app-frame");
+        const btnBack = document.getElementById("btn-back");
+        const menuView = document.getElementById("menu-view");
+
+        frame.src = url;
+        frame.style.display = "block";
+        btnBack.style.display = "block";
+        menuView.style.display = "none";
+      }
+
+      function volverMenu() {
+        const frame = document.getElementById("app-frame");
+        const btnBack = document.getElementById("btn-back");
+        const menuView = document.getElementById("menu-view");
+
+        frame.style.display = "none";
+        frame.src = "";
+        btnBack.style.display = "none";
+        menuView.style.display = "block";
+      }
+    </script>
+  </body>
+</html>

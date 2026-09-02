@@ -1,0 +1,2909 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestor de Clientes Pro v14 - Multi-Listas y Filtros</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght=400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary: #4f46e5;
+        --primary-light: #eef2ff;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --bg-color: #f3f4f6;
+        --card-bg: #ffffff;
+        --text-main: #1f2937;
+        --text-muted: #6b7280;
+
+        /* Colores Categorías */
+        --badge-oro: #d97706;
+        --badge-oro-bg: #fef3c7;
+        --badge-plata: #4b5563;
+        --badge-plata-bg: #f3f4f6;
+        --badge-premium: #7c3aed;
+        --badge-premium-bg: #f3e8ff;
+      }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        font-family: "Inter", sans-serif;
+      }
+      body {
+        background-color: var(--bg-color);
+        color: var(--text-main);
+        display: flex;
+        min-height: 100vh;
+        overflow: hidden;
+      }
+      .app-container {
+        display: flex;
+        width: 100%;
+        height: 100vh;
+      }
+
+      sidebar {
+        width: 260px;
+        background: var(--card-bg);
+        border-right: 1px solid #e5e7eb;
+        display: flex;
+        flex-direction: column;
+        padding: 20px 10px;
+      }
+      .brand {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: var(--primary);
+        padding: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .nav-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-grow: 1;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        cursor: pointer;
+        font-weight: 500;
+        gap: 12px;
+        padding: 12px 16px;
+        border-radius: 10px;
+        transition: all 0.2s ease;
+      }
+      .nav-item i {
+        font-size: 1.3rem;
+      }
+      .nav-item:hover {
+        background: #f9fafb;
+        color: var(--text-main);
+      }
+      .nav-item.active {
+        color: var(--primary);
+        background: var(--primary-light);
+        font-weight: 600;
+      }
+
+      .main-content {
+        flex-grow: 1;
+        padding: 30px;
+        overflow-y: auto;
+        height: 100vh;
+      }
+      .view {
+        display: none;
+      }
+      .view.active {
+        display: block;
+        animation: fadeIn 0.2s ease;
+      }
+
+      .view-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 4px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+      h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #111827;
+      }
+      .subtitle {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        margin-bottom: 25px;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 24px;
+        box-shadow:
+          0 1px 3px rgba(0, 0, 0, 0.05),
+          0 1px 2px rgba(0, 0, 0, 0.03);
+        margin-bottom: 20px;
+      }
+
+      .stats-grid,
+      .comparison-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        margin-bottom: 18px;
+      }
+
+      .card-header-split {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .btn-small {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+      }
+
+      .ventas-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .form-column {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 18px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .column-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #cbd5e1;
+      }
+
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .form-label {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #334155;
+      }
+
+      input[type="number"],
+      input[type="text"] {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 12px;
+        padding: 14px 16px;
+        font-size: 0.95rem;
+        color: #0f172a;
+        transition:
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      input[type="number"]:focus,
+      input[type="text"]:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 18px;
+        margin-bottom: 18px;
+      }
+
+      .stats-grid.conteo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      }
+
+      .stat-card,
+      .goal-card {
+        background: linear-gradient(135deg, #ffffff, #f8fbff);
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        border-radius: 20px;
+        box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        padding: 26px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        transition:
+          transform 0.25s ease,
+          box-shadow 0.25s ease;
+      }
+
+      .stat-card-large {
+        grid-column: span 2;
+      }
+
+      .stat-header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .stat-icon {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: rgba(37, 99, 235, 0.1);
+        color: #2563eb;
+        font-size: 1.3rem;
+      }
+
+      .stat-title {
+        display: block;
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .stat-note {
+        display: block;
+        font-size: 0.85rem;
+        color: #64748b;
+        margin-top: 4px;
+      }
+
+      .stat-card:hover,
+      .goal-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 22px 50px rgba(15, 23, 42, 0.12);
+      }
+
+      .stat-title,
+      .goal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .stat-value,
+      .goal-meta,
+      .goal-actual {
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #1d4ed8;
+      }
+
+      .goal-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .goal-icon {
+        width: 40px;
+        height: 40px;
+        display: grid;
+        place-items: center;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+        color: #1d4ed8;
+        border-radius: 12px;
+        font-size: 1.3rem;
+      }
+
+      .goal-summary {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.95rem;
+        color: #475569;
+      }
+
+      .goal-summary strong {
+        color: #0f172a;
+      }
+
+      .goal-progress {
+        width: 100%;
+        height: 14px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .goal-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #22c55e);
+        transition: width 0.35s ease;
+      }
+
+      .goal-diff {
+        font-size: 0.95rem;
+        color: #334155;
+        font-weight: 600;
+      }
+
+      .goal-card .goal-title {
+        margin: 0;
+      }
+
+      .stat-note {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+      }
+
+      .goal-values {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      .goal-progress {
+        width: 100%;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+      }
+
+      .goal-bar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #22c55e);
+        transition: width 0.35s ease;
+      }
+
+      .goal-diff {
+        font-size: 0.95rem;
+        color: #334155;
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      .goal-card h2 {
+        margin-bottom: 12px;
+      }
+
+      textarea,
+      input[type="text"],
+      select {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 0.9rem;
+        outline: none;
+        background: #f9fafb;
+        color: var(--text-main);
+        transition: all 0.2s;
+      }
+      textarea {
+        height: 140px;
+        resize: none;
+        margin-bottom: 15px;
+      }
+      textarea:focus,
+      input[type="text"]:focus,
+      select:focus {
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+      .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+        display: block;
+      }
+
+      button {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      button:active {
+        transform: scale(0.98);
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+      }
+      .btn-primary:hover {
+        background: #4338ca;
+      }
+      .btn-danger-icon {
+        background: #fee2e2;
+        color: var(--danger);
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 1.2rem;
+      }
+      .btn-danger-icon:hover {
+        background: #fecaca;
+      }
+
+      /* Controles de Lista y Filtros */
+      .list-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: #f9fafb;
+        padding: 6px;
+        border-radius: 10px;
+        border: 1px solid #e5e7eb;
+      }
+      .list-controls select {
+        background: #fff;
+        border: 1px solid #d1d5db;
+        min-width: 220px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      .filter-controls {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 20px;
+        background: #fff;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        flex-wrap: wrap;
+      }
+      .filter-item {
+        flex: 1;
+        min-width: 180px;
+      }
+      .filter-item label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--text-muted);
+        display: block;
+        margin-bottom: 6px;
+      }
+      .filter-item select {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+
+      /* Panel de llamadas */
+      .desktop-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 25px;
+        align-items: start;
+      }
+      .client-box {
+        border: 1px solid #e5e7eb;
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 16px;
+      }
+      .client-info-container {
+        background: #f9fafb;
+        border: 1px solid #f3f4f6;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+      .client-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 6px;
+        font-weight: 600;
+      }
+      .client-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #111827;
+      }
+      .client-phone-box {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #111827;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .client-phone-box i {
+        color: var(--primary);
+      }
+
+      .dni-click-box {
+        background: #ffffff;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        color: #374151;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .dni-click-box:hover {
+        background: var(--primary-light);
+        border-color: #a5b4fc;
+        color: var(--primary);
+      }
+
+      .queue-counter {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--primary);
+        margin-top: 15px;
+        background: var(--primary-light);
+        padding: 8px 18px;
+        border-radius: 9999px;
+        display: inline-block;
+      }
+
+      /* Botonera Principal Avanzada */
+      .actions-grid {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .btn-si {
+        background: var(--success);
+        color: white;
+        flex: 1;
+        min-width: 200px;
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .btn-si:hover {
+        background: #059669;
+      }
+      .btn-viejo {
+        background: #f59e0b;
+        color: white;
+        flex: 1;
+        min-width: 200px;
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .btn-viejo:hover {
+        background: #d97706;
+      }
+      .btn-sobregirados {
+        background: #8b5cf6;
+        color: white;
+        flex: 1;
+        min-width: 200px;
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .btn-sobregirados:hover {
+        background: #7c3aed;
+      }
+      .btn-vendido {
+        background: #22c55e;
+        color: white;
+        flex: 1;
+        min-width: 200px;
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .btn-vendido:hover {
+        background: #16a34a;
+      }
+      .btn-acciones {
+        background: #4338ca;
+        color: white;
+        min-width: 180px;
+      }
+      .btn-acciones:hover {
+        background: #3730a3;
+      }
+      .btn-nointeres {
+        background: #f97316;
+        color: white;
+      }
+      .btn-nointeres:hover {
+        background: #ea580c;
+      }
+      .btn-pasar {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #e5e7eb;
+        flex: 1;
+        min-width: 150px;
+        padding: 16px;
+        font-size: 1rem;
+      }
+      .btn-pasar:hover {
+        background: #e5e7eb;
+      }
+
+      /* Botones de acción Dinámicos de Tablas */
+      .btn-row {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+        border-radius: 6px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .btn-guardados {
+        background: #eef2ff;
+        color: #3730a3;
+        border: 1px solid #c7d2fe;
+      }
+      .btn-guardados:hover {
+        background: #e0e7ff;
+      }
+      .btn-nocontesto {
+        background: #f3f4f6;
+        color: #4b5563;
+        border: 1px solid #d1d5db;
+      }
+      .btn-nocontesto:hover {
+        background: #e5e7eb;
+      }
+      .btn-erroneo {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fca5a5;
+      }
+      .btn-erroneo:hover {
+        background: #fecaca;
+      }
+      .btn-interesa {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #6ee7b7;
+      }
+      .btn-interesa:hover {
+        background: #a7f3d0;
+      }
+      .btn-espera {
+        background: #fef3c7;
+        color: #d97706;
+        border: 1px solid #fcd34d;
+      }
+      .btn-espera:hover {
+        background: #fde68a;
+      }
+      .btn-export {
+        background: #059669;
+        color: white;
+        padding: 8px 16px;
+        font-size: 0.85rem;
+      }
+      .btn-export:hover {
+        background: #047857;
+      }
+      .action-cell {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      /* Estilos de Insignias / Badges */
+      .badge {
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        display: inline-block;
+        text-transform: uppercase;
+      }
+      .badge-oro {
+        background: var(--badge-oro-bg);
+        color: var(--badge-oro);
+      }
+      .badge-plata {
+        background: var(--badge-plata-bg);
+        color: var(--badge-plata);
+        border: 1px solid #e5e7eb;
+      }
+      .badge-premium {
+        background: var(--badge-premium-bg);
+        color: var(--badge-premium);
+      }
+
+      .badge-credito-activo {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .badge-sin-credito {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .badge-desconocido {
+        background: #f3f4f6;
+        color: #6b7280;
+      }
+
+      .copyable-id {
+        cursor: pointer;
+        font-weight: 500;
+        color: #374151;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.15s;
+      }
+      .copyable-id:hover {
+        background: var(--primary-light);
+        color: var(--primary);
+      }
+      .copyable-id i {
+        font-size: 0.85rem;
+        opacity: 0.6;
+        margin-right: 2px;
+      }
+
+      .table-container {
+        background: #fff;
+        border-radius: 8px;
+        border: 1px solid #e5e7eb;
+        overflow-x: auto;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 0.85rem;
+      }
+      th,
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid #e5e7eb;
+        white-space: nowrap;
+      }
+      th {
+        background: #f9fafb;
+        font-weight: 600;
+        color: #374151;
+      }
+      tr:hover td {
+        background: #f9fafb;
+      }
+
+      .empty-state {
+        text-align: center;
+        color: var(--text-muted);
+        padding: 40px 20px;
+      }
+
+      .toast {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #1f2937;
+        color: white;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        opacity: 0;
+        transform: translateY(20px);
+        pointer-events: none;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      /* --- Modales --- */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(17, 24, 39, 0.6); /* Tono oscuro más elegante */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(4px); /* Blur un poco más pronunciado */
+      }
+
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .modal-content {
+        background: #ffffff;
+        width: 100%;
+        max-width: 420px;
+        padding: 24px;
+        border-radius: 16px; /* Bordes más redondeados y modernos */
+        box-shadow:
+          0 20px 25px -5px rgba(0, 0, 0, 0.1),
+          0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        /* Animación inicial del contenido */
+        transform: scale(0.95) translateY(-10px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .modal-overlay.active .modal-content {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+
+      .modal-header {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #111827;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 1px solid #f3f4f6; /* Línea separadora sutil */
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .close-modal {
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 1.75rem;
+        transition:
+          color 0.2s,
+          transform 0.2s;
+      }
+
+      .close-modal:hover {
+        color: #ef4444; /* Rojo al pasar el mouse para indicar "cerrar" */
+        transform: rotate(90deg); /* Pequeño detalle de interacción */
+      }
+
+      /* --- Contenedor de Botones --- */
+      .modal-body {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-height: 60vh; /* Previene que sea más alto que la pantalla */
+        overflow-y: auto; /* Scroll si hay demasiados botones */
+        padding-right: 5px; /* Espacio para el scrollbar */
+      }
+
+      /* --- Estilos de Botones de Acción --- */
+      .btn-action {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        width: 100%;
+        padding: 12px 16px;
+        background-color: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #374151;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: left;
+      }
+
+      .btn-action i {
+        font-size: 1.3rem;
+        transition: transform 0.2s ease;
+      }
+
+      /* Efecto Hover General */
+      .btn-action:hover {
+        background-color: #f9fafb;
+        border-color: #d1d5db;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      }
+
+      .btn-action:hover i {
+        transform: scale(1.15);
+      }
+
+      /* --- Colores Específicos por Acción (Iconos) --- */
+      .btn-guardados i {
+        color: #3b82f6;
+      } /* Azul */
+      .btn-interesa i {
+        color: #8b5cf6;
+      } /* Morado */
+      .btn-vendido i {
+        color: #10b981;
+      } /* Verde */
+      .btn-nointeres i {
+        color: #6b7280;
+      } /* Gris oscuro */
+      .btn-nocontesto i {
+        color: #f59e0b;
+      } /* Amarillo/Ámbar */
+      .btn-espera i {
+        color: #06b6d4;
+      } /* Cian */
+      .btn-sobregirados i {
+        color: #f97316;
+      } /* Naranja */
+      .btn-erroneo {
+        color: #ef4444;
+      } /* Texto rojo para borrar */
+      .btn-erroneo i {
+        color: #ef4444;
+      } /* Rojo */
+
+      .btn-erroneo:hover {
+        background-color: #fef2f2;
+        border-color: #fca5a5;
+      }
+
+      /* Opcional: Personalizar el scrollbar si es necesario */
+      .modal-body::-webkit-scrollbar {
+        width: 6px;
+      }
+      .modal-body::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 4px;
+      }
+/* --- Botones de Selección para Modal Calificación --- */
+      .selection-group {
+        display: flex;
+        gap: 10px;
+        margin-top: 5px;
+      }
+      .btn-select {
+        flex: 1;
+        padding: 10px 5px;
+        border: 2px solid #e5e7eb;
+        background: #f9fafb;
+        border-radius: 10px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-align: center;
+      }
+      .btn-select:hover {
+        background: #f3f4f6;
+        border-color: #d1d5db;
+        transform: translateY(-1px);
+      }
+      
+      /* Estados Activos por Categoría */
+      .btn-cat.active[data-value="Oro"] {
+        background: var(--badge-oro-bg);
+        color: var(--badge-oro);
+        border-color: var(--badge-oro);
+      }
+      .btn-cat.active[data-value="Plata"] {
+        background: var(--badge-plata-bg);
+        color: #1f2937;
+        border-color: var(--badge-plata);
+      }
+      .btn-cat.active[data-value="Premium"] {
+        background: var(--badge-premium-bg);
+        color: var(--badge-premium);
+        border-color: var(--badge-premium);
+      }
+      
+      /* Estados Activos por Crédito */
+      .btn-cred.active[data-value="Crédito Activo"] {
+        background: #d1fae5;
+        color: #065f46;
+        border-color: #10b981;
+      }
+      .btn-cred.active[data-value="Sin Créditos"] {
+        background: #fee2e2;
+        color: #991b1b;
+        border-color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Barra Lateral -->
+      <sidebar>
+        <div class="nav-group">
+          <div class="brand">
+            <i class="bx bx-laptop"></i> Gestion de Prospectos
+          </div>
+          <div class="nav-item active" onclick="switchView('carga', this)">
+            <i class="bx bx-cloud-upload"></i>Cargar Lista de contactos
+          </div>
+          <div class="nav-item" onclick="switchView('gestion', this)">
+            <i class="bx bx-phone-call"></i>Sistema Insular
+          </div>
+          <div class="nav-item" onclick="switchView('sistemaviejo', this)">
+            <i class="bx bx-history"></i>Sistema Viejo
+          </div>
+          <div class="nav-item" onclick="switchView('sobregirados', this)">
+            <i class="bx bx-transfer-alt"></i>Sobregirados
+          </div>
+          <div class="nav-item" onclick="switchView('guardados', this)">
+            <i class="bx bx-folder-open"></i>Lista Guardados
+          </div>
+          <div class="nav-item" onclick="switchView('nocontesto', this)">
+            <i class="bx bx-phone-off"></i>No Contestaron
+          </div>
+          <div class="nav-item" onclick="switchView('enespera', this)">
+            <i class="bx bx-time-five"></i>En Espera
+          </div>
+          <div class="nav-item" onclick="switchView('siinteresados', this)">
+            <i class="bx bx-shopping-bag"></i>Sí Interesados
+          </div>
+          <div class="nav-item" onclick="switchView('nointeres', this)">
+            <i class="bx bx-sad"></i>No le interesa por el momento
+          </div>
+          <div class="nav-item" onclick="switchView('vendido', this)">
+            <i class="bx bx-shopping-bag"></i>Vendido
+          </div>
+          <div class="nav-item" onclick="switchView('conteo', this)">
+            <i class="bx bx-pie-chart-alt"></i>Conteo
+          </div>
+          <div class="nav-item" onclick="switchView('ventas', this)">
+            <i class="bx bx-trending-up"></i>Ventas vs Meta
+          </div>
+        </div>
+      </sidebar>
+
+      <div class="main-content">
+        <!-- Vista: Cargar Datos -->
+        <div id="view-carga" class="view active">
+          <div class="view-header"><h1>Cargar Datos</h1></div>
+          <p class="subtitle">
+            Pega tus celdas de Excel y crea una nueva lista de gestión.
+          </p>
+          <div class="card">
+            <div class="form-group">
+              <label class="form-label">Nombre de la lista (Opcional):</label>
+              <input
+                type="text"
+                id="nombre-nueva-lista"
+                placeholder="Ej. Base de Datos Lunes, Prospectos Claro..."
+              />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Pegar datos de Excel:</label>
+              <textarea
+                id="excel-input"
+                placeholder="Juan Perez&#9;99887766&#9;0501199501234&#10;Maria Silva&#9;33221100"
+              ></textarea>
+            </div>
+            <button class="btn-primary" onclick="procesarExcel()">
+              <i class="bx bx-import"></i> Crear e Importar Lista
+            </button>
+          </div>
+        </div>
+
+        <!-- Vista: Panel de Gestión Activa -->
+        <div id="view-gestion" class="view">
+          <div class="view-header">
+            <h1>Panel de Gestión Activa</h1>
+            <div class="list-controls">
+              <label
+                for="selector-listas"
+                style="
+                  font-size: 0.85rem;
+                  font-weight: 600;
+                  color: var(--text-muted);
+                "
+                ><i class="bx bx-list-ul"></i> Seleccionar Lista:</label
+              >
+              <select
+                id="selector-listas"
+                onchange="cambiarListaActiva()"
+              ></select>
+              <button
+                class="btn-danger-icon"
+                onclick="borrarListaActiva()"
+                title="Borrar lista actual por completo"
+              >
+                <i class="bx bx-trash"></i>
+              </button>
+              <div
+                style="
+                  width: 1px;
+                  height: 30px;
+                  background: #d1d5db;
+                  margin: 0 5px;
+                "
+              ></div>
+              <button class="btn-export" onclick="exportarExcel('cola')">
+                <i class="bx bx-spreadsheet"></i> Exportar Lista
+              </button>
+            </div>
+          </div>
+
+          <div class="desktop-grid">
+            <div class="card client-box">
+              <div class="client-info-container">
+                <div class="client-label">Cliente en Lista Activa</div>
+                <div class="client-name" id="c-name">
+                  No hay clientes en la lista
+                </div>
+                <div class="client-label">Teléfono</div>
+                <div class="client-phone-box">
+                  <i class="bx bx-phone"></i> <span id="c-phone">-</span>
+                </div>
+                <div class="client-label">
+                  Identificación (DNI) - Haz clic para copiar
+                </div>
+                <div
+                  class="dni-click-box"
+                  onclick="copiarDniPanel('c-dni')"
+                  title="Hacer clic para copiar ID/DNI"
+                >
+                  <i class="bx bx-id-card"></i> <span id="c-dni">-</span>
+                </div>
+              </div>
+              <div
+                class="actions-grid"
+                id="action-buttons-group"
+                style="display: none"
+              >
+                <button
+                  class="btn-si"
+                  onclick="abrirModalCalificacion('normal')"
+                >
+                  <i class="bx bx-check-circle"></i> Enviar a Lista Guardados
+                </button>
+                <button class="btn-viejo" onclick="transferirASistemaViejo()">
+                  <i class="bx bx-history"></i> Revisar en Sistema Viejo
+                </button>
+                <button
+                  class="btn-sobregirados"
+                  onclick="enviarASobregirados('normal')"
+                >
+                  <i class="bx bx-transfer-alt"></i> Enviar a Sobregirados
+                </button>
+                <button class="btn-pasar" onclick="omitirCliente('normal')">
+                  <i class="bx bx-x-circle"></i> Omitir / Descartar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="queue-counter" id="queue-count">
+            0 clientes restantes en la lista
+          </div>
+        </div>
+
+        <!-- Vista: Sistema Viejo -->
+        <div id="view-sistemaviejo" class="view">
+          <div class="view-header">
+            <h1>Panel de Sistema Viejo</h1>
+            <button class="btn-export" onclick="exportarExcel('viejo')">
+              <i class="bx bx-spreadsheet"></i> Exportar Cola Vieja
+            </button>
+          </div>
+          <p class="subtitle">
+            Cola global de los leads enviados a revisión de registro antiguo.
+          </p>
+          <div class="desktop-grid">
+            <div class="card client-box">
+              <div class="client-info-container">
+                <div class="client-label">Cliente en Cola (Sistema Viejo)</div>
+                <div class="client-name" id="v-name">
+                  No hay clientes en cola vieja
+                </div>
+                <div class="client-label">Teléfono</div>
+                <div class="client-phone-box">
+                  <i class="bx bx-phone"></i> <span id="v-phone">-</span>
+                </div>
+                <div class="client-label">
+                  Identificación (DNI) - Haz clic para copiar
+                </div>
+                <div
+                  class="dni-click-box"
+                  onclick="copiarDniPanel('v-dni')"
+                  title="Hacer clic para copiar ID/DNI"
+                >
+                  <i class="bx bx-id-card"></i> <span id="v-dni">-</span>
+                </div>
+              </div>
+              <div
+                class="actions-grid"
+                id="action-viejo-group"
+                style="display: none"
+              >
+                <button
+                  class="btn-si"
+                  onclick="abrirModalCalificacion('viejo')"
+                >
+                  <i class="bx bx-check-circle"></i> Enviar a Lista Guardados
+                </button>
+                <button
+                  class="btn-sobregirados"
+                  onclick="enviarASobregirados('viejo')"
+                >
+                  <i class="bx bx-transfer-alt"></i> Enviar a Sobregirados
+                </button>
+                <button class="btn-pasar" onclick="omitirCliente('viejo')">
+                  <i class="bx bx-x-circle"></i> Omitir / Descartar
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="queue-counter" id="queue-viejo-count">
+            0 clientes restantes en cola vieja
+          </div>
+        </div>
+
+        <div id="view-sobregirados" class="view">
+          <div class="view-header">
+            <h1>Lista Sobregirados</h1>
+            <button class="btn-export" onclick="exportarExcel('sobregirados')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">
+            Leads marcados como sobregirados con las mismas opciones de
+            reclasificación.
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-sobregirados-body"></tbody>
+            </table>
+            <div
+              id="empty-sobregirados"
+              class="empty-state"
+              style="display: none"
+            >
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista: Lista de Guardados con Filtros -->
+        <div id="view-guardados" class="view">
+          <div class="view-header">
+            <h1>Lista de Guardados</h1>
+            <button class="btn-export" onclick="exportarExcel('guardados')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">
+            Leads calificados que esperan clasificación avanzada.
+          </p>
+
+          <!-- Panel de Filtros -->
+          <div class="filter-controls">
+            <div class="filter-item">
+              <label
+                ><i class="bx bx-filter-alt"></i> Filtrar por Categoría:</label
+              >
+              <select
+                id="filtro-cat-guardados"
+                onchange="renderTablaGuardados()"
+              >
+                <option value="Todos">Todas las categorías</option>
+                <option value="Oro">Oro</option>
+                <option value="Plata">Plata</option>
+                <option value="Premium">Premium</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label
+                ><i class="bx bx-credit-card"></i> Filtrar por Crédito:</label
+              >
+              <select
+                id="filtro-cred-guardados"
+                onchange="renderTablaGuardados()"
+              >
+                <option value="Todos">Todos los estados</option>
+                <option value="Crédito Activo">Crédito Activo</option>
+                <option value="Sin Créditos">Sin Créditos</option>
+              </select>
+            </div>
+            <div class="filter-item">
+              <label><i class="bx bx-sort"></i> Ordenar por:</label>
+              <select id="orden-guardados" onchange="renderTablaGuardados()">
+                <option value="defecto">Orden de guardado (Por defecto)</option>
+                <option value="cat-asc">Categoría (A-Z)</option>
+                <option value="cred-asc">Estado Crédito (A-Z)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-guardados-body"></tbody>
+            </table>
+            <div id="empty-guardados" class="empty-state" style="display: none">
+              <p>No hay registros que coincidan con los filtros.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-nocontesto" class="view">
+          <div class="view-header">
+            <h1>No Contestaron</h1>
+            <button class="btn-export" onclick="exportarExcel('nocontesto')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">Historial de clientes que no respondieron.</p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-nocontesto-body"></tbody>
+            </table>
+            <div
+              id="empty-nocontesto"
+              class="empty-state"
+              style="display: none"
+            >
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-enespera" class="view">
+          <div class="view-header">
+            <h1>En Espera</h1>
+            <button class="btn-export" onclick="exportarExcel('enespera')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">
+            Clientes que solicitaron un seguimiento posterior.
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-enespera-body"></tbody>
+            </table>
+            <div id="empty-enespera" class="empty-state" style="display: none">
+              <p>No hay prospectos en espera.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-siinteresados" class="view">
+          <div class="view-header">
+            <h1>Sí Interesados</h1>
+            <button class="btn-export" onclick="exportarExcel('siinteresados')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">Clientes con intención de compra clara.</p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Artículo</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-siinteresados-body"></tbody>
+            </table>
+            <div
+              id="empty-siinteresados"
+              class="empty-state"
+              style="display: none"
+            >
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-vendido" class="view">
+          <div class="view-header">
+            <h1>Vendido</h1>
+            <button class="btn-export" onclick="exportarExcel('vendido')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">Clientes que ya se marcaron como vendidos.</p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Artículo</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-vendido-body"></tbody>
+            </table>
+            <div id="empty-vendido" class="empty-state" style="display: none">
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-nointeres" class="view">
+          <div class="view-header">
+            <h1>No le interesa por el momento</h1>
+            <button class="btn-export" onclick="exportarExcel('nointeres')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">
+            Clientes que se marcaron como no interesados por ahora.
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Artículo</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-nointeres-body"></tbody>
+            </table>
+            <div id="empty-nointeres" class="empty-state" style="display: none">
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-conteo" class="view">
+          <div class="view-header">
+            <h1>Conteo de Gestión</h1>
+            <button
+              class="btn-export"
+              onclick="actualizarContadoresYTarjetas()"
+            >
+              <i class="bx bx-refresh"></i> Actualizar
+            </button>
+          </div>
+          <p class="subtitle">Resumen de listas y contactos por gestionar.</p>
+
+          <div class="stats-grid conteo-grid">
+            <div class="stat-card stat-card-large">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-list-ul"></i></span>
+                <div>
+                  <span class="stat-title">Listas sin gestionar</span>
+                  <span class="stat-note">Listas activas cargadas</span>
+                </div>
+              </div>
+              <span class="stat-value" id="stat-listas-sin-gestionar">0</span>
+            </div>
+            <div class="stat-card stat-card-large">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-user-check"></i></span>
+                <div>
+                  <span class="stat-title">Contactos por gestionar</span>
+                  <span class="stat-note"
+                    >Total dentro de todas las listas de cola</span
+                  >
+                </div>
+              </div>
+              <span class="stat-value" id="stat-contactos-por-gestionar"
+                >0</span
+              >
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"
+                  ><i class="bx bx-transfer-alt"></i
+                ></span>
+                <span class="stat-title">Sobregirados</span>
+              </div>
+              <span class="stat-value" id="stat-sobregirados">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-folder-open"></i></span>
+                <span class="stat-title">Guardados</span>
+              </div>
+              <span class="stat-value" id="stat-guardados">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-phone-off"></i></span>
+                <span class="stat-title">No Contestaron</span>
+              </div>
+              <span class="stat-value" id="stat-nocontesto">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-time-five"></i></span>
+                <span class="stat-title">En Espera</span>
+              </div>
+              <span class="stat-value" id="stat-enespera">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"
+                  ><i class="bx bx-shopping-bag"></i
+                ></span>
+                <span class="stat-title">Sí Interesados</span>
+              </div>
+              <span class="stat-value" id="stat-siinteresados">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"><i class="bx bx-face-sad"></i></span>
+                <span class="stat-title">No le interesa</span>
+              </div>
+              <span class="stat-value" id="stat-nointeres">0</span>
+            </div>
+            <div class="stat-card">
+              <div class="stat-header">
+                <span class="stat-icon"
+                  ><i class="bx bx-check-circle"></i
+                ></span>
+                <span class="stat-title">Vendido</span>
+              </div>
+              <span class="stat-value" id="stat-vendido">0</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="view-ventas" class="view">
+          <div class="view-header">
+            <h1>Ventas vs Meta</h1>
+            <button class="btn-export" onclick="guardarMetasVentas()">
+              <i class="bx bx-save"></i> Guardar Metas
+            </button>
+          </div>
+          <p class="subtitle">
+            Compara tus resultados actuales frente a las metas de crédito,
+            contado, garantía y motos.
+          </p>
+
+          <div class="comparison-grid">
+            <div class="goal-card">
+              <div class="goal-header">
+                <span class="goal-icon"><i class="bx bx-credit-card"></i></span>
+                <span class="goal-title">Crédito</span>
+              </div>
+              <div class="goal-summary">
+                <span>Meta: <strong id="meta-credito">0</strong></span>
+                <span>Real: <strong id="real-credito">0</strong></span>
+              </div>
+              <div class="goal-progress">
+                <div class="goal-bar" id="bar-credito"></div>
+              </div>
+              <span class="goal-diff" id="diff-credito">Diferencia: 0</span>
+            </div>
+            <div class="goal-card">
+              <div class="goal-header">
+                <span class="goal-icon"><i class="bx bx-wallet"></i></span>
+                <span class="goal-title">Contado</span>
+              </div>
+              <div class="goal-summary">
+                <span>Meta: <strong id="meta-contado">0</strong></span>
+                <span>Real: <strong id="real-contado">0</strong></span>
+              </div>
+              <div class="goal-progress">
+                <div class="goal-bar" id="bar-contado"></div>
+              </div>
+              <span class="goal-diff" id="diff-contado">Diferencia: 0</span>
+            </div>
+            <div class="goal-card">
+              <div class="goal-header">
+                <span class="goal-icon"
+                  ><i class="bx bx-shield-quarter"></i
+                ></span>
+                <span class="goal-title">Garantía</span>
+              </div>
+              <div class="goal-summary">
+                <span>Meta: <strong id="meta-garantia">0</strong></span>
+                <span>Real: <strong id="real-garantia">0</strong></span>
+              </div>
+              <div class="goal-progress">
+                <div class="goal-bar" id="bar-garantia"></div>
+              </div>
+              <span class="goal-diff" id="diff-garantia">Diferencia: 0</span>
+            </div>
+            <div class="goal-card">
+              <div class="goal-header">
+                <span class="goal-icon"><i class="bx bx-bicycle"></i></span>
+                <span class="goal-title">Motos (unidades)</span>
+              </div>
+              <div class="goal-summary">
+                <span>Meta: <strong id="meta-motos">0</strong></span>
+                <span>Real: <strong id="real-motos">0</strong></span>
+              </div>
+              <div class="goal-progress">
+                <div class="goal-bar" id="bar-motos"></div>
+              </div>
+              <span class="goal-diff" id="diff-motos">Diferencia: 0</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header-split">
+              <div>
+                <h2>Actualizar metas y resultados</h2>
+                <p class="subtitle" style="margin-bottom: 0">
+                  Define tus metas de venta y registra el avance real en cada
+                  categoría.
+                </p>
+              </div>
+              <button
+                class="btn-primary btn-small"
+                onclick="guardarMetasVentas()"
+              >
+                <i class="bx bx-save"></i> Guardar y Actualizar
+              </button>
+            </div>
+
+            <div class="form-grid ventas-grid">
+              <div class="form-column">
+                <div class="column-header">
+                  <i class="bx bx-target-lock"></i> Metas
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Crédito</label>
+                  <input
+                    type="number"
+                    id="input-meta-credito"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contado</label>
+                  <input
+                    type="number"
+                    id="input-meta-contado"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Garantía</label>
+                  <input
+                    type="number"
+                    id="input-meta-garantia"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Motos (unidades)</label>
+                  <input
+                    type="number"
+                    id="input-meta-motos"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+              <div class="form-column">
+                <div class="column-header">
+                  <i class="bx bx-line-chart"></i> Real
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Crédito</label>
+                  <input
+                    type="number"
+                    id="input-real-credito"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Contado</label>
+                  <input
+                    type="number"
+                    id="input-real-contado"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Garantía</label>
+                  <input
+                    type="number"
+                    id="input-real-garantia"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Motos</label>
+                  <input
+                    type="number"
+                    id="input-real-motos"
+                    placeholder="0"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- MODALES -->
+
+
+<!-- MODAL DE INFORMACIÓN Y QR -->
+    <div class="modal-overlay" id="modal-info-cliente">
+      <div class="modal-content" style="max-width: 350px; text-align: center;">
+        <div class="modal-header">
+          <span>Información del Cliente</span>
+          <i class="bx bx-x close-modal" onclick="cerrarModalInfo()"></i>
+        </div>
+        
+        <div style="padding: 10px 0;">
+          <h3 id="info-nombre" style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 5px;">Nombre Cliente</h3>
+          <p id="info-telefono" style="font-size: 1.1rem; color: #2563eb; font-weight: 600; margin-bottom: 5px;">
+            <i class="bx bx-phone"></i> <span>0000-0000</span>
+          </p>
+          <p id="info-detalles" style="font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; font-weight: 500;">Categoría: Oro | Crédito: Activo</p>
+          
+          <div style="display: flex; justify-content: center; margin-bottom: 10px;">
+            <!-- La imagen del QR se generará dinámicamente aquí -->
+            <img id="info-qr" src="" alt="Código QR para llamar" style="width: 180px; height: 180px; border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" />
+          </div>
+          <p style="font-size: 0.85rem; color: #9ca3af;">
+            <i class="bx bx-scan"></i> Escanea para marcar rápidamente
+          </p>
+        </div>
+        
+        <button class="btn-primary" style="width: 100%; margin-top: 15px; background-color: #ef4444;" onclick="cerrarModalInfo()">
+          Cerrar
+        </button>
+      </div>
+    </div>
+
+
+    <div class="modal-overlay" id="modal-calificacion">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Calificación de Perfil Comercial</span>
+          <i
+            class="bx bx-x close-modal"
+            onclick="cerrarModalCalificacion()"
+          ></i>
+        </div>
+
+        <!-- ¡ESTE INPUT ES LA CLAVE POR LA QUE NO ABRÍA EL MODAL! Faltaba en tu código -->
+        <input type="hidden" id="calif-contexto-origen" value="" />
+
+        <!-- Inputs ocultos para mantener la compatibilidad con tu JS actual -->
+        <input type="hidden" id="sel-categoria" value="Oro" />
+        <input type="hidden" id="sel-credito" value="Crédito Activo" />
+
+        <div class="form-group">
+          <label class="form-label">Seleccionar Categoría:</label>
+          <div class="selection-group" id="group-categoria">
+            <button type="button" class="btn-select btn-cat active" data-value="Oro" onclick="selectOption('categoria', this)">Oro</button>
+            <button type="button" class="btn-select btn-cat" data-value="Plata" onclick="selectOption('categoria', this)">Plata</button>
+            <button type="button" class="btn-select btn-cat" data-value="Premium" onclick="selectOption('categoria', this)">Premium</button>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 25px">
+          <label class="form-label">Estado del Crédito:</label>
+          <div class="selection-group" id="group-credito">
+            <button type="button" class="btn-select btn-cred active" data-value="Crédito Activo" onclick="selectOption('credito', this)">Crédito Activo</button>
+            <button type="button" class="btn-select btn-cred" data-value="Sin Créditos" onclick="selectOption('credito', this)">Sin Créditos</button>
+          </div>
+        </div>
+        <button
+          class="btn-primary"
+          style="width: 100%; padding: 14px"
+          onclick="confirmarGuardadoCalificado()"
+        >
+          <i class="bx bx-save"></i> Guardar Cliente Calificado
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-interes">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>¿En qué artículo está interesado?</span>
+          <i class="bx bx-x close-modal" onclick="cerrarModal()"></i>
+        </div>
+        <input type="hidden" id="modal-cliente-id" />
+        <input type="hidden" id="modal-origen-id" />
+        <input
+          type="text"
+          id="input-articulo"
+          placeholder="Ej. Motocicleta, Smart TV..."
+          style="margin-bottom: 20px"
+        />
+        <button
+          class="btn-primary"
+          style="width: 100%"
+          onclick="guardarMoverSiInteresa()"
+        >
+          Confirmar y Guardar
+        </button>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="modal-acciones">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Selecciona una acción</span>
+          <i class="bx bx-x close-modal" onclick="cerrarModalAcciones()"></i>
+        </div>
+
+        <input type="hidden" id="accion-modal-id" />
+        <input type="hidden" id="accion-modal-origen" />
+
+        <div class="modal-body">
+          <button
+            class="btn-action btn-guardados"
+            id="accion-btn-guardar"
+            onclick="ejecutarAccionModal('guardados')"
+          >
+            <i class="bx bx-folder-open"></i> Guardar
+          </button>
+
+  <button
+            class="btn-action btn-interesa"
+            id="accion-btn-interesa"
+            onclick="ejecutarAccionModal('interesa')"
+          >
+            <i class="bx bx-shopping-bag"></i> Interesa
+          </button>
+
+          <button
+            class="btn-action btn-vendido"
+            id="accion-btn-vendido"
+            onclick="ejecutarAccionModal('vendido')"
+          >
+            <i class="bx bx-check-circle"></i> Vendido
+          </button>
+
+          <button
+            class="btn-action btn-nointeres"
+            id="accion-btn-nointeres"
+            onclick="ejecutarAccionModal('nointeres')"
+          >
+            <i class="bx bx-face-sad"></i> No le interesa por el momento
+          </button>
+
+          <button
+            class="btn-action btn-nocontesto"
+            id="accion-btn-nocontesto"
+            onclick="ejecutarAccionModal('nocontesto')"
+          >
+            <i class="bx bx-phone-off"></i> No contestó
+          </button>
+
+          <button
+            class="btn-action btn-espera"
+            id="accion-btn-enespera"
+            onclick="ejecutarAccionModal('enespera')"
+          >
+            <i class="bx bx-time"></i> En espera
+          </button>
+
+          <button
+            class="btn-action btn-sobregirados"
+            id="accion-btn-sobregirados"
+            onclick="ejecutarAccionModal('sobregirados')"
+          >
+            <i class="bx bx-transfer-alt"></i> Sobregirados
+          </button>
+
+          <button
+            class="btn-action btn-erroneo"
+            onclick="ejecutarAccionModal('borrar')"
+          >
+            <i class="bx bx-trash"></i> Borrar
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Toast -->
+    <div class="toast" id="toast-msg">
+      <i class="bx bx-check-circle" style="color: var(--success)"></i>
+      <span id="toast-text">Éxito</span>
+    </div>
+
+    <script>
+      // VARIABLES GLOBALES
+      let listasDeCola = [];
+      let listaActivaId = null;
+
+      let queueViejo = [];
+      let guardados = [];
+      let sobregirados = [];
+      let vendido = [];
+      let noInteres = [];
+      let noContesto = [];
+      let enEspera = [];
+      let siInteresados = [];
+      let ventasMeta = {
+        creditoMeta: 0,
+        contadoMeta: 0,
+        garantiaMeta: 0,
+        motosMeta: 0,
+        creditoReal: 0,
+        contadoReal: 0,
+        garantiaReal: 0,
+        motosReal: 0,
+      };
+
+      function genID() {
+        return (
+          "uid_" + Math.random().toString(36).substr(2, 9) + "_" + Date.now()
+        );
+      }
+
+      window.onload = () => {
+        if (localStorage.getItem("crm_listasDeCola"))
+          listasDeCola = JSON.parse(localStorage.getItem("crm_listasDeCola"));
+        if (localStorage.getItem("crm_listaActivaId"))
+          listaActivaId = localStorage.getItem("crm_listaActivaId");
+
+        if (localStorage.getItem("crm_queue")) {
+          let viejaQueue = JSON.parse(localStorage.getItem("crm_queue"));
+          if (viejaQueue.length > 0) {
+            let idRecuperada = genID();
+            listasDeCola.push({
+              id: idRecuperada,
+              nombre: "Lista Recuperada (Antigua)",
+              clientes: viejaQueue,
+            });
+            if (!listaActivaId) listaActivaId = idRecuperada;
+          }
+          localStorage.removeItem("crm_queue");
+        }
+
+        if (!listaActivaId && listasDeCola.length > 0)
+          listaActivaId = listasDeCola[0].id;
+
+        if (localStorage.getItem("crm_queue_viejo"))
+          queueViejo = JSON.parse(localStorage.getItem("crm_queue_viejo"));
+        if (localStorage.getItem("crm_guardados"))
+          guardados = JSON.parse(localStorage.getItem("crm_guardados"));
+        if (localStorage.getItem("crm_sobregirados"))
+          sobregirados = JSON.parse(localStorage.getItem("crm_sobregirados"));
+        if (localStorage.getItem("crm_vendido"))
+          vendido = JSON.parse(localStorage.getItem("crm_vendido"));
+        if (localStorage.getItem("crm_nointeres"))
+          noInteres = JSON.parse(localStorage.getItem("crm_nointeres"));
+        if (localStorage.getItem("crm_nocontesto"))
+          noContesto = JSON.parse(localStorage.getItem("crm_nocontesto"));
+        if (localStorage.getItem("crm_enespera"))
+          enEspera = JSON.parse(localStorage.getItem("crm_enespera"));
+        if (localStorage.getItem("crm_siinteresados"))
+          siInteresados = JSON.parse(localStorage.getItem("crm_siinteresados"));
+        if (localStorage.getItem("crm_ventas_meta"))
+          ventasMeta = JSON.parse(localStorage.getItem("crm_ventas_meta"));
+
+        [
+          queueViejo,
+          guardados,
+          sobregirados,
+          vendido,
+          noInteres,
+          noContesto,
+          enEspera,
+          siInteresados,
+        ].forEach((arr) => {
+          arr.forEach((c) => {
+            if (!c.id) c.id = genID();
+          });
+        });
+        listasDeCola.forEach((lst) => {
+          lst.clientes.forEach((c) => {
+            if (!c.id) c.id = genID();
+          });
+        });
+
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        renderTodasLasTablas();
+      };
+
+      function guardarLocalStorage() {
+        localStorage.setItem("crm_listasDeCola", JSON.stringify(listasDeCola));
+        localStorage.setItem("crm_listaActivaId", listaActivaId || "");
+        localStorage.setItem("crm_queue_viejo", JSON.stringify(queueViejo));
+        localStorage.setItem("crm_guardados", JSON.stringify(guardados));
+        localStorage.setItem("crm_sobregirados", JSON.stringify(sobregirados));
+        localStorage.setItem("crm_vendido", JSON.stringify(vendido));
+        localStorage.setItem("crm_nointeres", JSON.stringify(noInteres));
+        localStorage.setItem("crm_nocontesto", JSON.stringify(noContesto));
+        localStorage.setItem("crm_enespera", JSON.stringify(enEspera));
+        localStorage.setItem(
+          "crm_siinteresados",
+          JSON.stringify(siInteresados),
+        );
+        localStorage.setItem("crm_ventas_meta", JSON.stringify(ventasMeta));
+      }
+
+      function calcularProgreso(actual, meta) {
+        if (!meta || meta <= 0) return 0;
+        return Math.min(100, Math.round((actual / meta) * 100));
+      }
+
+      function actualizarVistaVentas() {
+        document.getElementById("meta-credito").innerText =
+          ventasMeta.creditoMeta;
+        document.getElementById("meta-contado").innerText =
+          ventasMeta.contadoMeta;
+        document.getElementById("meta-garantia").innerText =
+          ventasMeta.garantiaMeta;
+        document.getElementById("meta-motos").innerText = ventasMeta.motosMeta;
+        document.getElementById("real-credito").innerText =
+          ventasMeta.creditoReal;
+        document.getElementById("real-contado").innerText =
+          ventasMeta.contadoReal;
+        document.getElementById("real-garantia").innerText =
+          ventasMeta.garantiaReal;
+        document.getElementById("real-motos").innerText = ventasMeta.motosReal;
+
+        document.getElementById("input-meta-credito").value =
+          ventasMeta.creditoMeta;
+        document.getElementById("input-meta-contado").value =
+          ventasMeta.contadoMeta;
+        document.getElementById("input-meta-garantia").value =
+          ventasMeta.garantiaMeta;
+        document.getElementById("input-meta-motos").value =
+          ventasMeta.motosMeta;
+        document.getElementById("input-real-credito").value =
+          ventasMeta.creditoReal;
+        document.getElementById("input-real-contado").value =
+          ventasMeta.contadoReal;
+        document.getElementById("input-real-garantia").value =
+          ventasMeta.garantiaReal;
+        document.getElementById("input-real-motos").value =
+          ventasMeta.motosReal;
+
+        document.getElementById("bar-credito").style.width =
+          `${calcularProgreso(
+            ventasMeta.creditoReal,
+            ventasMeta.creditoMeta,
+          )}%`;
+        document.getElementById("bar-contado").style.width =
+          `${calcularProgreso(
+            ventasMeta.contadoReal,
+            ventasMeta.contadoMeta,
+          )}%`;
+        document.getElementById("bar-garantia").style.width =
+          `${calcularProgreso(
+            ventasMeta.garantiaReal,
+            ventasMeta.garantiaMeta,
+          )}%`;
+        document.getElementById("bar-motos").style.width = `${calcularProgreso(
+          ventasMeta.motosReal,
+          ventasMeta.motosMeta,
+        )}%`;
+
+        document.getElementById("diff-credito").innerText =
+          `Diferencia: ${ventasMeta.creditoReal - ventasMeta.creditoMeta}`;
+        document.getElementById("diff-contado").innerText =
+          `Diferencia: ${ventasMeta.contadoReal - ventasMeta.contadoMeta}`;
+        document.getElementById("diff-garantia").innerText =
+          `Diferencia: ${ventasMeta.garantiaReal - ventasMeta.garantiaMeta}`;
+        document.getElementById("diff-motos").innerText =
+          `Diferencia: ${ventasMeta.motosReal - ventasMeta.motosMeta}`;
+      }
+
+      function guardarMetasVentas() {
+        ventasMeta.creditoMeta =
+          Number(document.getElementById("input-meta-credito").value) || 0;
+        ventasMeta.contadoMeta =
+          Number(document.getElementById("input-meta-contado").value) || 0;
+        ventasMeta.garantiaMeta =
+          Number(document.getElementById("input-meta-garantia").value) || 0;
+        ventasMeta.motosMeta =
+          Number(document.getElementById("input-meta-motos").value) || 0;
+        ventasMeta.creditoReal =
+          Number(document.getElementById("input-real-credito").value) || 0;
+        ventasMeta.contadoReal =
+          Number(document.getElementById("input-real-contado").value) || 0;
+        ventasMeta.garantiaReal =
+          Number(document.getElementById("input-real-garantia").value) || 0;
+        ventasMeta.motosReal =
+          Number(document.getElementById("input-real-motos").value) || 0;
+
+        guardarLocalStorage();
+        actualizarVistaVentas();
+        showToast("Metas de ventas actualizadas");
+      }
+
+      // CONTROL DE LISTAS MULTIPLES
+      function renderSelectorListas() {
+        const selector = document.getElementById("selector-listas");
+        selector.innerHTML = "";
+
+        if (listasDeCola.length === 0) {
+          selector.innerHTML = `<option value="">No hay listas cargadas</option>`;
+          selector.disabled = true;
+        } else {
+          selector.disabled = false;
+          listasDeCola.forEach((lista) => {
+            let option = document.createElement("option");
+            option.value = lista.id;
+            option.text = `${lista.nombre} (${lista.clientes.length} restantes)`;
+            if (lista.id === listaActivaId) option.selected = true;
+            selector.appendChild(option);
+          });
+        }
+      }
+
+      function cambiarListaActiva() {
+        listaActivaId = document.getElementById("selector-listas").value;
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+      }
+
+      function borrarListaActiva() {
+        if (!listaActivaId) return;
+
+        const clave = prompt(
+          "Ingrese la clave para borrar la lista seleccionada:",
+        );
+        if (clave !== "8863") {
+          if (clave !== null)
+            alert("Clave incorrecta. No se eliminó la lista.");
+          return;
+        }
+
+        if (
+          confirm(
+            "¿Estás seguro de ELIMINAR permanentemente esta lista del panel?",
+          )
+        ) {
+          listasDeCola = listasDeCola.filter((l) => l.id !== listaActivaId);
+          listaActivaId = listasDeCola.length > 0 ? listasDeCola[0].id : null;
+          guardarLocalStorage();
+          actualizarContadoresYTarjetas();
+          showToast("Lista borrada exitosamente");
+        }
+      }
+
+      function mapListName(listId) {
+        if (listId === "cola") {
+          let listaActual = listasDeCola.find((l) => l.id === listaActivaId);
+          return listaActual ? listaActual.clientes : [];
+        }
+        if (listId === "viejo") return queueViejo;
+        if (listId === "guardados") return guardados;
+        if (listId === "sobregirados") return sobregirados;
+        if (listId === "vendido") return vendido;
+        if (listId === "nointeres") return noInteres;
+        if (listId === "nocontesto") return noContesto;
+        if (listId === "enespera") return enEspera;
+        if (listId === "siinteresados") return siInteresados;
+        return [];
+      }
+
+      function switchView(viewId, element) {
+        document
+          .querySelectorAll(".view")
+          .forEach((v) => v.classList.remove("active"));
+        document
+          .querySelectorAll(".nav-item")
+          .forEach((n) => n.classList.remove("active"));
+        document.getElementById(`view-${viewId}`).classList.add("active");
+        if (element) element.classList.add("active");
+        actualizarContadoresYTarjetas();
+        renderTodasLasTablas();
+      }
+
+      function showToast(msg) {
+        const toast = document.getElementById("toast-msg");
+        document.getElementById("toast-text").innerText = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 2500);
+      }
+
+      function ejecutarCopiado(texto) {
+        if (!texto || texto === "-" || texto === "No provisto") return;
+        navigator.clipboard
+          .writeText(texto)
+          .then(() => {
+            showToast(`ID Copiado: ${texto}`);
+          })
+          .catch((err) => {
+            console.error("Error copiando", err);
+          });
+      }
+
+      function copiarDniPanel(idElemento) {
+        const numeroDni = document.getElementById(idElemento).innerText;
+        ejecutarCopiado(numeroDni);
+      }
+
+      function procesarExcel() {
+        const rawText = document.getElementById("excel-input").value.trim();
+        const inputNombre = document
+          .getElementById("nombre-nueva-lista")
+          .value.trim();
+
+        if (!rawText) {
+          alert("Por favor, introduce o pega datos primero.");
+          return;
+        }
+
+        const rows = rawText.split("\n");
+        let nuevosClientes = [];
+
+        rows.forEach((row) => {
+          if (!row.trim()) return;
+          let col = row.split("\t");
+          if (col.length < 2) col = row.split(";");
+          if (col.length < 2) col = row.split(",");
+
+          let nombre = col[0] ? col[0].trim() : "";
+          let numero = col[1] ? col[1].trim().replace(/[^0-9]/g, "") : "";
+          let dni = col[2] ? col[2].trim() : "No provisto";
+
+          if (nombre && nombre.toLowerCase() !== "nombre") {
+            if (!numero) numero = "Sin número";
+            nuevosClientes.push({ id: genID(), nombre, numero, dni });
+          }
+        });
+
+        if (nuevosClientes.length > 0) {
+          let numLista = listasDeCola.length + 1;
+          let nombreDefinitivo = inputNombre || `Lista ${numLista}`;
+
+          let nuevaListaObj = {
+            id: "list_" + Date.now(),
+            nombre: nombreDefinitivo,
+            clientes: nuevosClientes,
+          };
+
+          listasDeCola.push(nuevaListaObj);
+          listaActivaId = nuevaListaObj.id;
+
+          guardarLocalStorage();
+          document.getElementById("excel-input").value = "";
+          document.getElementById("nombre-nueva-lista").value = "";
+
+          showToast(
+            `¡¡${nombreDefinitivo} cargada con ${nuevosClientes.length} clientes!!`,
+          );
+          actualizarContadoresYTarjetas();
+          switchView("gestion", document.querySelectorAll(".nav-item")[1]);
+        } else {
+          alert("No se extrajeron celdas válidas.");
+        }
+      }
+
+      function actualizarContadoresYTarjetas() {
+        renderSelectorListas();
+
+        let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+        let queueActual = listaActivaObj ? listaActivaObj.clientes : [];
+
+        document.getElementById("queue-count").innerText =
+          `${queueActual.length} clientes en lista activa`;
+        const buttonsGroup = document.getElementById("action-buttons-group");
+
+        if (queueActual.length > 0) {
+          const actual = queueActual[0];
+          document.getElementById("c-name").innerText = actual.nombre;
+          document.getElementById("c-phone").innerText = actual.numero;
+          document.getElementById("c-dni").innerText = actual.dni;
+          buttonsGroup.style.display = "flex";
+        } else {
+          document.getElementById("c-name").innerText =
+            "No hay clientes en esta lista";
+          document.getElementById("c-phone").innerText = "-";
+          document.getElementById("c-dni").innerText = "-";
+          buttonsGroup.style.display = "none";
+        }
+
+        document.getElementById("queue-viejo-count").innerText =
+          `${queueViejo.length} clientes en cola vieja`;
+        const buttonsViejoGroup = document.getElementById("action-viejo-group");
+
+        if (queueViejo.length > 0) {
+          const viejoActual = queueViejo[0];
+          document.getElementById("v-name").innerText = viejoActual.nombre;
+          document.getElementById("v-phone").innerText = viejoActual.numero;
+          document.getElementById("v-dni").innerText = viejoActual.dni;
+          buttonsViejoGroup.style.display = "flex";
+        } else {
+          document.getElementById("v-name").innerText =
+            "No hay clientes en cola vieja";
+          document.getElementById("v-phone").innerText = "-";
+          document.getElementById("v-dni").innerText = "-";
+          buttonsViejoGroup.style.display = "none";
+        }
+
+        document.getElementById("stat-listas-sin-gestionar").innerText =
+          listasDeCola.length;
+        document.getElementById("stat-contactos-por-gestionar").innerText =
+          listasDeCola.reduce((sum, list) => sum + list.clientes.length, 0);
+        document.getElementById("stat-sobregirados").innerText =
+          sobregirados.length;
+        document.getElementById("stat-guardados").innerText = guardados.length;
+        document.getElementById("stat-nocontesto").innerText =
+          noContesto.length;
+        document.getElementById("stat-enespera").innerText = enEspera.length;
+        document.getElementById("stat-siinteresados").innerText =
+          siInteresados.length;
+        document.getElementById("stat-nointeres").innerText = noInteres.length;
+        document.getElementById("stat-vendido").innerText = vendido.length;
+
+        actualizarVistaVentas();
+      }
+
+      function transferirASistemaViejo() {
+        let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+        if (!listaActivaObj || listaActivaObj.clientes.length === 0) return;
+
+        const cliente = listaActivaObj.clientes.shift();
+        queueViejo.push(cliente);
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        showToast("Cliente enviado a cola de Sistema Viejo");
+      }
+
+      function enviarASobregirados(contexto) {
+        if (contexto === "normal") {
+          let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+          if (!listaActivaObj || listaActivaObj.clientes.length === 0) return;
+          const cliente = listaActivaObj.clientes.shift();
+          sobregirados.push(cliente);
+        } else {
+          if (queueViejo.length === 0) return;
+          const cliente = queueViejo.shift();
+          sobregirados.push(cliente);
+        }
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        showToast("Cliente enviado a Sobregirados");
+      }
+
+      function abrirModalCalificacion(contexto) {
+        if (contexto === "normal") {
+          let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+          if (!listaActivaObj || listaActivaObj.clientes.length === 0) return;
+        } else {
+          if (queueViejo.length === 0) return;
+        }
+
+        document.getElementById("calif-contexto-origen").value = contexto;
+        document.getElementById("modal-calificacion").classList.add("active");
+      }
+
+      function cerrarModalCalificacion() {
+        document
+          .getElementById("modal-calificacion")
+          .classList.remove("active");
+      }
+
+      function confirmarGuardadoCalificado() {
+        const contexto = document.getElementById("calif-contexto-origen").value;
+        let cliente;
+
+        if (contexto === "normal") {
+          let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+          cliente = listaActivaObj.clientes.shift();
+        } else {
+          cliente = queueViejo.shift();
+        }
+
+        const categoria = document.getElementById("sel-categoria").value;
+        const credito = document.getElementById("sel-credito").value;
+
+        cliente.fecha = new Date().toLocaleDateString();
+        cliente.categoria = categoria;
+        cliente.credito = credito;
+
+        guardados.push(cliente);
+        guardarLocalStorage();
+        cerrarModalCalificacion();
+        actualizarContadoresYTarjetas();
+        showToast("Cliente segmentado y guardado");
+      }
+
+      function omitirCliente(contexto) {
+        if (contexto === "normal") {
+          let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+          if (listaActivaObj && listaActivaObj.clientes.length > 0)
+            listaActivaObj.clientes.shift();
+        } else {
+          if (queueViejo.length > 0) queueViejo.shift();
+        }
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        showToast("Cliente descartado de la cola");
+      }
+
+      function obtenerBadgeCategoriaHtml(cat) {
+        if (!cat) return `<span class="badge badge-plata">Sin Asignar</span>`;
+        return `<span class="badge badge-${cat.toLowerCase()}">${cat}</span>`;
+      }
+      function obtenerBadgeCreditoHtml(cred) {
+        if (!cred) return `<span class="badge badge-desconocido">N/A</span>`;
+        if (cred === "Crédito Activo")
+          return `<span class="badge badge-credito-activo"><i class='bx bx-check'></i> Activo</span>`;
+        return `<span class="badge badge-sin-credito"><i class='bx bx-minus-circle'></i> Sin Crédito</span>`;
+      }
+
+      function crearFilaAccionesHtml(id, currentListId) {
+        return `<div class="action-cell"><button class="btn-row btn-acciones" onclick="abrirModalAcciones('${id}', '${currentListId}')"><i class='bx bx-dots-horizontal-rounded'></i> Más acciones</button></div>`;
+      }
+
+      function moverClienteDinamico(id, origenId, destinoId) {
+        let origenArr = mapListName(origenId);
+        let destinoArr = mapListName(destinoId);
+        const index = origenArr.findIndex((c) => c.id === id);
+
+        if (index !== -1) {
+          let cliente = origenArr.splice(index, 1)[0];
+          cliente.fechaAccion = new Date().toLocaleDateString();
+          if (
+            origenId === "siinteresados" &&
+            destinoId !== "siinteresados" &&
+            destinoId !== "vendido"
+          )
+            delete cliente.articuloInteres;
+          destinoArr.push(cliente);
+          guardarLocalStorage();
+          renderTodasLasTablas();
+          showToast("Registro reclasificado");
+        }
+      }
+
+      function abrirModalAcciones(id, origenId) {
+        document.getElementById("accion-modal-id").value = id;
+        document.getElementById("accion-modal-origen").value = origenId;
+
+        const btnGuardar = document.getElementById("accion-btn-guardar");
+        const btnVendido = document.getElementById("accion-btn-vendido");
+        const btnInteresa = document.getElementById("accion-btn-interesa");
+        const btnNoInteres = document.getElementById("accion-btn-nointeres");
+        const btnNoContesto = document.getElementById("accion-btn-nocontesto");
+        const btnEspera = document.getElementById("accion-btn-enespera");
+        const btnSobregirados = document.getElementById(
+          "accion-btn-sobregirados",
+        );
+
+        btnGuardar.style.display = origenId === "guardados" ? "none" : "flex";
+        btnVendido.style.display =
+          origenId === "siinteresados" ? "flex" : "none";
+        btnInteresa.style.display =
+          origenId === "siinteresados" || origenId === "vendido"
+            ? "none"
+            : "flex";
+        btnNoInteres.style.display = origenId === "nointeres" ? "none" : "flex";
+        btnNoContesto.style.display =
+          origenId === "nocontesto" ? "none" : "flex";
+        btnEspera.style.display = origenId === "enespera" ? "none" : "flex";
+        btnSobregirados.style.display =
+          origenId === "sobregirados" ? "none" : "flex";
+
+        document.getElementById("modal-acciones").classList.add("active");
+      }
+
+      function cerrarModalAcciones() {
+        document.getElementById("modal-acciones").classList.remove("active");
+      }
+
+      function ejecutarAccionModal(destinoId) {
+        const id = document.getElementById("accion-modal-id").value;
+        const origenId = document.getElementById("accion-modal-origen").value;
+
+        if (destinoId === "interesa") {
+          cerrarModalAcciones();
+          abrirModalSiInteresa(id, origenId);
+          return;
+        }
+
+        if (destinoId === "borrar") {
+          eliminarClienteDinamico(id, origenId);
+          cerrarModalAcciones();
+          return;
+        }
+
+        moverClienteDinamico(id, origenId, destinoId);
+        cerrarModalAcciones();
+      }
+
+      function eliminarClienteDinamico(id, origenId) {
+        if (
+          confirm(
+            "¿Deseas eliminar de forma permanente este registro de la base de datos?",
+          )
+        ) {
+          let origenArr = mapListName(origenId);
+          const index = origenArr.findIndex((c) => c.id === id);
+          if (index !== -1) {
+            origenArr.splice(index, 1);
+            guardarLocalStorage();
+            renderTodasLasTablas();
+            showToast("Registro eliminado");
+          }
+        }
+      }
+
+      function abrirModalSiInteresa(id, origenId) {
+        document.getElementById("modal-cliente-id").value = id;
+        document.getElementById("modal-origen-id").value = origenId;
+        document.getElementById("input-articulo").value = "";
+        document.getElementById("modal-interes").classList.add("active");
+        document.getElementById("input-articulo").focus();
+      }
+
+      function cerrarModal() {
+        document.getElementById("modal-interes").classList.remove("active");
+      }
+
+      function guardarMoverSiInteresa() {
+        const id = document.getElementById("modal-cliente-id").value;
+        const origenId = document.getElementById("modal-origen-id").value;
+        const articulo = document.getElementById("input-articulo").value.trim();
+
+        if (!articulo) {
+          alert("Debes indicar el artículo.");
+          return;
+        }
+
+        let origenArr = mapListName(origenId);
+        const index = origenArr.findIndex((c) => c.id === id);
+
+        if (index !== -1) {
+          let cliente = origenArr.splice(index, 1)[0];
+          cliente.articuloInteres = articulo;
+          cliente.fechaAccion = new Date().toLocaleDateString();
+          siInteresados.push(cliente);
+
+          guardarLocalStorage();
+          cerrarModal();
+          renderTodasLasTablas();
+          showToast("Asignado a: Sí Interesados");
+        }
+      }
+
+      // MOTOR DE TABLAS
+   function renderTablaGuardados() {
+  const tbG = document.getElementById("tabla-guardados-body");
+  const filtroCat = document.getElementById("filtro-cat-guardados").value;
+  const filtroCred = document.getElementById("filtro-cred-guardados").value;
+  const orden = document.getElementById("orden-guardados").value;
+
+  let listaVisual = [...guardados];
+
+  if (filtroCat !== "Todos")
+    listaVisual = listaVisual.filter((c) => c.categoria === filtroCat);
+  if (filtroCred !== "Todos")
+    listaVisual = listaVisual.filter((c) => c.credito === filtroCred);
+
+  if (orden === "cat-asc") {
+    listaVisual.sort((a, b) =>
+      (a.categoria || "").localeCompare(b.categoria || ""),
+    );
+  } else if (orden === "cred-asc") {
+    listaVisual.sort((a, b) =>
+      (a.credito || "").localeCompare(b.credito || ""),
+    );
+  }
+
+  tbG.innerHTML = "";
+  document.getElementById("empty-guardados").style.display =
+    listaVisual.length === 0 ? "block" : "none";
+
+  listaVisual.forEach((c) => {
+    const nombreSafe = (c.nombre || "").replace(/'/g, "\\'");
+    const telefonoSafe = (c.numero || "").replace(/'/g, "\\'");
+    const catSafe = (c.categoria || "").replace(/'/g, "\\'");
+    const credSafe = (c.credito || "").replace(/'/g, "\\'");
+
+    tbG.innerHTML += `
+      <tr style="cursor:pointer" onclick="abrirModalInfoCliente('${nombreSafe}', '${telefonoSafe}', '${catSafe}', '${credSafe}')">
+        <td><strong>${c.nombre}</strong></td>
+        <td>${c.numero}</td>
+        <td>
+          <div class="copyable-id" onclick="event.stopPropagation(); ejecutarCopiado('${c.dni}')">
+            <i class='bx bx-copy'></i> ${c.dni}
+          </div>
+        </td>
+        <td>${obtenerBadgeCategoriaHtml(c.categoria)}</td>
+        <td>${obtenerBadgeCreditoHtml(c.credito)}</td>
+        <td onclick="event.stopPropagation()">
+          ${crearFilaAccionesHtml(c.id, "guardados")}
+        </td>
+      </tr>`;
+  });
+}
+      function renderTodasLasTablas() {
+        // Renderizar la tabla de Guardados con sus filtros actuales
+        renderTablaGuardados();
+
+        const tbNC = document.getElementById("tabla-nocontesto-body");
+        tbNC.innerHTML = "";
+        document.getElementById("empty-nocontesto").style.display =
+          noContesto.length === 0 ? "block" : "none";
+        noContesto.forEach((c) => {
+          tbNC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nocontesto")}</td></tr>`;
+        });
+
+        const tbEE = document.getElementById("tabla-enespera-body");
+        tbEE.innerHTML = "";
+        document.getElementById("empty-enespera").style.display =
+          enEspera.length === 0 ? "block" : "none";
+        enEspera.forEach((c) => {
+          tbEE.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "enespera")}</td></tr>`;
+        });
+
+        const tbSI = document.getElementById("tabla-siinteresados-body");
+        tbSI.innerHTML = "";
+        document.getElementById("empty-siinteresados").style.display =
+          siInteresados.length === 0 ? "block" : "none";
+        siInteresados.forEach((c) => {
+          tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
+        });
+
+        const tbSG = document.getElementById("tabla-sobregirados-body");
+        tbSG.innerHTML = "";
+        document.getElementById("empty-sobregirados").style.display =
+          sobregirados.length === 0 ? "block" : "none";
+        sobregirados.forEach((c) => {
+          tbSG.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "sobregirados")}</td></tr>`;
+        });
+
+        const tbV = document.getElementById("tabla-vendido-body");
+        tbV.innerHTML = "";
+        document.getElementById("empty-vendido").style.display =
+          vendido.length === 0 ? "block" : "none";
+        vendido.forEach((c) => {
+          tbV.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "vendido")}</td></tr>`;
+        });
+
+        const tbNI = document.getElementById("tabla-nointeres-body");
+        tbNI.innerHTML = "";
+        document.getElementById("empty-nointeres").style.display =
+          noInteres.length === 0 ? "block" : "none";
+        noInteres.forEach((c) => {
+          tbNI.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nointeres")}</td></tr>`;
+        });
+      }
+
+      // EXPORTACIÓN
+      function exportarExcel(listaId) {
+        let datos = mapListName(listaId);
+        let nombreArchivo = `Lista_${listaId}.csv`;
+
+        if (listaId === "cola") {
+          let listaActualObj = listasDeCola.find((l) => l.id === listaActivaId);
+          if (listaActualObj)
+            nombreArchivo = `Exportacion_${listaActualObj.nombre.replace(/ /g, "_")}.csv`;
+        }
+        if (listaId === "viejo")
+          nombreArchivo = "Clientes_Cola_Sistema_Viejo.csv";
+        if (listaId === "sobregirados")
+          nombreArchivo = "Clientes_Sobregirados.csv";
+        if (listaId === "vendido") nombreArchivo = "Clientes_Vendidos.csv";
+        if (listaId === "nointeres")
+          nombreArchivo = "Clientes_No_Le_Interesa.csv";
+
+        // Si es la lista de guardados, exportar la versión que se está viendo (filtrada)
+        if (listaId === "guardados") {
+          const filtroCat = document.getElementById(
+            "filtro-cat-guardados",
+          ).value;
+          const filtroCred = document.getElementById(
+            "filtro-cred-guardados",
+          ).value;
+
+          if (filtroCat !== "Todos")
+            datos = datos.filter((c) => c.categoria === filtroCat);
+          if (filtroCred !== "Todos")
+            datos = datos.filter((c) => c.credito === filtroCred);
+        }
+
+        if (datos.length === 0) {
+          alert("No hay registros visibles en esta lista para exportar.");
+          return;
+        }
+
+        let csvContent =
+          "\uFEFFNombre;Teléfono;DNI;Categoría;Estado Crédito;Artículo de Interés;Fecha\n";
+        datos.forEach((c) => {
+          let nombre = c.nombre ? c.nombre.replace(/"/g, '""') : "";
+          let numero = c.numero || "";
+          let dni = c.dni || "";
+          let cat = c.categoria || "N/A";
+          let cred = c.credito || "N/A";
+          let art = c.articuloInteres
+            ? c.articuloInteres.replace(/"/g, '""')
+            : "N/A";
+          let fecha = c.fechaAccion || c.fecha || "En Cola";
+          csvContent += `"${nombre}";"${numero}";"${dni}";"${cat}";"${cred}";"${art}";"${fecha}"\n`;
+        });
+
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.setAttribute("download", nombreArchivo);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+// Función para alternar la selección de botones
+      function selectOption(tipo, element) {
+        // Remover la clase 'active' de todos los botones del mismo grupo
+        let group = document.getElementById('group-' + tipo);
+        let buttons = group.getElementsByClassName('btn-select');
+        for (let btn of buttons) {
+          btn.classList.remove('active');
+        }
+        
+        // Agregar la clase 'active' al botón presionado
+        element.classList.add('active');
+        
+        // Actualizar el valor del input oculto correspondiente
+        document.getElementById('sel-' + tipo).value = element.getAttribute('data-value');
+      }
+function abrirModalCalificacion(contexto) {
+        if (contexto === "normal") {
+          let listaActivaObj = listasDeCola.find((l) => l.id === listaActivaId);
+          if (!listaActivaObj || listaActivaObj.clientes.length === 0) return;
+        } else {
+          if (queueViejo.length === 0) return;
+        }
+
+        // --- NUEVO: Resetear botones a valores por defecto (Oro / Crédito Activo) ---
+        document.getElementById('sel-categoria').value = "Oro";
+        document.getElementById('sel-credito').value = "Crédito Activo";
+        
+        document.querySelectorAll('.btn-cat').forEach(b => b.classList.remove('active'));
+        document.querySelector('.btn-cat[data-value="Oro"]').classList.add('active');
+        
+        document.querySelectorAll('.btn-cred').forEach(b => b.classList.remove('active'));
+        document.querySelector('.btn-cred[data-value="Crédito Activo"]').classList.add('active');
+        // -----------------------------------------------------------------------------
+
+        document.getElementById("calif-contexto-origen").value = contexto;
+        document.getElementById("modal-calificacion").classList.add("active");
+      }
+// Función para abrir el modal con la información y el QR
+    function abrirModalInfoCliente(nombre, telefono, categoria, credito) {
+      // 1. Asignar los textos
+      document.getElementById('info-nombre').innerText = nombre || 'Sin Nombre';
+      document.getElementById('info-telefono').innerHTML = `<i class="bx bx-phone"></i> ${telefono || 'Sin número'}`;
+      
+      // 2. Construir los detalles (si no hay datos, se oculta o se pone genérico)
+      let detalles = [];
+      if (categoria) detalles.push(`Categoría: ${categoria}`);
+      if (credito) detalles.push(`Crédito: ${credito}`);
+      document.getElementById('info-detalles').innerText = detalles.join(' | ');
+
+      // 3. Generar el QR usando la API de qrserver
+      if (telefono) {
+        // Limpiamos el teléfono (quitamos espacios o guiones para que el celular lo lea bien)
+        let telLimpio = telefono.toString().replace(/[^0-9+]/g, '');
+        // Usamos tel: para que el celular sepa que es una llamada
+        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=tel:${telLimpio}`;
+        document.getElementById('info-qr').src = qrUrl;
+        document.getElementById('info-qr').style.display = 'block';
+      } else {
+        document.getElementById('info-qr').style.display = 'none'; // Ocultar si no hay número
+      }
+
+      // 4. Mostrar el modal
+      document.getElementById('modal-info-cliente').classList.add('active');
+    }
+
+    // Función para cerrar el modal
+    function cerrarModalInfo() {
+      document.getElementById('modal-info-cliente').classList.remove('active');
+    }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Escáner de Documentos</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+    <style>
+        :root {
+            --primary: #4361EE;
+            --primary-hover: #3a53d0;
+            --bg-color: #F4F7FE;
+            --card-bg: #FFFFFF;
+            --text-dark: #2B3674;
+            --text-muted: #A3AED0;
+            --danger: #E31A1A;
+            --success: #05CD99;
+            --sidebar-w: 68px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR DERECHO ── */
+        .sidebar {
+            width: var(--sidebar-w);
+            min-height: 100vh;
+            background: var(--card-bg);
+            border-left: 1px solid #E0E5F2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 10px;
+            position: fixed;
+            right: 0;
+            top: 0;
+            z-index: 200;
+            box-shadow: -4px 0 20px rgba(112,144,176,0.1);
+        }
+
+        .sidebar-label {
+            font-size: 0.6rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+        }
+
+        .trabajo-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            background: var(--bg-color);
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            transition: all 0.25s ease;
+            position: relative;
+        }
+
+        .trabajo-btn i {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            transition: color 0.25s;
+        }
+
+        .trabajo-btn span {
+            font-size: 0.55rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .trabajo-btn.active {
+            background: #E9EDFF;
+            border-color: var(--primary);
+        }
+
+        .trabajo-btn.active i,
+        .trabajo-btn.active span { color: var(--primary); }
+
+        .trabajo-btn .badge {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .trabajo-btn.has-data .badge { display: block; }
+
+        .sidebar-divider {
+            width: 36px;
+            height: 1px;
+            background: #E0E5F2;
+            margin: 4px 0;
+        }
+
+        /* ── MAIN AREA ── */
+        .main-wrap {
+            flex: 1;
+            margin-right: var(--sidebar-w);
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 110px;
+        }
+
+        header {
+            padding: 25px 20px 10px;
+            background: var(--bg-color);
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+        }
+
+        header h1 { font-size: 1.5rem; font-weight: 700; color: var(--text-dark); }
+        header p  { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* Chip de trabajo activo */
+        .trabajo-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--primary);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            margin-top: 4px;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--card-bg);
+            margin: 0 20px 20px;
+            padding: 20px;
+            border-radius: 20px;
+            box-shadow: 0 10px 20px rgba(112,144,176,0.08);
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+
+        .card-header h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-header i {
+            color: var(--primary);
+            font-size: 1.3rem;
+            background: #F4F7FE;
+            padding: 6px;
+            border-radius: 10px;
+        }
+
+        /* Guardar imagen badge */
+        .btn-save-img {
+            background: #E6FBF5;
+            color: var(--success);
+            border: none;
+            border-radius: 10px;
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.2s;
+        }
+        .btn-save-img:active { transform: scale(0.95); }
+
+        .upload-zone {
+            background-color: #F8F9FA;
+            border: 2px dashed #D0D5E2;
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .upload-zone:hover  { border-color: var(--primary); background-color: #F0F4FF; }
+        .upload-zone:active { transform: scale(0.98); }
+        .upload-zone i      { font-size: 2.5rem; color: var(--primary); }
+        .upload-zone span   { font-size: 0.95rem; color: var(--text-muted); font-weight: 500; }
+
+        input[type="file"] { display: none; }
+
+        .preview-container {
+            width: 100%;
+            height: 220px;
+            border-radius: 12px;
+            background-color: #F8F9FA;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            border: 1px solid #E0E5F2;
+        }
+
+        .preview-img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .action-buttons {
+            display: none;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn-card {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-edit   { background-color: #E9EDFF; color: var(--primary); }
+        .btn-delete { background-color: #FFE5E5; color: var(--danger); }
+        .btn-card:active { transform: scale(0.95); }
+
+        /* ── BOTTOM BAR ── */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            right: var(--sidebar-w);
+            left: 0;
+            background: rgba(255,255,255,0.96);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px 22px;
+            border-top: 1px solid #E0E5F2;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+            max-width: calc(100vw - var(--sidebar-w));
+        }
+
+        .btn-main {
+            flex: 1;
+            border: none;
+            padding: 14px 8px;
+            border-radius: 14px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.3s;
+        }
+
+        .btn-pdf   { background-color: var(--primary); color: white; box-shadow: 0 4px 15px rgba(67,97,238,0.3); }
+        .btn-print { background-color: var(--text-dark); color: white; box-shadow: 0 4px 15px rgba(43,54,116,0.3); }
+        .btn-img   { background-color: #0F9E6E; color: white; box-shadow: 0 4px 15px rgba(5,205,153,0.3); }
+        .btn-main:active { transform: translateY(2px); }
+
+        /* ── MODAL RECORTADOR ── */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.98);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .modal-header button {
+            background: rgba(255,255,255,0.1);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .modal-header .btn-save {
+            background: var(--primary);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(67,97,238,0.4);
+        }
+
+        .modal-body {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            margin: 0 20px;
+            border-radius: 16px;
+            background: #000;
+        }
+
+        .cropper-wrapper { width: 100%; height: 100%; }
+        #cropper-image   { display: block; max-width: 100%; max-height: 100%; }
+
+        .toolbar { padding: 20px 20px 35px; }
+
+        .toolbar-title {
+            color: #94A3B8;
+            font-size: 0.75rem;
+            text-align: center;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 600;
+        }
+
+        .tools-grid { display: flex; justify-content: center; gap: 15px; }
+
+        .tool-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.05);
+            color: white;
+            padding: 12px;
+            border-radius: 16px;
+            width: 75px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tool-btn:active { background: rgba(255,255,255,0.2); transform: scale(0.95); }
+        .tool-btn i      { font-size: 1.5rem; color: #E2E8F0; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 110px;
+            right: calc(var(--sidebar-w) + 20px);
+            left: 20px;
+            background: #1E293B;
+            color: white;
+            padding: 12px 18px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 2000;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .toast.show { transform: translateY(0); opacity: 1; }
+        .toast i    { font-size: 1.2rem; color: var(--success); }
+
+        .hidden { display: none !important; }
+
+        /* ── SECCIÓN IP ── */
+        #seccion-ip       { display: none; }
+        #seccion-dni      { display: block; }
+        #seccion-licencia { display: none; }
+
+        .ip-preview-container {
+            width: 100%;
+            aspect-ratio: 215.9 / 279.4;
+            border-radius: 12px;
+            background: #F8F9FA;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid #E0E5F2;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .ip-preview-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .upload-zone-ip {
+            background-color: #F8F9FA;
+            border: 2px dashed #D0D5E2;
+            border-radius: 16px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .upload-zone-ip:hover  { border-color: var(--primary); background: #F0F4FF; }
+        .upload-zone-ip:active { transform: scale(0.98); }
+        .upload-zone-ip i      { font-size: 2.5rem; color: var(--primary); }
+        .upload-zone-ip .uz-title { font-size: 0.95rem; color: var(--text-muted); font-weight: 500; }
+        .upload-zone-ip .uz-sub   { font-size: 0.78rem; color: #C0C7D8; }
+
+        .hoja-numero {
+            background: var(--primary);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── PRINT ── */
+        @media print {
+            body * { visibility: hidden; }
+            body   { background: white; }
+            #print-area, #print-area * { visibility: visible; }
+            /* DNI clásico */
+            #print-area.print-dni {
+                position: absolute;
+                left: 0; top: 0;
+                width: 215.9mm;
+                height: 279.4mm;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding-top: 30mm;
+                gap: 20mm;
+            }
+            .print-card-img {
+                width: 85.6mm;
+                height: 54mm;
+                object-fit: cover;
+                border-radius: 3mm;
+                border: 1px solid #ddd;
+            }
+            /* IP: cada hoja es una página carta completa */
+            #print-area.print-ip {
+                position: absolute;
+                left: 0; top: 0;
+                width: 100%;
+            }
+            .print-ip-hoja {
+                width: 215.9mm;
+                height: 279.4mm;
+                page-break-after: always;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+            }
+            .print-ip-hoja img {
+                width: 215.9mm;
+                height: 279.4mm;
+                object-fit: fill;
+                display: block;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR DERECHO -->
+    <div class="sidebar">
+        <div class="sidebar-label">Trabajo</div>
+
+        <button class="trabajo-btn active" id="btn-trabajo-DNI" onclick="cambiarTrabajo('DNI')" title="DNI">
+            <div class="badge"></div>
+            <i class='bx bx-id-card'></i>
+            <span>DNI</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button class="trabajo-btn" id="btn-trabajo-LICENCIA" onclick="cambiarTrabajo('LICENCIA')" title="LICENCIA">
+            <div class="badge"></div>
+            <i class='bx bx-card'></i>
+            <span>LIC</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button class="trabajo-btn" id="btn-trabajo-CALCA" onclick="cambiarTrabajo('CALCA')" title="CALCA">
+            <div class="badge"></div>
+            <i class='bx bx-copy-alt'></i>
+            <span>CALCA</span>
+        </button>
+
+        <div class="sidebar-divider"></div>
+
+        <button class="trabajo-btn" id="btn-trabajo-IP" onclick="cambiarTrabajo('IP')" title="IP">
+            <div class="badge"></div>
+            <i class='bx bx-file-blank'></i>
+            <span>IP</span>
+        </button>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="main-wrap">
+        <div class="app-container">
+            <header>
+                <div>
+                    <h1>Escáner de DNI</h1>
+                    <p>Ajusta tu documento para exportar en Carta</p>
+                </div>
+                <div class="trabajo-chip" id="chip-trabajo">
+                    <i class='bx bx-id-card'></i>
+                    <span id="chip-label">DNI</span>
+                </div>
+            </header>
+
+            <!-- FRENTE -->
+            <div id="seccion-dni" style="display:block">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class='bx bx-id-card'></i> Frente (Derecho)</h2>
+                </div>
+
+                <label class="upload-zone" id="zone-frente">
+                    <i class='bx bx-camera'></i>
+                    <span>Tocar para subir imagen</span>
+                    <input type="file" id="input-frente" accept="image/*">
+                </label>
+
+                <div class="preview-container" id="container-frente">
+                    <img id="preview-frente" class="preview-img" src="">
+                </div>
+
+                <div class="action-buttons" id="actions-frente">
+                    <button class="btn-card btn-edit" onclick="abrirRecortador('frente')">
+                        <i class='bx bx-crop'></i> Ajustar
+                    </button>
+                    <button class="btn-card btn-delete" onclick="borrarImagen('frente')">
+                        <i class='bx bx-trash'></i> Borrar
+                    </button>
+                </div>
+            </div>
+
+            <!-- REVERSO -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class='bx bx-scan'></i> Reverso (Revés)</h2>
+                </div>
+
+                <label class="upload-zone" id="zone-reverso">
+                    <i class='bx bx-camera'></i>
+                    <span>Tocar para subir imagen</span>
+                    <input type="file" id="input-reverso" accept="image/*">
+                </label>
+
+                <div class="preview-container" id="container-reverso">
+                    <img id="preview-reverso" class="preview-img" src="">
+                </div>
+
+                <div class="action-buttons" id="actions-reverso">
+                    <button class="btn-card btn-edit" onclick="abrirRecortador('reverso')">
+                        <i class='bx bx-crop'></i> Ajustar
+                    </button>
+                    <button class="btn-card btn-delete" onclick="borrarImagen('reverso')">
+                        <i class='bx bx-trash'></i> Borrar
+                    </button>
+                </div>
+            </div>
+            </div><!-- /seccion-dni -->
+
+            <!-- ══════ SECCIÓN LICENCIA ══════ -->
+            <div id="seccion-licencia" style="display:none">
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class='bx bx-card'></i> Frente (Derecho)</h2>
+                    </div>
+                    <label class="upload-zone" id="zone-lic-frente">
+                        <i class='bx bx-camera'></i>
+                        <span>Tocar para subir imagen</span>
+                        <input type="file" id="input-lic-frente" accept="image/*">
+                    </label>
+                    <div class="preview-container" id="container-lic-frente">
+                        <img id="preview-lic-frente" class="preview-img" src="">
+                    </div>
+                    <div class="action-buttons" id="actions-lic-frente">
+                        <button class="btn-card btn-edit" onclick="abrirRecortador('lic-frente')">
+                            <i class='bx bx-crop'></i> Ajustar
+                        </button>
+                        <button class="btn-card btn-delete" onclick="borrarImagen('lic-frente')">
+                            <i class='bx bx-trash'></i> Borrar
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class='bx bx-scan'></i> Reverso (Revés)</h2>
+                    </div>
+                    <label class="upload-zone" id="zone-lic-reverso">
+                        <i class='bx bx-camera'></i>
+                        <span>Tocar para subir imagen</span>
+                        <input type="file" id="input-lic-reverso" accept="image/*">
+                    </label>
+                    <div class="preview-container" id="container-lic-reverso">
+                        <img id="preview-lic-reverso" class="preview-img" src="">
+                    </div>
+                    <div class="action-buttons" id="actions-lic-reverso">
+                        <button class="btn-card btn-edit" onclick="abrirRecortador('lic-reverso')">
+                            <i class='bx bx-crop'></i> Ajustar
+                        </button>
+                        <button class="btn-card btn-delete" onclick="borrarImagen('lic-reverso')">
+                            <i class='bx bx-trash'></i> Borrar
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /seccion-licencia -->
+            <div id="seccion-ip">
+
+                <!-- HOJA 1 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class='bx bx-file-blank'></i> Hoja 1</h2>
+                        <span class="hoja-numero">Carta</span>
+                    </div>
+
+                    <label class="upload-zone-ip" id="ip-zone-hoja1">
+                        <i class='bx bx-cloud-upload'></i>
+                        <span class="uz-title">Subir imagen o PDF</span>
+                        <span class="uz-sub">JPG, PNG, PDF</span>
+                        <input type="file" id="ip-input-hoja1" accept="image/*,application/pdf">
+                    </label>
+
+                    <div class="ip-preview-container" id="ip-container-hoja1">
+                        <img id="ip-preview-hoja1" class="ip-preview-img" src="">
+                    </div>
+
+                    <div class="action-buttons" id="ip-actions-hoja1">
+                        <button class="btn-card btn-delete" onclick="ipBorrar('hoja1')">
+                            <i class='bx bx-trash'></i> Borrar
+                        </button>
+                    </div>
+                </div>
+
+                <!-- HOJA 2 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class='bx bx-file-blank'></i> Hoja 2</h2>
+                        <span class="hoja-numero">Carta</span>
+                    </div>
+
+                    <label class="upload-zone-ip" id="ip-zone-hoja2">
+                        <i class='bx bx-cloud-upload'></i>
+                        <span class="uz-title">Subir imagen o PDF</span>
+                        <span class="uz-sub">JPG, PNG, PDF</span>
+                        <input type="file" id="ip-input-hoja2" accept="image/*,application/pdf">
+                    </label>
+
+                    <div class="ip-preview-container" id="ip-container-hoja2">
+                        <img id="ip-preview-hoja2" class="ip-preview-img" src="">
+                    </div>
+
+                    <div class="action-buttons" id="ip-actions-hoja2">
+                        <button class="btn-card btn-delete" onclick="ipBorrar('hoja2')">
+                            <i class='bx bx-trash'></i> Borrar
+                        </button>
+                    </div>
+                </div>
+
+            </div><!-- /seccion-ip -->
+
+            <!-- BOTTOM BAR -->
+            <div class="bottom-bar">
+                <button class="btn-main btn-pdf" id="btn-export" onclick="exportarPDF()">
+                    <i class='bx bxs-file-pdf'></i> PDF
+                </button>
+                <button class="btn-main btn-img" onclick="exportarImagen()">
+                    <i class='bx bx-image-export'></i> Imagen
+                </button>
+                <button class="btn-main btn-print" onclick="imprimirDirecto()">
+                    <i class='bx bx-printer'></i> Imprimir
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÁREA IMPRESIÓN -->
+    <div id="print-area" class="hidden">
+        <!-- DNI / CALCA -->
+        <img id="print-frente" class="print-card-img" src="" alt="Frente">
+        <img id="print-reverso" class="print-card-img" src="" alt="Reverso">
+        <!-- IP -->
+        <div class="print-ip-hoja" id="print-ip-h1" style="display:none">
+            <img id="print-ip-img1" src="" alt="Hoja 1">
+        </div>
+        <div class="print-ip-hoja" id="print-ip-h2" style="display:none">
+            <img id="print-ip-img2" src="" alt="Hoja 2">
+        </div>
+    </div>
+
+    <!-- MODAL RECORTADOR -->
+    <div class="modal" id="cropper-modal">
+        <div class="modal-header">
+            <button onclick="cerrarRecortador()">Cancelar</button>
+            <span style="font-weight:600;font-size:1rem;color:#fff;">Ajustar Imagen</span>
+            <button class="btn-save" onclick="guardarRecorte()">Aplicar</button>
+        </div>
+        <div class="modal-body">
+            <div class="cropper-wrapper">
+                <img id="cropper-image" src="">
+            </div>
+        </div>
+        <div class="toolbar">
+            <div class="toolbar-title">Rotación y Nivelación</div>
+            <div class="tools-grid">
+                <button class="tool-btn" onclick="rotarImagen(-90)"><i class='bx bx-rotate-left'></i><span>-90°</span></button>
+                <button class="tool-btn" onclick="rotarImagen(-1)"><i class='bx bx-undo'></i><span>-1° Fino</span></button>
+                <button class="tool-btn" onclick="rotarImagen(1)"><i class='bx bx-redo'></i><span>+1° Fino</span></button>
+                <button class="tool-btn" onclick="rotarImagen(90)"><i class='bx bx-rotate-right'></i><span>+90°</span></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <i class='bx bx-check-circle'></i>
+        <span id="toast-msg">Guardado correctamente</span>
+    </div>
+
+    <script>
+    // ══════════════════════════════════════════════
+    //  IndexedDB
+    // ══════════════════════════════════════════════
+    const DB_NAME    = 'EscanerDNI';
+    const DB_VERSION = 1;
+    const STORE_NAME = 'imagenes';
+    let   db         = null;
+
+    function abrirDB() {
+        return new Promise((resolve, reject) => {
+            if (db) { resolve(db); return; }
+            const req = indexedDB.open(DB_NAME, DB_VERSION);
+            req.onupgradeneeded = e => {
+                const d = e.target.result;
+                if (!d.objectStoreNames.contains(STORE_NAME)) {
+                    d.createObjectStore(STORE_NAME, { keyPath: 'id' });
+                }
+            };
+            req.onsuccess = e => { db = e.target.result; resolve(db); };
+            req.onerror   = e => reject(e.target.error);
+        });
+    }
+
+    async function idbGuardar(id, base64) {
+        const d = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const tx = d.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).put({ id, base64 });
+            tx.oncomplete = resolve;
+            tx.onerror    = e => reject(e.target.error);
+        });
+    }
+
+    async function idbLeer(id) {
+        const d = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const tx  = d.transaction(STORE_NAME, 'readonly');
+            const req = tx.objectStore(STORE_NAME).get(id);
+            req.onsuccess = e => resolve(e.target.result ? e.target.result.base64 : null);
+            req.onerror   = e => reject(e.target.error);
+        });
+    }
+
+    async function idbBorrar(id) {
+        const d = await abrirDB();
+        return new Promise((resolve, reject) => {
+            const tx = d.transaction(STORE_NAME, 'readwrite');
+            tx.objectStore(STORE_NAME).delete(id);
+            tx.oncomplete = resolve;
+            tx.onerror    = e => reject(e.target.error);
+        });
+    }
+
+    // ══════════════════════════════════════════════
+    //  Estado de la app
+    // ══════════════════════════════════════════════
+    let trabajoActual = 'DNI';   // 'DNI' | 'CALCA' | 'IP'
+    let cropper       = null;
+    let caraActual    = '';
+    const LIMIT_SIZE  = 1200;
+
+    // Imágenes en memoria para el trabajo activo
+    const memImages = { frente: null, reverso: null };
+    const memIP     = { hoja1: null, hoja2: null };
+
+    // PDF.js worker
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    }
+
+    // ══════════════════════════════════════════════
+    //  Init
+    // ══════════════════════════════════════════════
+    window.onload = async () => {
+        await abrirDB();
+        await cargarTrabajo('DNI');
+        await actualizarBadges();
+    };
+
+    document.getElementById('input-frente').addEventListener('change',  e => procesarArchivo(e, 'frente'));
+    document.getElementById('input-reverso').addEventListener('change', e => procesarArchivo(e, 'reverso'));
+    document.getElementById('input-lic-frente').addEventListener('change',  e => procesarArchivo(e, 'lic-frente'));
+    document.getElementById('input-lic-reverso').addEventListener('change', e => procesarArchivo(e, 'lic-reverso'));
+    document.getElementById('ip-input-hoja1').addEventListener('change', e => ipProcesarArchivo(e, 'hoja1'));
+    document.getElementById('ip-input-hoja2').addEventListener('change', e => ipProcesarArchivo(e, 'hoja2'));
+
+    // ══════════════════════════════════════════════
+    //  Cambio de trabajo
+    // ══════════════════════════════════════════════
+    async function cambiarTrabajo(nombre) {
+        if (nombre === trabajoActual) return;
+        trabajoActual = nombre;
+
+        // Actualizar sidebar
+        document.querySelectorAll('.trabajo-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-trabajo-${nombre}`).classList.add('active');
+
+        // Actualizar chip
+        const icons     = { DNI: 'bx-id-card', LICENCIA: 'bx-card', CALCA: 'bx-copy-alt', IP: 'bx-file-blank' };
+        const subtitulos = { DNI: 'Ajusta tu documento para exportar en Carta', LICENCIA: 'Ajusta tu licencia para exportar en Carta', CALCA: 'Ajusta tu documento para exportar en Carta', IP: 'Dos hojas tamaño Carta al 100%' };
+        const titulos    = { DNI: 'Escáner de DNI', LICENCIA: 'Escáner de Licencia', CALCA: 'Escáner de CALCA', IP: 'Escáner IP' };
+        document.getElementById('chip-label').textContent = nombre;
+        document.querySelector('.trabajo-chip i').className = `bx ${icons[nombre]}`;
+        document.querySelector('header h1').textContent = titulos[nombre];
+        document.querySelector('header p').textContent  = subtitulos[nombre];
+
+        // Mostrar/ocultar secciones
+        const esIP  = nombre === 'IP';
+        const esLic = nombre === 'LICENCIA';
+        document.getElementById('seccion-dni').style.display      = (!esIP && !esLic) ? 'block' : 'none';
+        document.getElementById('seccion-licencia').style.display = esLic ? 'block' : 'none';
+        document.getElementById('seccion-ip').style.display       = esIP  ? 'block' : 'none';
+
+        if (esIP) {
+            ipLimpiarVista('hoja1'); ipLimpiarVista('hoja2');
+            memIP.hoja1 = null; memIP.hoja2 = null;
+            await ipCargarHojas();
+        } else if (esLic) {
+            limpiarVista('lic-frente'); limpiarVista('lic-reverso');
+            memImages.frente = null; memImages.reverso = null;
+            await cargarTrabajo(nombre);
+        } else {
+            limpiarVista('frente'); limpiarVista('reverso');
+            memImages.frente = null; memImages.reverso = null;
+            await cargarTrabajo(nombre);
+        }
+    }
+
+    async function cargarTrabajo(nombre) {
+        const prefijoFrente  = nombre === 'LICENCIA' ? 'lic-frente'  : 'frente';
+        const prefijoReverso = nombre === 'LICENCIA' ? 'lic-reverso' : 'reverso';
+        for (const cara of [prefijoFrente, prefijoReverso]) {
+            const base64 = await idbLeer(`${nombre}_${cara}`);
+            if (base64) {
+                memImages[cara.startsWith('lic') ? cara.replace('lic-','') : cara] = base64;
+                actualizarVista(cara, base64);
+            }
+        }
+        await actualizarBadges();
+    }
+
+    // ══════════════════════════════════════════════
+    //  Procesamiento de archivos
+    // ══════════════════════════════════════════════
+    function procesarArchivo(event, cara) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = e => {
+            comprimirImagen(e.target.result, LIMIT_SIZE, async imagenComprimida => {
+                // Para LICENCIA las caras son 'lic-frente' / 'lic-reverso'
+                const esLic   = cara.startsWith('lic-');
+                const trabajo = esLic ? 'LICENCIA' : trabajoActual;
+                memImages[esLic ? cara.replace('lic-','') : cara] = imagenComprimida;
+                actualizarVista(cara, imagenComprimida);
+                await idbGuardar(`${trabajo}_${cara}`, imagenComprimida);
+                await actualizarBadges();
+                event.target.value = '';
+                abrirRecortador(cara);
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ══════════════════════════════════════════════
+    //  Vista
+    // ══════════════════════════════════════════════
+    function actualizarVista(cara, base64) {
+        document.getElementById(`zone-${cara}`).classList.add('hidden');
+        const container = document.getElementById(`container-${cara}`);
+        const img       = document.getElementById(`preview-${cara}`);
+        const actions   = document.getElementById(`actions-${cara}`);
+        img.src                  = base64;
+        container.style.display  = 'flex';
+        actions.style.display    = 'flex';
+    }
+
+    function limpiarVista(cara) {
+        document.getElementById(`zone-${cara}`).classList.remove('hidden');
+        document.getElementById(`container-${cara}`).style.display = 'none';
+        document.getElementById(`actions-${cara}`).style.display   = 'none';
+        document.getElementById(`preview-${cara}`).src = '';
+    }
+
+    function mostrarBtnGuardar(cara) {
+        const el = document.getElementById(`save-${cara}`);
+        if (el) el.style.display = 'flex';
+    }
+
+    function ocultarBtnGuardar(cara) {
+        const el = document.getElementById(`save-${cara}`);
+        if (el) el.style.display = 'none';
+    }
+
+    // ══════════════════════════════════════════════
+    //  Guardar imagen en IndexedDB (manual)
+    // ══════════════════════════════════════════════
+    async function guardarImagenIDB(cara) {
+        const base64 = memImages[cara];
+        if (!base64) return;
+        await idbGuardar(`${trabajoActual}_${cara}`, base64);
+        ocultarBtnGuardar(cara);
+        await actualizarBadges();
+        mostrarToast(`Imagen "${cara}" guardada en ${trabajoActual} ✓`);
+    }
+
+    // ══════════════════════════════════════════════
+    //  Borrar imagen
+    // ══════════════════════════════════════════════
+    async function borrarImagen(cara) {
+        const esLic   = cara.startsWith('lic-');
+        const trabajo = esLic ? 'LICENCIA' : trabajoActual;
+        await idbBorrar(`${trabajo}_${cara}`);
+        memImages[esLic ? cara.replace('lic-','') : cara] = null;
+        limpiarVista(cara);
+        await actualizarBadges();
+    }
+
+    // ══════════════════════════════════════════════
+    //  Badges (punto verde en sidebar)
+    // ══════════════════════════════════════════════
+    async function actualizarBadges() {
+        for (const trabajo of ['DNI', 'CALCA']) {
+            const f = await idbLeer(`${trabajo}_frente`);
+            const r = await idbLeer(`${trabajo}_reverso`);
+            const btn = document.getElementById(`btn-trabajo-${trabajo}`);
+            if (f || r) btn.classList.add('has-data');
+            else        btn.classList.remove('has-data');
+        }
+        // IP
+        const h1 = await idbLeer('IP_hoja1');
+        const h2 = await idbLeer('IP_hoja2');
+        const btnIP = document.getElementById('btn-trabajo-IP');
+        if (h1 || h2) btnIP.classList.add('has-data');
+        else          btnIP.classList.remove('has-data');
+    }
+
+    // ══════════════════════════════════════════════
+    //  Recortador
+    // ══════════════════════════════════════════════
+    function abrirRecortador(cara) {
+        caraActual = cara;
+        const src  = document.getElementById(`preview-${cara}`).src;
+        if (!src || src === window.location.href) return;
+
+        const modal        = document.getElementById('cropper-modal');
+        const cropperImage = document.getElementById('cropper-image');
+
+        if (cropper) { cropper.destroy(); cropper = null; }
+
+        modal.style.display = 'flex';
+
+        cropperImage.onload = function () {
+            cropper = new Cropper(cropperImage, {
+                aspectRatio:  85.6 / 54,
+                viewMode:     1,
+                autoCropArea: 0.9,
+                background:   false,
+                responsive:   true,
+                checkOrientation: false
+            });
+            cropperImage.onload = null;
+        };
+        cropperImage.src = src;
+    }
+
+    function cerrarRecortador() {
+        document.getElementById('cropper-modal').style.display = 'none';
+        if (cropper) { cropper.destroy(); cropper = null; }
+        document.getElementById('cropper-image').src = '';
+    }
+
+    function rotarImagen(grados) {
+        if (cropper) cropper.rotate(grados);
+    }
+
+    async function guardarRecorte() {
+        if (!cropper) return;
+        const canvas = cropper.getCroppedCanvas({ maxWidth: LIMIT_SIZE, maxHeight: LIMIT_SIZE });
+        if (canvas) {
+            const base64   = canvas.toDataURL('image/jpeg', 0.9);
+            const esLic    = caraActual.startsWith('lic-');
+            const trabajo  = esLic ? 'LICENCIA' : trabajoActual;
+            memImages[esLic ? caraActual.replace('lic-','') : caraActual] = base64;
+            actualizarVista(caraActual, base64);
+            await idbGuardar(`${trabajo}_${caraActual}`, base64);
+            await actualizarBadges();
+            cerrarRecortador();
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    //  IP – Funciones específicas
+    // ══════════════════════════════════════════════
+
+    async function ipProcesarArchivo(event, hoja) {
+        const file = event.target.files[0];
+        if (!file) return;
+        event.target.value = '';
+
+        if (file.type === 'application/pdf') {
+            // Renderizar primera página del PDF a base64
+            const arrayBuf = await file.arrayBuffer();
+            const pdfDoc   = await pdfjsLib.getDocument({ data: arrayBuf }).promise;
+            const page     = await pdfDoc.getPage(1);
+            // Escala para aprox tamaño carta a 150dpi
+            const viewport = page.getViewport({ scale: 1.5 });
+            const canvas   = document.createElement('canvas');
+            canvas.width   = viewport.width;
+            canvas.height  = viewport.height;
+            await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise;
+            const base64 = canvas.toDataURL('image/jpeg', 0.92);
+            await ipGuardarYMostrar(hoja, base64);
+        } else {
+            // Imagen normal
+            const reader = new FileReader();
+            reader.onload = async e => {
+                comprimirImagen(e.target.result, 2000, async base64 => {
+                    await ipGuardarYMostrar(hoja, base64);
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function ipGuardarYMostrar(hoja, base64) {
+        memIP[hoja] = base64;
+        ipActualizarVista(hoja, base64);
+        await idbGuardar(`IP_${hoja}`, base64);
+        await actualizarBadges();
+    }
+
+    function ipActualizarVista(hoja, base64) {
+        document.getElementById(`ip-zone-${hoja}`).classList.add('hidden');
+        const cont    = document.getElementById(`ip-container-${hoja}`);
+        const img     = document.getElementById(`ip-preview-${hoja}`);
+        const actions = document.getElementById(`ip-actions-${hoja}`);
+        img.src              = base64;
+        cont.style.display   = 'flex';
+        actions.style.display = 'flex';
+    }
+
+    function ipLimpiarVista(hoja) {
+        document.getElementById(`ip-zone-${hoja}`).classList.remove('hidden');
+        document.getElementById(`ip-container-${hoja}`).style.display  = 'none';
+        document.getElementById(`ip-actions-${hoja}`).style.display    = 'none';
+        document.getElementById(`ip-preview-${hoja}`).src = '';
+    }
+
+    async function ipBorrar(hoja) {
+        await idbBorrar(`IP_${hoja}`);
+        memIP[hoja] = null;
+        ipLimpiarVista(hoja);
+        await actualizarBadges();
+    }
+
+    async function ipCargarHojas() {
+        for (const hoja of ['hoja1', 'hoja2']) {
+            const base64 = await idbLeer(`IP_${hoja}`);
+            if (base64) { memIP[hoja] = base64; ipActualizarVista(hoja, base64); }
+        }
+        await actualizarBadges();
+    }
+
+    // ══════════════════════════════════════════════
+    //  Validación
+    // ══════════════════════════════════════════════
+    async function obtenerImagenes() {
+        if (trabajoActual === 'IP') {
+            const h1 = memIP.hoja1 || await idbLeer('IP_hoja1');
+            const h2 = memIP.hoja2 || await idbLeer('IP_hoja2');
+            if (!h1 && !h2) { mostrarToast('⚠️ Sube al menos una hoja antes de continuar', true); return null; }
+            return { tipo: 'IP', hoja1: h1, hoja2: h2 };
+        }
+        const esLic  = trabajoActual === 'LICENCIA';
+        const preF   = esLic ? 'lic-frente'  : 'frente';
+        const preR   = esLic ? 'lic-reverso' : 'reverso';
+        const frente  = memImages.frente  || await idbLeer(`${trabajoActual}_${preF}`);
+        const reverso = memImages.reverso || await idbLeer(`${trabajoActual}_${preR}`);
+        if (!frente || !reverso) {
+            mostrarToast('⚠️ Sube ambas caras antes de continuar', true);
+            return null;
+        }
+        return { tipo: 'DNI', frente, reverso };
+    }
+
+    // ══════════════════════════════════════════════
+    //  Exportar PDF
+    // ══════════════════════════════════════════════
+    async function exportarPDF() {
+        const imgs = await obtenerImagenes();
+        if (!imgs) return;
+
+        const btn  = document.getElementById('btn-export');
+        const orig = btn.innerHTML;
+        btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Creando PDF...";
+
+        setTimeout(() => {
+            const { jsPDF } = window.jspdf;
+
+            if (imgs.tipo === 'IP') {
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+                const W = 215.9, H = 279.4;
+                if (imgs.hoja1) doc.addImage(imgs.hoja1, 'JPEG', 0, 0, W, H);
+                if (imgs.hoja2) {
+                    doc.addPage('letter', 'portrait');
+                    doc.addImage(imgs.hoja2, 'JPEG', 0, 0, W, H);
+                }
+                doc.save('IP_Carta.pdf');
+            } else {
+                const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+                const w = 85.6, h = 54;
+                const x = (215.9 - w) / 2;
+                doc.addImage(imgs.frente,  'JPEG', x, 30, w, h);
+                doc.addImage(imgs.reverso, 'JPEG', x, 30 + h + 20, w, h);
+                doc.save(`${trabajoActual}_Carta.pdf`);
+            }
+
+            btn.innerHTML = orig;
+            mostrarToast(`PDF "${trabajoActual}" exportado ✓`);
+        }, 300);
+    }
+
+    // ══════════════════════════════════════════════
+    //  Exportar Imagen (canvas combinado frente+reverso)
+    // ══════════════════════════════════════════════
+    async function exportarImagen() {
+        const imgs = await obtenerImagenes();
+        if (!imgs) return;
+
+        if (imgs.tipo === 'IP') {
+            // Para IP: exportar cada hoja como imagen separada
+            const cargarImg = src => new Promise(res => { const i = new Image(); i.onload = () => res(i); i.src = src; });
+            if (imgs.hoja1) {
+                const i1 = await cargarImg(imgs.hoja1);
+                const c1 = document.createElement('canvas');
+                c1.width = i1.width; c1.height = i1.height;
+                c1.getContext('2d').drawImage(i1, 0, 0);
+                const a1 = document.createElement('a'); a1.download = 'IP_hoja1.jpg'; a1.href = c1.toDataURL('image/jpeg', 0.95); a1.click();
+            }
+            if (imgs.hoja2) {
+                await new Promise(r => setTimeout(r, 400));
+                const i2 = await cargarImg(imgs.hoja2);
+                const c2 = document.createElement('canvas');
+                c2.width = i2.width; c2.height = i2.height;
+                c2.getContext('2d').drawImage(i2, 0, 0);
+                const a2 = document.createElement('a'); a2.download = 'IP_hoja2.jpg'; a2.href = c2.toDataURL('image/jpeg', 0.95); a2.click();
+            }
+            mostrarToast('Imágenes IP exportadas ✓');
+            return;
+        }
+
+        // DNI / CALCA
+        const W = 486, H = 306;
+        const GAP = 30;
+        const PAD = 40;
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = W + PAD * 2;
+        canvas.height = (H * 2) + GAP + PAD * 2;
+
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#F4F7FE';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        const cargarImg = src => new Promise(res => {
+            const i = new Image(); i.onload = () => res(i); i.src = src;
+        });
+
+        const imgF = await cargarImg(imgs.frente);
+        const imgR = await cargarImg(imgs.reverso);
+
+        // Esquinas redondeadas
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        // Frente
+        ctx.save();
+        roundRect(ctx, PAD, PAD, W, H, 14);
+        ctx.clip();
+        ctx.drawImage(imgF, PAD, PAD, W, H);
+        ctx.restore();
+
+        // Reverso
+        ctx.save();
+        roundRect(ctx, PAD, PAD + H + GAP, W, H, 14);
+        ctx.clip();
+        ctx.drawImage(imgR, PAD, PAD + H + GAP, W, H);
+        ctx.restore();
+
+        // Descargar
+        const a = document.createElement('a');
+        a.download = `${trabajoActual}_documento.jpg`;
+        a.href = canvas.toDataURL('image/jpeg', 0.95);
+        a.click();
+
+        mostrarToast(`Imagen "${trabajoActual}" exportada ✓`);
+    }
+
+    // ══════════════════════════════════════════════
+    //  Imprimir
+    // ══════════════════════════════════════════════
+    async function imprimirDirecto() {
+        const imgs = await obtenerImagenes();
+        if (!imgs) return;
+
+        const area = document.getElementById('print-area');
+
+        // Ocultar todo primero
+        document.getElementById('print-frente').style.display  = 'none';
+        document.getElementById('print-reverso').style.display = 'none';
+        document.getElementById('print-ip-h1').style.display   = 'none';
+        document.getElementById('print-ip-h2').style.display   = 'none';
+
+        if (imgs.tipo === 'IP') {
+            area.className = 'print-ip';
+            if (imgs.hoja1) { document.getElementById('print-ip-img1').src = imgs.hoja1; document.getElementById('print-ip-h1').style.display = 'flex'; }
+            if (imgs.hoja2) { document.getElementById('print-ip-img2').src = imgs.hoja2; document.getElementById('print-ip-h2').style.display = 'flex'; }
+        } else {
+            area.className = 'print-dni';
+            document.getElementById('print-frente').src          = imgs.frente;
+            document.getElementById('print-reverso').src         = imgs.reverso;
+            document.getElementById('print-frente').style.display  = '';
+            document.getElementById('print-reverso').style.display = '';
+        }
+
+        area.classList.remove('hidden');
+        window.print();
+        area.classList.add('hidden');
+    }
+
+    // ══════════════════════════════════════════════
+    //  Toast
+    // ══════════════════════════════════════════════
+    let toastTimer = null;
+    function mostrarToast(msg, esError = false) {
+        const t = document.getElementById('toast');
+        const i = t.querySelector('i');
+        document.getElementById('toast-msg').textContent = msg;
+        i.className = esError ? 'bx bx-error-circle' : 'bx bx-check-circle';
+        i.style.color = esError ? '#E31A1A' : 'var(--success)';
+        t.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+    }
+
+    // ══════════════════════════════════════════════
+    //  Compresión
+    // ══════════════════════════════════════════════
+    function comprimirImagen(base64Str, maxWidth, callback) {
+        const img = new Image();
+        img.src = base64Str;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+            canvas.width = w; canvas.height = h;
+            canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+            callback(canvas.toDataURL('image/jpeg', 0.8));
+        };
+    }
+    </script>
+</body>
+</html>

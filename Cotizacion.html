@@ -1,0 +1,1032 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generador de Cotización</title>
+    <style>
+      /* ===== GENERAL ===== */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        background: #eef1f7;
+        display: flex;
+        min-height: 100vh;
+      }
+
+      /* ===== SIDEBAR ===== */
+      .sidebar {
+        width: 380px;
+        min-width: 340px;
+        background: #f8f9fa;
+        border-right: 1px solid #dee2e6;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+      }
+
+      .sidebar-header {
+        background: #2c2c2c;
+        color: #ffffff;
+        padding: 16px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .sidebar-body {
+        padding: 16px 18px;
+        flex: 1;
+      }
+
+      .section-badge {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        background: #3a3a3a;
+        color: #fff;
+        padding: 5px 10px;
+        border-radius: 3px;
+        margin: 14px 0 10px;
+        display: block;
+      }
+
+      .form-group {
+        margin-bottom: 10px;
+      }
+
+      .form-group label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #444;
+        margin-bottom: 4px;
+      }
+
+      .form-group input,
+      .form-group textarea {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        font-size: 13px;
+        color: #212529;
+        background: #fff;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        resize: none;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus {
+        border-color: #555;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+      }
+
+      /* ===== TABLA PRODUCTOS EN SIDEBAR ===== */
+      .product-table-wrapper {
+        overflow-x: auto;
+        margin-top: 6px;
+      }
+
+      table.product-input-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5px;
+      }
+
+      table.product-input-table th {
+        background: #2c2c2c;
+        color: #fff;
+        padding: 7px 5px;
+        text-align: center;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        white-space: nowrap;
+      }
+
+      table.product-input-table td {
+        padding: 4px 3px;
+        border-bottom: 1px solid #e9ecef;
+        vertical-align: middle;
+      }
+
+      table.product-input-table input {
+        width: 100%;
+        padding: 5px 6px;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 11.5px;
+        background: #fff;
+      }
+
+      table.product-input-table input:focus {
+        border-color: #555;
+        outline: none;
+      }
+
+      .col-sku {
+        width: 70px;
+      }
+      .col-desc {
+        width: 130px;
+      }
+      .col-qty {
+        width: 42px;
+      }
+      .col-price {
+        width: 70px;
+      }
+      .col-promo {
+        width: 70px;
+      }
+      .col-del {
+        width: 28px;
+        text-align: center;
+      }
+
+      .btn-del-row {
+        background: #555;
+        border: none;
+        color: #fff;
+        border-radius: 3px;
+        width: 22px;
+        height: 22px;
+        cursor: pointer;
+        font-size: 13px;
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: auto;
+        transition: background 0.2s;
+      }
+      .btn-del-row:hover {
+        background: #222;
+      }
+
+      .btn-add-row {
+        width: 100%;
+        margin-top: 10px;
+        padding: 9px;
+        background: #fff;
+        color: #2c2c2c;
+        border: 1px dashed #888;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-add-row:hover {
+        background: #ebebeb;
+      }
+
+      /* ===== BOTON IMPRIMIR ===== */
+      .btn-print {
+        width: 100%;
+        padding: 13px;
+        background: #2c2c2c;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 18px;
+        letter-spacing: 0.5px;
+        transition: background 0.2s;
+      }
+      .btn-print:hover {
+        background: #111;
+      }
+
+      /* ===== CONTENT / DOCUMENTO ===== */
+      .content {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        overflow-y: auto;
+      }
+
+      .document {
+        background: #fff;
+        width: 210mm;
+        min-height: 297mm;
+        padding: 18mm 20mm 20mm;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.18);
+        box-sizing: border-box;
+        font-size: 13px;
+        color: #000;
+      }
+
+      /* ===== ENCABEZADO DOCUMENTO ===== */
+      .doc-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #1a1a1a;
+        padding-bottom: 14px;
+      }
+
+      .doc-header-left {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .doc-logo {
+        display: block;
+        max-height: 75px;
+        max-width: 220px;
+        object-fit: contain;
+      }
+
+      .doc-address {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #000;
+        line-height: 1.5;
+      }
+
+      .doc-meta {
+        text-align: right;
+        font-size: 12px;
+      }
+
+      .doc-meta .doc-title {
+        font-size: 22px;
+        font-weight: 700;
+        color: #000;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        border-bottom: 1px solid #aaa;
+        padding-bottom: 4px;
+        margin-bottom: 6px;
+      }
+      .doc-meta table {
+        margin-left: auto;
+        border-collapse: collapse;
+      }
+      .doc-meta table td {
+        padding: 2px 6px;
+        font-size: 11.5px;
+      }
+      .doc-meta table td:first-child {
+        font-weight: 600;
+        color: #444;
+        text-align: right;
+      }
+      .doc-meta table td:last-child {
+        color: #000;
+      }
+
+      /* ===== DATOS CLIENTE ===== */
+      .client-section {
+        background: #f8f9fa;
+        border: 1px solid #e0e5f2;
+        border-radius: 6px;
+        padding: 12px 16px;
+        margin-bottom: 22px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4px 20px;
+        font-size: 12px;
+      }
+      .client-section .cs-title {
+        grid-column: 1 / -1;
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #000;
+        letter-spacing: 0.7px;
+        margin-bottom: 6px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 4px;
+      }
+      .client-section .cs-row {
+        display: flex;
+        gap: 6px;
+      }
+      .client-section .cs-label {
+        font-weight: 700;
+        color: #333;
+        white-space: nowrap;
+      }
+      .client-section .cs-val {
+        color: #000;
+      }
+
+      /* ===== TABLA DE PRODUCTOS (DOCUMENTO) ===== */
+      .products-title {
+        font-size: 10.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #000;
+        letter-spacing: 0.7px;
+        margin-bottom: 7px;
+      }
+
+      table.doc-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 12px;
+        margin-bottom: 0;
+      }
+
+      table.doc-table thead tr {
+        background: #1a1a1a;
+      }
+
+      table.doc-table thead th {
+        padding: 9px 10px;
+        text-align: center;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      table.doc-table tbody tr:nth-child(even) {
+        background: #f5f5f5;
+      }
+      table.doc-table tbody tr:nth-child(odd) {
+        background: #fff;
+      }
+
+      table.doc-table tbody td {
+        padding: 8px 10px;
+        border-bottom: 1px solid #e0e5f2;
+        vertical-align: middle;
+      }
+
+      .td-sku {
+        text-align: center;
+        font-weight: 700;
+        width: 80px;
+      }
+      .td-desc {
+        text-align: left;
+      }
+      .td-qty {
+        text-align: center;
+        width: 50px;
+      }
+      .td-price {
+        text-align: right;
+        width: 90px;
+      }
+      .td-promo {
+        text-align: right;
+        width: 90px;
+        font-weight: 700;
+      }
+      .td-sub {
+        text-align: right;
+        width: 90px;
+        font-weight: 700;
+      }
+
+      .promo-tag {
+        display: inline-block;
+        border: 1px solid #333;
+        color: #000;
+        font-size: 8.5px;
+        font-weight: 700;
+        padding: 1px 5px;
+        border-radius: 2px;
+        margin-left: 5px;
+        vertical-align: middle;
+        letter-spacing: 0.5px;
+      }
+
+      /* ===== TOTALES ===== */
+      .totals-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 10px;
+      }
+
+      .totals-box {
+        width: 260px;
+        border: 1px solid #e0e5f2;
+        border-radius: 6px;
+        overflow: hidden;
+        font-size: 12.5px;
+      }
+
+      .totals-box table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .totals-box table td {
+        padding: 7px 14px;
+      }
+      .totals-box table tr:not(:last-child) td {
+        border-bottom: 1px solid #e0e5f2;
+      }
+      .totals-box .t-label {
+        color: #444;
+        font-weight: 500;
+      }
+      .totals-box .t-val {
+        text-align: right;
+        font-weight: 700;
+        color: #000;
+      }
+      .totals-box .t-savings td {
+        background: #f0f0f0;
+        font-style: italic;
+      }
+      .totals-box .t-total {
+        background: #1a1a1a;
+      }
+      .totals-box .t-total td {
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+      }
+
+      /* ===== NOTAS ===== */
+      .notes-section {
+        margin-top: 22px;
+        border-top: 1px solid #e0e5f2;
+        padding-top: 12px;
+      }
+      .notes-section .notes-title {
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #333;
+        margin-bottom: 5px;
+      }
+      .notes-section p#out-notes {
+        font-size: 12px;
+        color: #333;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      /* ===== FOOTER DOCUMENTO ===== */
+      .doc-footer {
+        margin-top: 30px;
+        text-align: center;
+        font-size: 10.5px;
+        color: #888;
+        border-top: 1px solid #e0e5f2;
+        padding-top: 10px;
+      }
+
+      /* ===== IMPRESIÓN ===== */
+      @media print {
+        @page {
+          size: A4;
+          margin: 0;
+        }
+        body {
+          background: white;
+        }
+        .sidebar {
+          display: none;
+        }
+        .content {
+          padding: 0;
+          display: block;
+          overflow: visible;
+        }
+        .document {
+          box-shadow: none;
+          width: 100%;
+          padding: 18mm 20mm 20mm;
+          min-height: auto;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ===================== SIDEBAR ===================== -->
+    <div class="sidebar">
+      <div class="sidebar-header">Datos de la Cotizacion</div>
+      <div class="sidebar-body">
+        <span class="section-badge">Informacion del Documento</span>
+
+        <div class="form-group">
+          <label>N° de Cotización</label>
+          <input type="text" id="in-cotNum" placeholder="COT-2026-001" />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div class="form-group">
+            <label>Fecha de emision</label>
+            <input type="text" id="in-fecha" readonly />
+          </div>
+          <div class="form-group">
+            <label>Dias de vigencia</label>
+            <input
+              type="number"
+              id="in-diasVigencia"
+              placeholder="15"
+              min="1"
+              value=""
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Valida hasta (calculado)</label>
+          <input
+            type="text"
+            id="in-validez"
+            placeholder="Se calcula automaticamente"
+            readonly
+          />
+        </div>
+
+        <span class="section-badge">Datos del Vendedor</span>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div class="form-group">
+            <label>Nombre del Vendedor</label>
+            <input type="text" id="in-vendedor" placeholder="Nombre completo" />
+          </div>
+          <div class="form-group">
+            <label>Telefono del Vendedor</label>
+            <input type="text" id="in-vendedorPhone" placeholder="+504 0000-0000" />
+          </div>
+        </div>
+
+        <span class="section-badge">Datos del Cliente</span>
+
+        <div class="form-group">
+          <label>Nombre / Empresa</label>
+          <input
+            type="text"
+            id="in-clientName"
+            placeholder="Nombre del cliente"
+          />
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+          <div class="form-group">
+            <label>RTN / Identidad</label>
+            <input type="text" id="in-clientRTN" placeholder="RTN o N° ID" />
+          </div>
+          <div class="form-group">
+            <label>Teléfono</label>
+            <input
+              type="text"
+              id="in-clientPhone"
+              placeholder="+504 0000-0000"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Dirección</label>
+          <input
+            type="text"
+            id="in-clientAddress"
+            placeholder="Ciudad, Departamento"
+          />
+        </div>
+
+        <span class="section-badge">Productos y Servicios</span>
+
+        <div class="product-table-wrapper">
+          <table class="product-input-table" id="product-input-table">
+            <thead>
+              <tr>
+                <th class="col-sku">SKU</th>
+                <th class="col-desc">Descripción</th>
+                <th class="col-qty">Cant.</th>
+                <th class="col-price">P. Normal</th>
+                <th class="col-promo">P. Promo</th>
+                <th class="col-del"></th>
+              </tr>
+            </thead>
+            <tbody id="product-rows">
+              <!-- filas dinámicas -->
+            </tbody>
+          </table>
+        </div>
+        <button class="btn-add-row" onclick="agregarFila()">
+          + Agregar producto
+        </button>
+
+        <span class="section-badge">Notas y Condiciones</span>
+        <div class="form-group">
+          <textarea
+            id="in-notes"
+            rows="3"
+            placeholder="Condiciones de pago, garantía, tiempo de entrega..."
+          ></textarea>
+        </div>
+
+        <button class="btn-print" onclick="window.print()">
+          IMPRIMIR COTIZACION
+        </button>
+        <button
+          onclick="resetearTodo()"
+          style="width:100%;padding:10px;background:#fff;color:#2c2c2c;border:1px solid #aaa;border-radius:4px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px;transition:background 0.2s;"
+          onmouseover="this.style.background='#ebebeb'"
+          onmouseout="this.style.background='#fff'"
+        >
+          RESETEAR TODO
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== DOCUMENTO ===================== -->
+    <div class="content">
+      <div class="document">
+        <!-- Encabezado -->
+        <div class="doc-header">
+          <div class="doc-header-left">
+            <img
+              src="https://i.imgur.com/fafYb6c.png"
+              class="doc-logo"
+              alt="Logo empresa"
+            />
+            <div class="doc-address">
+              <strong>Comercial Insular de los Fuertes</strong><br />
+              <strong>Roatan, Islas de la Bahia</strong>
+            </div>
+            <div style="font-size:11.5px; margin-top:4px; line-height:1.6;">
+              <span style="font-weight:700;">Vendedor:</span>
+              <span id="out-vendedor">—</span><br/>
+              <span style="font-weight:700;">Tel:</span>
+              <span id="out-vendedorPhone">—</span>
+            </div>
+          </div>
+          <div class="doc-meta">
+            <div class="doc-title">Cotizacion</div>
+            <table>
+              <tr>
+                <td>N° Cotizacion:</td>
+                <td id="out-cotNum">—</td>
+              </tr>
+              <tr>
+                <td>Fecha de emision:</td>
+                <td id="out-fecha">—</td>
+              </tr>
+              <tr>
+                <td>Vigencia:</td>
+                <td id="out-diasVigencia">—</td>
+              </tr>
+              <tr>
+                <td>Valida hasta:</td>
+                <td id="out-validez">—</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Datos cliente -->
+        <div class="client-section">
+          <div class="cs-title">Datos del Cliente</div>
+          <div class="cs-row">
+            <span class="cs-label">Cliente:</span
+            ><span class="cs-val" id="out-clientName">—</span>
+          </div>
+          <div class="cs-row">
+            <span class="cs-label">RTN / ID:</span
+            ><span class="cs-val" id="out-clientRTN">—</span>
+          </div>
+          <div class="cs-row">
+            <span class="cs-label">Teléfono:</span
+            ><span class="cs-val" id="out-clientPhone">—</span>
+          </div>
+          <div class="cs-row">
+            <span class="cs-label">Dirección:</span
+            ><span class="cs-val" id="out-clientAddress">—</span>
+          </div>
+        </div>
+
+        <!-- Tabla productos -->
+        <div class="products-title">Detalle de Productos / Servicios</div>
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th style="width: 70px">SKU</th>
+              <th style="text-align: left">Descripción</th>
+              <th style="width: 50px">Cant.</th>
+              <th style="width: 90px">P. Normal</th>
+              <th style="width: 90px">P. Promo</th>
+              <th style="width: 95px">Subtotal</th>
+            </tr>
+          </thead>
+          <tbody id="out-product-rows">
+            <tr id="empty-row">
+              <td
+                colspan="6"
+                style="
+                  text-align: center;
+                  color: #aaa;
+                  padding: 20px;
+                  font-style: italic;
+                "
+              >
+                Agrega productos desde el panel izquierdo
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Totales -->
+        <div class="totals-wrapper">
+          <div class="totals-box">
+            <table>
+              <tr>
+                <td class="t-label">Subtotal (precio normal):</td>
+                <td class="t-val" id="out-subtotalNormal">L. 0.00</td>
+              </tr>
+              <tr>
+                <td class="t-label">Subtotal (precio promo):</td>
+                <td class="t-val" id="out-subtotalPromo">L. 0.00</td>
+              </tr>
+              <tr class="t-savings">
+                <td class="t-label">Ahorro total:</td>
+                <td class="t-val" id="out-savings">L. 0.00</td>
+              </tr>
+              <tr class="t-total">
+                <td class="t-label">TOTAL A PAGAR:</td>
+                <td class="t-val" id="out-total">L. 0.00</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <!-- Notas -->
+        <div class="notes-section">
+          <div class="notes-title">Notas y Condiciones</div>
+          <p id="out-notes">—</p>
+        </div>
+
+        <!-- Firma -->
+        <div style="margin-top: 50px; display: flex; justify-content: center;">
+          <div style="width: 260px; text-align: center;">
+            <div style="border-top: 1px solid #000; margin-bottom: 8px;"></div>
+            <div style="font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Administracion</div>
+            <div style="font-size: 11px; color: #444; margin-top: 3px;">Firma y Sello</div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="doc-footer">
+          Esta cotizacion fue generada el <span id="out-fecha-foot"></span>.
+          Precios sujetos a disponibilidad de inventario.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // ===== LOCAL STORAGE =====
+      const LS_KEY = 'cotizacion_data';
+
+      const allFields = [
+        'in-cotNum','in-diasVigencia','in-validez',
+        'in-vendedor','in-vendedorPhone',
+        'in-clientName','in-clientRTN','in-clientPhone','in-clientAddress',
+        'in-notes'
+      ];
+
+      function guardarLS() {
+        const data = {};
+        allFields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) data[id] = el.value;
+        });
+        // guardar filas de productos
+        const rows = [];
+        document.querySelectorAll('#product-rows tr').forEach(tr => {
+          const inputs = tr.querySelectorAll('input');
+          if (inputs.length < 5) return;
+          rows.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, inputs[4].value]);
+        });
+        data['_rows'] = rows;
+        localStorage.setItem(LS_KEY, JSON.stringify(data));
+      }
+
+      function cargarLS() {
+        const raw = localStorage.getItem(LS_KEY);
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        allFields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && data[id] !== undefined && id !== 'in-fecha') {
+            el.value = data[id];
+            el.dispatchEvent(new Event('input'));
+          }
+        });
+        // restaurar filas
+        if (data['_rows'] && data['_rows'].length > 0) {
+          // limpiar la fila inicial vacía
+          document.getElementById('product-rows').innerHTML = '';
+          rowCount = 0;
+          data['_rows'].forEach(cols => {
+            rowCount++;
+            const id = rowCount;
+            const tbody = document.getElementById('product-rows');
+            const tr = document.createElement('tr');
+            tr.id = `input-row-${id}`;
+            tr.innerHTML = `
+              <td class="col-sku"><input type="text" placeholder="SKU-001" oninput="renderDoc();guardarLS()" value="${cols[0]}"></td>
+              <td class="col-desc"><input type="text" placeholder="Descripcion del producto" oninput="renderDoc();guardarLS()" value="${cols[1]}"></td>
+              <td class="col-qty"><input type="number" placeholder="1" min="1" oninput="renderDoc();guardarLS()" value="${cols[2]}"></td>
+              <td class="col-price"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[3]}"></td>
+              <td class="col-promo"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[4]}"></td>
+              <td class="col-del"><button class="btn-del-row" onclick="eliminarFila(${id})">x</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+          renderDoc();
+        }
+      }
+
+      function resetearTodo() {
+        if (!confirm('¿Desea borrar todos los datos del formulario?')) return;
+        localStorage.removeItem(LS_KEY);
+        allFields.forEach(id => {
+          const el = document.getElementById(id);
+          if (el && id !== 'in-fecha') el.value = '';
+          if (el && id !== 'in-fecha') el.dispatchEvent(new Event('input'));
+        });
+        document.getElementById('product-rows').innerHTML = '';
+        rowCount = 0;
+        agregarFila();
+      }
+
+      // ===== FECHA AUTOMATICA =====
+      const today = new Date();
+      const pad = (n) => (n < 10 ? "0" + n : n);
+      const fechaStr = `${pad(today.getDate())}/${pad(today.getMonth() + 1)}/${today.getFullYear()}`;
+      document.getElementById("in-fecha").value = fechaStr;
+      document.getElementById("out-fecha").textContent = fechaStr;
+      document.getElementById("out-fecha-foot").textContent = fechaStr;
+
+      // ===== DIAS DE VIGENCIA -> CALCULO FECHA LIMITE =====
+      document
+        .getElementById("in-diasVigencia")
+        .addEventListener("input", function () {
+          const dias = parseInt(this.value);
+          const outDias = document.getElementById("out-diasVigencia");
+          const outValidez = document.getElementById("out-validez");
+          const inValidez = document.getElementById("in-validez");
+          if (dias > 0) {
+            const limite = new Date(today);
+            limite.setDate(limite.getDate() + dias);
+            const fechaLimite = `${pad(limite.getDate())}/${pad(limite.getMonth() + 1)}/${limite.getFullYear()}`;
+            inValidez.value = fechaLimite;
+            outValidez.textContent = fechaLimite;
+            outDias.textContent = dias + (dias === 1 ? " dia" : " dias");
+          } else {
+            inValidez.value = "";
+            outValidez.textContent = "—";
+            outDias.textContent = "—";
+          }
+        });
+
+      // ===== SYNC CAMPOS SIMPLES =====
+      const simpleMap = {
+        "in-cotNum": "out-cotNum",
+        "in-vendedor": "out-vendedor",
+        "in-vendedorPhone": "out-vendedorPhone",
+        "in-clientName": "out-clientName",
+        "in-clientRTN": "out-clientRTN",
+        "in-clientPhone": "out-clientPhone",
+        "in-clientAddress": "out-clientAddress",
+        "in-notes": "out-notes",
+      };
+
+      for (const [inId, outId] of Object.entries(simpleMap)) {
+        document.getElementById(inId).addEventListener("input", function () {
+          document.getElementById(outId).textContent = this.value.trim() || "—";
+          guardarLS();
+        });
+      }
+
+      document.getElementById('in-diasVigencia').addEventListener('change', guardarLS);
+
+      // ===== TABLA DE PRODUCTOS =====
+      let rowCount = 0;
+
+      function agregarFila() {
+        rowCount++;
+        const id = rowCount;
+        const tbody = document.getElementById("product-rows");
+        const tr = document.createElement("tr");
+        tr.id = `input-row-${id}`;
+        tr.innerHTML = `
+            <td class="col-sku"><input type="text" placeholder="SKU-001" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-desc"><input type="text" placeholder="Descripción del producto" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-qty"><input type="number" placeholder="1" min="1" value="1" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-price"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-promo"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-del"><button class="btn-del-row" onclick="eliminarFila(${id})">x</button></td>
+        `;
+        tbody.appendChild(tr);
+        renderDoc();
+      }
+
+      function eliminarFila(id) {
+        const row = document.getElementById(`input-row-${id}`);
+        if (row) row.remove();
+        renderDoc();
+      }
+
+      function getProductData() {
+        const rows = document.querySelectorAll("#product-rows tr");
+        const products = [];
+        rows.forEach((tr) => {
+          const inputs = tr.querySelectorAll("input");
+          if (inputs.length < 5) return;
+          const sku = inputs[0].value.trim();
+          const desc = inputs[1].value.trim();
+          const qty = parseFloat(inputs[2].value) || 0;
+          const price = parseFloat(inputs[3].value) || 0;
+          const promo = parseFloat(inputs[4].value) || 0;
+          products.push({ sku, desc, qty, price, promo });
+        });
+        return products;
+      }
+
+      const fmt = (n) =>
+        "L. " +
+        n.toLocaleString("es-HN", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+
+      function renderDoc() {
+        const products = getProductData();
+        const tbody = document.getElementById("out-product-rows");
+        tbody.innerHTML = "";
+
+        if (products.length === 0) {
+          tbody.innerHTML = `<tr id="empty-row"><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Agrega productos desde el panel izquierdo</td></tr>`;
+          document.getElementById("out-subtotalNormal").textContent = fmt(0);
+          document.getElementById("out-subtotalPromo").textContent = fmt(0);
+          document.getElementById("out-savings").textContent = fmt(0);
+          document.getElementById("out-total").textContent = fmt(0);
+          return;
+        }
+
+        let totalNormal = 0,
+          totalPromo = 0;
+
+        products.forEach((p, i) => {
+          const usePromo = p.promo > 0 && p.promo < p.price;
+          const unitPrice = usePromo ? p.promo : p.price;
+          const subtotal = unitPrice * p.qty;
+          const subNormal = p.price * p.qty;
+
+          totalNormal += subNormal;
+          totalPromo += subtotal;
+
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+                <td class="td-sku">${p.sku || "—"}</td>
+                <td class="td-desc">${p.desc || "—"}</td>
+                <td class="td-qty">${p.qty}</td>
+                <td class="td-price">${p.price > 0 ? fmt(p.price) : "—"}</td>
+                <td class="td-promo">${p.promo > 0 ? fmt(p.promo) : "—"}</td>
+                <td class="td-sub">${fmt(subtotal)}</td>
+            `;
+          tbody.appendChild(tr);
+        });
+
+        const savings = totalNormal - totalPromo;
+
+        document.getElementById("out-subtotalNormal").textContent =
+          fmt(totalNormal);
+        document.getElementById("out-subtotalPromo").textContent =
+          fmt(totalPromo);
+        document.getElementById("out-savings").textContent = fmt(
+          savings > 0 ? savings : 0,
+        );
+        document.getElementById("out-total").textContent = fmt(totalPromo);
+      }
+
+      // Fila inicial vacía al cargar
+      agregarFila();
+      // Cargar datos guardados
+      cargarLS();
+    </script>
+  </body>
+</html>

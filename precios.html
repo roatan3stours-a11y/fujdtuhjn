@@ -434,6 +434,7 @@
     .modal-container {
       background: #f8fafc;
       width: 96%; max-width: 1050px; max-height: 90vh;
+      height: 90vh;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
       display: flex; flex-direction: column; overflow: hidden;
@@ -483,6 +484,7 @@
 
     .modal-body {
       padding: 18px 22px; overflow-y: auto; flex: 1;
+      min-height: 0;
       display: flex; flex-direction: column; gap: 14px;
     }
 
@@ -510,6 +512,21 @@
       font-family: 'Montserrat', sans-serif;
     }
     .btn-add-product:hover { background: var(--primary-hover); }
+
+    #pasteProductsInput {
+      width: 100%;
+      min-height: 220px;
+      resize: vertical;
+      padding: 9px 10px;
+      border: 1px solid #fdba74;
+      border-radius: 7px;
+      background: #fff;
+      color: var(--text-main);
+      font: 12px/1.45 monospace;
+      outline: none;
+    }
+
+    #pasteProductsInput:focus { border-color: #ea580c; box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.12); }
 
     .btn-action-sm {
       background: white;
@@ -576,7 +593,8 @@
     .table-wrapper {
       border: 1px solid #e2e8f0;
       border-radius: 10px;
-      overflow: hidden;
+      max-height: 45vh;
+      overflow: auto;
     }
 
     .custom-table {
@@ -904,6 +922,7 @@
         <!-- Barra de acciones -->
         <div class="prod-action-bar">
           <button class="btn-add-product" id="btnNewProduct">＋ Nuevo Producto</button>
+          <button class="btn-action-sm" id="openPasteImportBtn" type="button">📥 Importar lista</button>
           <button class="btn-action-sm" id="btnNuevaLista" title="Guarda la lista actual y empieza una nueva vacía">📋 Nueva Lista</button>
           <button class="btn-action-sm" id="exportXmlBtn">📊 Exportar XML</button>
           <button class="btn-action-sm" id="importXmlTriggerBtn">📥 Importar XML</button>
@@ -944,6 +963,25 @@
             <tbody id="modalProductTableBody"></tbody>
           </table>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-MODAL: IMPORTAR LISTA DE PRODUCTOS -->
+  <div class="form-modal-overlay" id="pasteImportModal">
+    <div class="form-modal-container">
+      <div class="form-modal-header">
+        <h3>📥 Importar lista</h3>
+        <button class="modal-close" id="closePasteImportModal" type="button">&times;</button>
+      </div>
+      <div class="form-modal-body">
+        <div class="fm-section">Datos de productos</div>
+        <p style="font-size:12px;color:#64748b;line-height:1.45;margin-bottom:10px;">Pega una línea por producto. Se tomarán el SKU y el precio de cada línea; las líneas de cupones se ignorarán.</p>
+        <textarea id="pasteProductsInput" placeholder="Ejemplo: 1 13675 CEL SAMSUNG S26 12+256GB BLACK 30,887.00"></textarea>
+      </div>
+      <div class="form-modal-footer">
+        <button class="btn-fm-cancel" id="clearPasteProductsBtn" type="button">Limpiar</button>
+        <button class="btn-fm-save" id="pasteProductsBtn" type="button">Importar</button>
       </div>
     </div>
   </div>
@@ -1215,6 +1253,16 @@
       document.getElementById('cancelEditBtn').addEventListener('click', closeFormModal);
       productFormModal.addEventListener('click', (e) => { if (e.target === productFormModal) closeFormModal(); });
 
+      // ── SUB-MODAL IMPORTAR LISTA ─────────────────────────────
+      const pasteImportModal = document.getElementById('pasteImportModal');
+      function openPasteImportModal() { pasteImportModal.style.display = 'flex'; }
+      function closePasteImportModal() { pasteImportModal.style.display = 'none'; }
+      document.getElementById('openPasteImportBtn').addEventListener('click', openPasteImportModal);
+      document.getElementById('closePasteImportModal').addEventListener('click', closePasteImportModal);
+      pasteImportModal.addEventListener('click', (e) => {
+        if (e.target === pasteImportModal) closePasteImportModal();
+      });
+
       // ── GUARDAR PRODUCTO ─────────────────────────────────────
       document.getElementById('saveProductBtn').addEventListener('click', () => {
         const editId = document.getElementById('editProductId').value;
@@ -1283,6 +1331,10 @@
       document.getElementById('exportXmlBtn').addEventListener('click', exportProductsXml);
       document.getElementById('importXmlTriggerBtn').addEventListener('click', () => document.getElementById('importXmlInput').click());
       document.getElementById('importXmlInput').addEventListener('change', importProductsXml);
+      document.getElementById('pasteProductsBtn').addEventListener('click', importProductsFromText);
+      document.getElementById('clearPasteProductsBtn').addEventListener('click', () => {
+        document.getElementById('pasteProductsInput').value = '';
+      });
 
       document.getElementById('printBtn').addEventListener('click', () => window.print());
       document.getElementById('clearBtn').addEventListener('click', handleClearAll);
@@ -1633,6 +1685,41 @@
       };
       reader.readAsText(file);
       e.target.value = '';
+    }
+
+    function importProductsFromText() {
+      const input = document.getElementById('pasteProductsInput');
+      const lines = input.value.split(/\r?\n/);
+      const importedProducts = [];
+      const importId = Date.now();
+
+      lines.forEach((line, index) => {
+        const match = line.trim().match(/^\d+\s+(\S+)\s+(.+?)\s+([\d,]+\.\d{2})\s*$/);
+        if (!match) return;
+
+        const price = parseFloat(match[3].replace(/,/g, ''));
+        if (isNaN(price)) return;
+
+        importedProducts.push({
+          id: importId + index,
+          sku: match[1],
+          description: match[2].trim(),
+          price
+        });
+      });
+
+      if (importedProducts.length === 0) {
+        alert('No se encontraron productos válidos. Revisa que cada línea tenga cantidad, SKU, descripción y precio.');
+        return;
+      }
+
+      appState.products = importedProducts;
+      selectedProductIds = new Set(importedProducts.map(product => product.id));
+      input.value = '';
+      document.getElementById('pasteImportModal').style.display = 'none';
+      saveAndRender();
+      renderProductTable();
+      alert(`¡Se importaron exitosamente ${importedProducts.length} productos desde el texto pegado!`);
     }
 
     async function handleClearAll() {
