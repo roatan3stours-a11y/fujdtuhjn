@@ -197,6 +197,69 @@
         background: #ebebeb;
       }
 
+      .import-list-panel {
+        margin-top: 10px;
+        padding: 10px 10px 8px;
+        background: #fff;
+        border: 1px solid #dfe3ea;
+        border-radius: 6px;
+      }
+
+      .import-list-panel label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 10px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        color: #444;
+      }
+
+      .import-list-panel textarea {
+        width: 100%;
+        min-height: 120px;
+        resize: vertical;
+        border: 1px solid #ced4da;
+        border-radius: 6px;
+        padding: 8px 10px;
+        font-size: 11.5px;
+        color: #212529;
+        background: #fff;
+      }
+
+      .import-list-panel textarea:focus {
+        border-color: #555;
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
+      }
+
+      .btn-import-list {
+        width: 100%;
+        margin-top: 8px;
+        padding: 10px;
+        background: #2c2c2c;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+
+      .btn-import-list:hover {
+        background: #111;
+      }
+
+      .hint-text {
+        display: block;
+        margin-top: 6px;
+        font-size: 10px;
+        color: #666;
+        line-height: 1.5;
+      }
+
       /* ===== BOTON IMPRIMIR ===== */
       .btn-print {
         width: 100%;
@@ -629,6 +692,20 @@
           + Agregar producto
         </button>
 
+        <div class="import-list-panel">
+          <label for="lista-productos-input">Agregar desde lista</label>
+          <textarea
+            id="lista-productos-input"
+            placeholder="1	12029	CASCO P/MOTO RYDER F-778	695.00&#10;      Aplica Cupón MEMO REVENTON SEPTIEMBRE	106.70"
+          ></textarea>
+          <button class="btn-import-list" onclick="agregarDesdeLista()">
+            AGREGAR DESDE LISTA
+          </button>
+          <span class="hint-text">
+            Formato sugerido: cantidad, SKU, descripción, precio promo y luego la línea con el cupón.
+          </span>
+        </div>
+
         <span class="section-badge">Notas y Condiciones</span>
         <div class="form-group">
           <textarea
@@ -926,21 +1003,116 @@
       // ===== TABLA DE PRODUCTOS =====
       let rowCount = 0;
 
-      function agregarFila() {
+      function parseMoney(value) {
+        if (value === null || value === undefined || value === '') return 0;
+        const normalized = String(value)
+          .replace(/L\.?\s*/gi, '')
+          .replace(/[^0-9,.-]/g, '')
+          .trim();
+        if (!normalized) return 0;
+        if (normalized.includes(',') && normalized.includes('.')) {
+          const lastDot = normalized.lastIndexOf('.');
+          const lastComma = normalized.lastIndexOf(',');
+          if (lastComma > lastDot) {
+            return Number(normalized.replace(/[.]/g, '').replace(',', '.')) || 0;
+          }
+          return Number(normalized.replace(/,/g, '')) || 0;
+        }
+        if (normalized.includes(',')) {
+          return Number(normalized.replace(/,/g, '')) || 0;
+        }
+        return Number(normalized) || 0;
+      }
+
+      function calcularPrecioNormal(precioPromo, cupo) {
+        const promo = Number(precioPromo) || 0;
+        const cupon = Number(cupo) || 0;
+        if (cupon <= 0) return Number(promo.toFixed(2));
+        const aumento = Math.round((cupon * 0.15) * 100) / 100;
+        return Number((promo + cupon + aumento).toFixed(2));
+      }
+
+      function agregarFilaConValores({ sku = '', desc = '', qty = 1, price = '', promo = '' } = {}) {
         rowCount++;
         const id = rowCount;
         const tbody = document.getElementById("product-rows");
         const tr = document.createElement("tr");
         tr.id = `input-row-${id}`;
         tr.innerHTML = `
-            <td class="col-sku"><input type="text" placeholder="SKU-001" oninput="renderDoc();guardarLS()"></td>
-            <td class="col-desc"><input type="text" placeholder="Descripción del producto" oninput="renderDoc();guardarLS()"></td>
-            <td class="col-qty"><input type="number" placeholder="1" min="1" value="1" oninput="renderDoc();guardarLS()"></td>
-            <td class="col-price"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()"></td>
-            <td class="col-promo"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-sku"><input type="text" placeholder="SKU-001" value="${sku}" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-desc"><input type="text" placeholder="Descripción del producto" value="${desc}" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-qty"><input type="number" placeholder="1" min="1" value="${qty}" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-price"><input type="number" placeholder="0.00" min="0" step="0.01" value="${price}" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-promo"><input type="number" placeholder="0.00" min="0" step="0.01" value="${promo}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-del"><button class="btn-del-row" onclick="eliminarFila(${id})">x</button></td>
         `;
         tbody.appendChild(tr);
+        renderDoc();
+      }
+
+      function agregarFila() {
+        agregarFilaConValores();
+      }
+
+      function agregarDesdeLista() {
+        const input = document.getElementById('lista-productos-input');
+        const texto = input.value.trim();
+        if (!texto) {
+          alert('Pegue la lista de productos para importarla.');
+          return;
+        }
+
+        const lineas = texto.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+        const productos = [];
+        let productoActual = null;
+
+        lineas.forEach((linea) => {
+          const productoMatch = linea.match(/^(\d+(?:[.,]\d+)?)\s+(\d+)\s+(.+?)\s+([0-9,]+(?:\.\d+)?)\s*$/);
+
+          if (productoMatch) {
+            if (productoActual) {
+              productos.push(productoActual);
+            }
+
+            productoActual = {
+              qty: parseFloat(productoMatch[1]) || 1,
+              sku: String(productoMatch[2]).trim(),
+              desc: String(productoMatch[3]).trim(),
+              promo: parseMoney(productoMatch[4]),
+              cupo: 0,
+            };
+            return;
+          }
+
+          const esCupon = /cup[oó]n|aplica/i.test(linea);
+          if (productoActual && esCupon) {
+            const ultimoNumero = linea.match(/([0-9][0-9,]*(?:\.\d+)?)/g);
+            const valor = ultimoNumero ? ultimoNumero[ultimoNumero.length - 1] : '0';
+            productoActual.cupo = parseMoney(valor);
+          }
+        });
+
+        if (productoActual) {
+          productos.push(productoActual);
+        }
+
+        if (!productos.length) {
+          alert('No se detectaron productos válidos en el texto.');
+          return;
+        }
+
+        productos.forEach((p) => {
+          const precioNormal = calcularPrecioNormal(p.promo, p.cupo);
+          agregarFilaConValores({
+            sku: p.sku,
+            desc: p.desc,
+            qty: p.qty,
+            price: precioNormal,
+            promo: p.promo,
+          });
+        });
+
+        input.value = '';
         renderDoc();
       }
 
