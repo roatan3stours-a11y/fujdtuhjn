@@ -1196,21 +1196,21 @@
         let totalGeneral = 0;
         let sumaPrima = 0;
         const cuotasSet = [];
-        let totalCuotas = 0;
+        let cuotaTotal = 0;
 
         products.forEach((p) => {
           const qty = Math.max(1, p.qty || 1);
           const cuotas = Number(p.cuotas) || 0;
           const prima = Number(p.prima) || 0;
           const valorCuota = Number(p.valorCuota) || 0;
-          const total = Number(p.total) || (valorCuota > 0 && cuotas > 0 ? valorCuota * qty : 0);
+          const total = Number(p.total) || (valorCuota > 0 && cuotas > 0 ? valorCuota * cuotas * qty : 0);
 
           totalGeneral += total;
           sumaPrima += prima;
 
           if (cuotas > 0) cuotasSet.push(cuotas);
           if (valorCuota > 0) {
-            totalCuotas += valorCuota;
+            cuotaTotal += valorCuota * cuotas;
           }
 
           const tr = document.createElement("tr");
@@ -1227,11 +1227,11 @@
         });
 
         const maxCuotas = cuotasSet.length ? Math.max(...cuotasSet) : 0;
-        const saldoPagar = Math.max(0, totalGeneral - sumaPrima);
+        const saldoPagar = cuotaTotal > 0 ? cuotaTotal : totalGeneral;
 
         document.getElementById("out-subtotalNormal").textContent = maxCuotas > 0 ? `${maxCuotas} meses` : "—";
         document.getElementById("out-subtotalPromo").textContent = fmt(sumaPrima);
-        document.getElementById("out-savings").textContent = totalCuotas > 0 ? fmt(totalCuotas) : fmt(0);
+        document.getElementById("out-savings").textContent = cuotaTotal > 0 ? fmt(cuotaTotal) : fmt(0);
         document.getElementById("out-total").textContent = fmt(saldoPagar);
       }
 
