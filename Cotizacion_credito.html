@@ -892,23 +892,6 @@
         'in-notes'
       ];
 
-      function calcularTotalFila({ qty = 1, cuotas = 0, prima = 0, valorCuota = 0 } = {}) {
-        const cantidad = Math.max(1, Number(qty) || 1);
-        const cuotasNum = Number(cuotas) || 0;
-        const primaNum = Number(prima) || 0;
-        const valorCuotaNum = Number(valorCuota) || 0;
-
-        if (cuotasNum > 0 && valorCuotaNum > 0) {
-          return Number((cantidad * (primaNum + valorCuotaNum * cuotasNum)).toFixed(2));
-        }
-
-        if (primaNum > 0) {
-          return Number((cantidad * primaNum).toFixed(2));
-        }
-
-        return 0;
-      }
-
       function guardarLS() {
         const data = {};
         allFields.forEach(id => {
@@ -1146,6 +1129,12 @@
 
           if (!productoActual) return;
 
+          const garantiaMatch = linea.match(/extra\s+garant[ia].*?([0-9][0-9.,]+)\s*$/i);
+          if (garantiaMatch) {
+            productoActual.extraGarantia = (Number(productoActual.extraGarantia) || 0) + parseMoney(garantiaMatch[1]);
+            return;
+          }
+
           const plazoMatch = linea.match(/plazo\s+(\d+)\s+cuotas.*?(?:monto\s+cuota|valor\s+cuota|cuota)\s*[: ]*\s*([0-9][0-9.,]+)/i);
           if (plazoMatch) {
             const cuotasValor = Number(plazoMatch[1].trim()) || 0;
@@ -1172,13 +1161,14 @@
         }
 
         productos.forEach((p) => {
+          const cuotaFinal = Number(p.valorCuota || 0) + Number(p.extraGarantia || 0);
           agregarFilaConValores({
             sku: p.sku,
             desc: p.desc,
             qty: p.qty,
             cuotas: p.cuotas,
             prima: p.prima,
-            valorCuota: p.valorCuota,
+            valorCuota: cuotaFinal,
             total: p.total,
           });
         });
