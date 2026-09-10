@@ -1075,6 +1075,18 @@
         return Number((promo + cupon + aumento).toFixed(2));
       }
 
+      function calcularTotalFila({ qty = 1, cuotas = 0, prima = 0, valorCuota = 0 } = {}) {
+        const cantidad = Math.max(1, Number(qty) || 1);
+        const cuotasNum = Number(cuotas) || 0;
+        const valorCuotaNum = Number(valorCuota) || 0;
+
+        if (cuotasNum > 0 && valorCuotaNum > 0) {
+          return Number((cantidad * valorCuotaNum * cuotasNum).toFixed(2));
+        }
+
+        return 0;
+      }
+
       function agregarFilaConValores({ sku = '', desc = '', qty = 1, cuotas = '', prima = '', valorCuota = '', total = '' } = {}) {
         rowCount++;
         const id = rowCount;
@@ -1127,7 +1139,7 @@
               total: parseMoney(productoMatch[4]),
               cuotas: '',
               prima: '',
-              valorCuota: '',
+              valorCuota: 0,
             };
             return;
           }
@@ -1136,17 +1148,16 @@
 
           const plazoMatch = linea.match(/plazo\s+(\d+)\s+cuotas.*?(?:monto\s+cuota|valor\s+cuota|cuota)\s*[: ]*\s*([0-9][0-9.,]+)/i);
           if (plazoMatch) {
-            productoActual.cuotas = plazoMatch[1].trim();
-            productoActual.valorCuota = parseMoney(plazoMatch[2]);
+            const cuotasValor = Number(plazoMatch[1].trim()) || 0;
+            const cuotaValor = parseMoney(plazoMatch[2]);
+            productoActual.cuotas = productoActual.cuotas ? Math.max(Number(productoActual.cuotas), cuotasValor) : cuotasValor;
+            productoActual.valorCuota = (Number(productoActual.valorCuota) || 0) + cuotaValor;
             return;
           }
 
           const primaMatch = linea.match(/prima\s*[: ]*\s*([0-9][0-9.,]+)/i);
           if (primaMatch) {
             productoActual.prima = parseMoney(primaMatch[1]);
-            if (!productoActual.total || productoActual.total === 0) {
-              productoActual.total = productoActual.prima;
-            }
             return;
           }
         });
@@ -1255,7 +1266,7 @@
         });
 
         const maxCuotas = cuotasSet.length ? Math.max(...cuotasSet) : 0;
-        const saldoPagar = Math.max(0, totalGeneral - sumaPrima);
+        const saldoPagar = totalGeneral;
 
         document.getElementById("out-subtotalNormal").textContent = maxCuotas > 0 ? `${maxCuotas} meses` : "—";
         document.getElementById("out-subtotalPromo").textContent = fmt(sumaPrima);
