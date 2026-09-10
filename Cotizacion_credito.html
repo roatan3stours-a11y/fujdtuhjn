@@ -1203,14 +1203,15 @@
           const cuotas = Number(p.cuotas) || 0;
           const prima = Number(p.prima) || 0;
           const valorCuota = Number(p.valorCuota) || 0;
-          const total = Number(p.total) || (valorCuota > 0 && cuotas > 0 ? valorCuota * cuotas * qty : 0);
+          const cuotaPorTiempo = valorCuota > 0 && cuotas > 0 ? valorCuota * cuotas * qty : 0;
+          const total = cuotaPorTiempo > 0 ? cuotaPorTiempo : Number(p.total) || 0;
 
           totalGeneral += total;
           sumaPrima += prima;
 
           if (cuotas > 0) cuotasSet.push(cuotas);
           if (valorCuota > 0) {
-            cuotaTotal += valorCuota * cuotas;
+            cuotaTotal += valorCuota * qty;
           }
 
           const tr = document.createElement("tr");
@@ -1227,7 +1228,7 @@
         });
 
         const maxCuotas = cuotasSet.length ? Math.max(...cuotasSet) : 0;
-        const saldoPagar = cuotaTotal > 0 ? cuotaTotal : totalGeneral;
+        const saldoPagar = totalGeneral;
 
         document.getElementById("out-subtotalNormal").textContent = maxCuotas > 0 ? `${maxCuotas} meses` : "—";
         document.getElementById("out-subtotalPromo").textContent = fmt(sumaPrima);
