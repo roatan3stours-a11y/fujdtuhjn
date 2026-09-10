@@ -152,6 +152,9 @@
       .col-cuotas {
         width: 52px;
       }
+      .col-prima {
+        width: 72px;
+      }
       .col-cuota {
         width: 76px;
       }
@@ -682,6 +685,7 @@
                 <th class="col-qty">Cant.</th>
                 <th class="col-desc">Descripción</th>
                 <th class="col-cuotas">Cuotas</th>
+                <th class="col-prima">Prima</th>
                 <th class="col-cuota">Valor cuota</th>
                 <th class="col-total">Total</th>
                 <th class="col-del"></th>
@@ -808,6 +812,7 @@
               <th style="width: 52px">Cant.</th>
               <th style="text-align: left">Descripción</th>
               <th style="width: 62px">Cuotas</th>
+              <th style="width: 90px">Prima</th>
               <th style="width: 100px">Valor cuota</th>
               <th style="width: 95px">Total</th>
             </tr>
@@ -834,19 +839,19 @@
           <div class="totals-box">
             <table>
               <tr>
-                <td class="t-label">Subtotal productos:</td>
-                <td class="t-val" id="out-subtotalNormal">L. 0.00</td>
+                <td class="t-label">Tiempo:</td>
+                <td class="t-val" id="out-subtotalNormal">—</td>
               </tr>
               <tr>
-                <td class="t-label">Cuotas vigentes:</td>
-                <td class="t-val" id="out-subtotalPromo">—</td>
+                <td class="t-label">Prima:</td>
+                <td class="t-val" id="out-subtotalPromo">L. 0.00</td>
               </tr>
               <tr class="t-savings">
-                <td class="t-label">Promedio por cuota:</td>
+                <td class="t-label">Cuota:</td>
                 <td class="t-val" id="out-savings">L. 0.00</td>
               </tr>
               <tr class="t-total">
-                <td class="t-label">TOTAL GENERAL:</td>
+                <td class="t-label">Saldo a pagar:</td>
                 <td class="t-val" id="out-total">L. 0.00</td>
               </tr>
             </table>
@@ -896,7 +901,7 @@
         const rows = [];
         document.querySelectorAll('#product-rows tr').forEach(tr => {
           const inputs = tr.querySelectorAll('input');
-          if (inputs.length < 6) return;
+          if (inputs.length < 7) return;
           rows.push([
             inputs[0].value,
             inputs[2].value,
@@ -904,6 +909,7 @@
             inputs[3].value,
             inputs[4].value,
             inputs[5].value,
+            inputs[6].value,
           ]);
         });
         data['_rows'] = rows;
@@ -935,8 +941,9 @@
               <td class="col-qty"><input type="number" placeholder="1" min="1" oninput="renderDoc();guardarLS()" value="${cols[2] || 1}"></td>
               <td class="col-desc"><input type="text" placeholder="Descripcion del producto" oninput="renderDoc();guardarLS()" value="${cols[1] || ''}"></td>
               <td class="col-cuotas"><input type="number" placeholder="36" min="1" oninput="renderDoc();guardarLS()" value="${cols[3] || ''}"></td>
-              <td class="col-cuota"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[4] || ''}"></td>
-              <td class="col-total"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[5] || ''}"></td>
+              <td class="col-prima"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[4] || ''}"></td>
+              <td class="col-cuota"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[5] || ''}"></td>
+              <td class="col-total"><input type="number" placeholder="0.00" min="0" step="0.01" oninput="renderDoc();guardarLS()" value="${cols[6] || ''}"></td>
               <td class="col-del"><button class="btn-del-row" onclick="eliminarFila(${id})">x</button></td>
             `;
             tbody.appendChild(tr);
@@ -1041,7 +1048,7 @@
         return Number((promo + cupon + aumento).toFixed(2));
       }
 
-      function agregarFilaConValores({ sku = '', desc = '', qty = 1, cuotas = '', valorCuota = '', total = '' } = {}) {
+      function agregarFilaConValores({ sku = '', desc = '', qty = 1, cuotas = '', prima = '', valorCuota = '', total = '' } = {}) {
         rowCount++;
         const id = rowCount;
         const tbody = document.getElementById("product-rows");
@@ -1052,6 +1059,7 @@
             <td class="col-qty"><input type="number" placeholder="1" min="1" value="${qty}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-desc"><input type="text" placeholder="Descripción del producto" value="${desc}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-cuotas"><input type="number" placeholder="36" min="1" value="${cuotas}" oninput="renderDoc();guardarLS()"></td>
+            <td class="col-prima"><input type="number" placeholder="0.00" min="0" step="0.01" value="${prima}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-cuota"><input type="number" placeholder="0.00" min="0" step="0.01" value="${valorCuota}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-total"><input type="number" placeholder="0.00" min="0" step="0.01" value="${total}" oninput="renderDoc();guardarLS()"></td>
             <td class="col-del"><button class="btn-del-row" onclick="eliminarFila(${id})">x</button></td>
@@ -1090,6 +1098,7 @@
               desc: String(productoMatch[3]).trim(),
               total: parseMoney(productoMatch[4]),
               cuotas: '',
+              prima: '',
               valorCuota: '',
             };
             return;
@@ -1106,7 +1115,11 @@
 
           const primaMatch = linea.match(/prima\s*[: ]*\s*([0-9][0-9.,]+)/i);
           if (primaMatch) {
-            productoActual.total = productoActual.total || parseMoney(primaMatch[1]);
+            productoActual.prima = parseMoney(primaMatch[1]);
+            if (!productoActual.total || productoActual.total === 0) {
+              productoActual.total = productoActual.prima;
+            }
+            return;
           }
         });
 
@@ -1125,6 +1138,7 @@
             desc: p.desc,
             qty: p.qty,
             cuotas: p.cuotas,
+            prima: p.prima,
             valorCuota: p.valorCuota,
             total: p.total,
           });
@@ -1145,14 +1159,15 @@
         const products = [];
         rows.forEach((tr) => {
           const inputs = tr.querySelectorAll("input");
-          if (inputs.length < 6) return;
+          if (inputs.length < 7) return;
           const sku = inputs[0].value.trim();
           const desc = inputs[2].value.trim();
           const qty = parseFloat(inputs[1].value) || 1;
           const cuotas = parseFloat(inputs[3].value) || 0;
-          const valorCuota = parseFloat(inputs[4].value) || 0;
-          const total = parseFloat(inputs[5].value) || 0;
-          products.push({ sku, desc, qty, cuotas, valorCuota, total });
+          const prima = parseFloat(inputs[4].value) || 0;
+          const valorCuota = parseFloat(inputs[5].value) || 0;
+          const total = parseFloat(inputs[6].value) || 0;
+          products.push({ sku, desc, qty, cuotas, prima, valorCuota, total });
         });
         return products;
       }
@@ -1170,25 +1185,28 @@
         tbody.innerHTML = "";
 
         if (products.length === 0) {
-          tbody.innerHTML = `<tr id="empty-row"><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Agrega productos desde el panel izquierdo</td></tr>`;
-          document.getElementById("out-subtotalNormal").textContent = fmt(0);
-          document.getElementById("out-subtotalPromo").textContent = "—";
+          tbody.innerHTML = `<tr id="empty-row"><td colspan="7" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Agrega productos desde el panel izquierdo</td></tr>`;
+          document.getElementById("out-subtotalNormal").textContent = "—";
+          document.getElementById("out-subtotalPromo").textContent = fmt(0);
           document.getElementById("out-savings").textContent = fmt(0);
           document.getElementById("out-total").textContent = fmt(0);
           return;
         }
 
         let totalGeneral = 0;
+        let sumaPrima = 0;
         const cuotasSet = [];
         let totalCuotas = 0;
 
         products.forEach((p) => {
           const qty = Math.max(1, p.qty || 1);
           const cuotas = Number(p.cuotas) || 0;
+          const prima = Number(p.prima) || 0;
           const valorCuota = Number(p.valorCuota) || 0;
           const total = Number(p.total) || (valorCuota > 0 && cuotas > 0 ? valorCuota * qty : 0);
 
           totalGeneral += total;
+          sumaPrima += prima;
 
           if (cuotas > 0) cuotasSet.push(cuotas);
           if (valorCuota > 0) {
@@ -1201,6 +1219,7 @@
                 <td class="td-qty">${qty}</td>
                 <td class="td-desc">${p.desc || "—"}</td>
                 <td class="td-cuotas">${cuotas > 0 ? cuotas : "—"}</td>
+                <td class="td-price">${prima > 0 ? fmt(prima) : "—"}</td>
                 <td class="td-price">${valorCuota > 0 ? fmt(valorCuota) : "—"}</td>
                 <td class="td-sub">${fmt(total)}</td>
             `;
@@ -1210,11 +1229,12 @@
         const maxCuotas = cuotasSet.length ? Math.max(...cuotasSet) : 0;
         const clientesConCuota = products.filter((p) => Number(p.valorCuota) > 0).length;
         const cuotaPromedio = totalCuotas > 0 && clientesConCuota > 0 ? totalCuotas / clientesConCuota : 0;
+        const saldoPagar = Math.max(0, totalGeneral - sumaPrima);
 
-        document.getElementById("out-subtotalNormal").textContent = fmt(totalGeneral);
-        document.getElementById("out-subtotalPromo").textContent = maxCuotas > 0 ? `${maxCuotas} cuotas` : "—";
+        document.getElementById("out-subtotalNormal").textContent = maxCuotas > 0 ? `${maxCuotas} meses` : "—";
+        document.getElementById("out-subtotalPromo").textContent = fmt(sumaPrima);
         document.getElementById("out-savings").textContent = cuotaPromedio > 0 ? fmt(cuotaPromedio) : fmt(0);
-        document.getElementById("out-total").textContent = fmt(totalGeneral);
+        document.getElementById("out-total").textContent = fmt(saldoPagar);
       }
 
       // Fila inicial vacía al cargar
