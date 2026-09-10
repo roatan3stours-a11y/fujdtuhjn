@@ -1227,13 +1227,11 @@
         });
 
         const maxCuotas = cuotasSet.length ? Math.max(...cuotasSet) : 0;
-        const clientesConCuota = products.filter((p) => Number(p.valorCuota) > 0).length;
-        const cuotaPromedio = totalCuotas > 0 && clientesConCuota > 0 ? totalCuotas / clientesConCuota : 0;
         const saldoPagar = Math.max(0, totalGeneral - sumaPrima);
 
         document.getElementById("out-subtotalNormal").textContent = maxCuotas > 0 ? `${maxCuotas} meses` : "—";
         document.getElementById("out-subtotalPromo").textContent = fmt(sumaPrima);
-        document.getElementById("out-savings").textContent = cuotaPromedio > 0 ? fmt(cuotaPromedio) : fmt(0);
+        document.getElementById("out-savings").textContent = totalCuotas > 0 ? fmt(totalCuotas) : fmt(0);
         document.getElementById("out-total").textContent = fmt(saldoPagar);
       }
 
