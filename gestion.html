@@ -1327,9 +1327,20 @@
         <div id="view-guardados" class="view">
           <div class="view-header">
             <h1>Lista de Guardados</h1>
-            <button class="btn-export" onclick="exportarExcel('guardados')">
-              <i class="bx bx-spreadsheet"></i> Exportar Excel
-            </button>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+              <button class="btn-export" onclick="document.getElementById('import-guardados-input').click()">
+                <i class="bx bx-import"></i> Importar Excel
+              </button>
+              <button class="btn-export" onclick="exportarExcel('guardados')">
+                <i class="bx bx-spreadsheet"></i> Exportar Excel
+              </button>
+            </div>
+            <input
+              type="file"
+              id="import-guardados-input"
+              accept=".csv,.txt"
+              style="display:none"
+            />
           </div>
           <p class="subtitle">
             Leads calificados que esperan clasificación avanzada.
@@ -2044,6 +2055,11 @@
       }
 
       window.onload = () => {
+        const inputImportGuardados = document.getElementById("import-guardados-input");
+        if (inputImportGuardados) {
+          inputImportGuardados.addEventListener("change", importarGuardadosDesdeArchivo);
+        }
+
         if (localStorage.getItem("crm_listasDeCola"))
           listasDeCola = JSON.parse(localStorage.getItem("crm_listasDeCola"));
         if (localStorage.getItem("crm_listaActivaId"))
@@ -2125,6 +2141,132 @@
           JSON.stringify(siInteresados),
         );
         localStorage.setItem("crm_ventas_meta", JSON.stringify(ventasMeta));
+      }
+
+      function parseCsvRow(linea) {
+        const fila = [];
+        let valorActual = "";
+        let dentroComillas = false;
+
+        for (let i = 0; i < linea.length; i++) {
+          const char = linea[i];
+
+          if (char === '"') {
+            if (dentroComillas && linea[i + 1] === '"') {
+              valorActual += '"';
+              i++;
+            } else {
+              dentroComillas = !dentroComillas;
+            }
+          } else if ((char === ";" || char === "," || char === "\t") && !dentroComillas) {
+            fila.push(valorActual.trim());
+            valorActual = "";
+          } else {
+            valorActual += char;
+          }
+        }
+
+        fila.push(valorActual.trim());
+        return fila;
+      }
+
+      function normalizarClienteImportado(rawCliente) {
+        const nombre = (rawCliente.nombre || "").trim();
+        const numero = (rawCliente.numero || "").replace(/[^0-9+()\-\s]/g, "").trim() || "Sin número";
+        const dni = (rawCliente.dni || "No provisto").trim() || "No provisto";
+        const categoria = ["Oro", "Plata", "Premium"].includes(rawCliente.categoria)
+          ? rawCliente.categoria
+          : "Oro";
+        const credito = rawCliente.credito === "Sin Créditos" ? "Sin Créditos" : "Crédito Activo";
+
+        return {
+          id: genID(),
+          nombre: nombre || "Cliente importado",
+          numero,
+          dni,
+          categoria,
+          credito,
+          fecha: rawCliente.fecha || new Date().toLocaleDateString(),
+          fechaAccion: rawCliente.fecha || new Date().toLocaleDateString(),
+        };
+      }
+
+      function importarGuardadosDesdeArchivo(event) {
+        const archivo = event.target.files && event.target.files[0];
+        if (!archivo) return;
+
+        const reader = new FileReader();
+
+        reader.onload = function () {
+          try {
+            const texto = (reader.result || "").replace(/\uFEFF/g, "");
+            const lineas = texto
+              .split(/\r?\n/)
+              .map((linea) => linea.trim())
+              .filter((linea) => linea.length > 0);
+
+            if (lineas.length === 0) {
+              alert("El archivo está vacío o no tiene datos válidos.");
+              return;
+            }
+
+            const datos = lineas.slice(1).map((linea) => {
+              const cols = parseCsvRow(linea);
+              if (cols.length < 5) return null;
+
+              const nombre = cols[0] || "";
+              const numero = cols[1] || "";
+              const dni = cols[2] || "No provisto";
+              const categoria = cols[3] || "Oro";
+              const credito = cols[4] || "Crédito Activo";
+              const fecha = cols[6] || cols[5] || new Date().toLocaleDateString();
+
+              return {
+                nombre: nombre.replace(/^"|"$/g, "").replace(/""/g, '"'),
+                numero: numero.replace(/^"|"$/g, "").replace(/""/g, '"'),
+                dni: dni.replace(/^"|"$/g, "").replace(/""/g, '"'),
+                categoria: categoria.replace(/^"|"$/g, "").replace(/""/g, '"'),
+                credito: credito.replace(/^"|"$/g, "").replace(/""/g, '"'),
+                fecha,
+              };
+            }).filter(Boolean);
+
+            if (datos.length === 0) {
+              alert("No se encontraron registros válidos para importar.");
+              return;
+            }
+
+            const clientesImportados = datos
+              .map((cliente) => normalizarClienteImportado(cliente))
+              .filter((cliente) => {
+                const yaExiste = guardados.some(
+                  (g) =>
+                    g.dni === cliente.dni &&
+                    g.numero === cliente.numero &&
+                    g.nombre === cliente.nombre,
+                );
+                return !yaExiste;
+              });
+
+            if (clientesImportados.length === 0) {
+              alert("Los registros importados ya existen en la lista de guardados.");
+              return;
+            }
+
+            guardados.push(...clientesImportados);
+            guardarLocalStorage();
+            renderTodasLasTablas();
+            actualizarContadoresYTarjetas();
+            showToast(`Se importaron ${clientesImportados.length} clientes a Guardados`);
+          } catch (error) {
+            console.error("Error importando CSV:", error);
+            alert("No se pudo importar el archivo. Verifica que sea un CSV válido.");
+          } finally {
+            event.target.value = "";
+          }
+        };
+
+        reader.readAsText(archivo, "UTF-8");
       }
 
       function calcularProgreso(actual, meta) {
