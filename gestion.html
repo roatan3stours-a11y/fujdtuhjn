@@ -1871,9 +1871,9 @@
           <p id="info-telefono" style="font-size: 1.1rem; color: #2563eb; font-weight: 600; margin-bottom: 5px;">
             <i class="bx bx-phone"></i> <span>0000-0000</span>
           </p>
-          <p id="info-dni" style="font-size: 0.9rem; color: #374151; margin: 8px 0 12px; font-weight: 600; cursor: pointer;">
+          <p id="info-dni" style="font-size: 0.9rem; color: #374151; margin: 8px 0 12px; font-weight: 600;">
             <i class="bx bx-id-card"></i>
-            <span id="info-dni-value" onclick="copiarDniPanel('info-dni-value')" style="text-decoration: underline;">No provisto</span>
+            <span id="info-dni-value" style="text-decoration: underline; cursor: pointer;">No provisto</span>
           </p>
           <p id="info-detalles" style="font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; font-weight: 500;">Categoría: Oro | Crédito: Activo</p>
 
@@ -1886,7 +1886,10 @@
           </p>
         </div>
 
-        <button class="btn-primary" style="width: 100%; margin-top: 15px; background-color: #2563eb;" onclick="abrirAccionesDesdeInfo()">
+        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #0f766e;" onclick="copiarDniPanel('info-dni-value')">
+          <i class="bx bx-copy"></i> Copiar DNI
+        </button>
+        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #2563eb;" onclick="abrirAccionesDesdeInfo()">
           <i class="bx bx-dots-horizontal-rounded"></i> Más acciones
         </button>
         <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #ef4444;" onclick="cerrarModalInfo()">
@@ -3047,6 +3050,7 @@ function abrirModalCalificacion(contexto) {
       document.getElementById('info-nombre').innerText = nombre || 'Sin Nombre';
       document.getElementById('info-telefono').innerHTML = `<i class="bx bx-phone"></i> ${telefono || 'Sin número'}`;
       document.getElementById('info-dni-value').innerText = dni || 'No provisto';
+      document.getElementById('info-dni-value').onclick = () => ejecutarCopiado(dni || 'No provisto');
 
       // 2. Construir los detalles (si no hay datos, se oculta o se pone genérico)
       let detalles = [];
