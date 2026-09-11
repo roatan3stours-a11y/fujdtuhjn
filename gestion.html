@@ -1862,14 +1862,21 @@
           <span>Información del Cliente</span>
           <i class="bx bx-x close-modal" onclick="cerrarModalInfo()"></i>
         </div>
-        
+
+        <input type="hidden" id="info-cliente-id" value="" />
+        <input type="hidden" id="info-cliente-origen" value="guardados" />
+
         <div style="padding: 10px 0;">
           <h3 id="info-nombre" style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 5px;">Nombre Cliente</h3>
           <p id="info-telefono" style="font-size: 1.1rem; color: #2563eb; font-weight: 600; margin-bottom: 5px;">
             <i class="bx bx-phone"></i> <span>0000-0000</span>
           </p>
+          <p id="info-dni" style="font-size: 0.9rem; color: #374151; margin: 8px 0 12px; font-weight: 600; cursor: pointer;">
+            <i class="bx bx-id-card"></i>
+            <span id="info-dni-value" onclick="copiarDniPanel('info-dni-value')" style="text-decoration: underline;">No provisto</span>
+          </p>
           <p id="info-detalles" style="font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; font-weight: 500;">Categoría: Oro | Crédito: Activo</p>
-          
+
           <div style="display: flex; justify-content: center; margin-bottom: 10px;">
             <!-- La imagen del QR se generará dinámicamente aquí -->
             <img id="info-qr" src="" alt="Código QR para llamar" style="width: 180px; height: 180px; border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" />
@@ -1878,8 +1885,11 @@
             <i class="bx bx-scan"></i> Escanea para marcar rápidamente
           </p>
         </div>
-        
-        <button class="btn-primary" style="width: 100%; margin-top: 15px; background-color: #ef4444;" onclick="cerrarModalInfo()">
+
+        <button class="btn-primary" style="width: 100%; margin-top: 15px; background-color: #2563eb;" onclick="abrirAccionesDesdeInfo()">
+          <i class="bx bx-dots-horizontal-rounded"></i> Más acciones
+        </button>
+        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #ef4444;" onclick="cerrarModalInfo()">
           Cerrar
         </button>
       </div>
@@ -2854,11 +2864,12 @@
   listaVisual.forEach((c) => {
     const nombreSafe = (c.nombre || "").replace(/'/g, "\\'");
     const telefonoSafe = (c.numero || "").replace(/'/g, "\\'");
+    const dniSafe = (c.dni || "").replace(/'/g, "\\'");
     const catSafe = (c.categoria || "").replace(/'/g, "\\'");
     const credSafe = (c.credito || "").replace(/'/g, "\\'");
 
     tbG.innerHTML += `
-      <tr style="cursor:pointer" onclick="abrirModalInfoCliente('${nombreSafe}', '${telefonoSafe}', '${catSafe}', '${credSafe}')">
+      <tr style="cursor:pointer" onclick="abrirModalInfoCliente('${c.id}', '${nombreSafe}', '${telefonoSafe}', '${dniSafe}', '${catSafe}', '${credSafe}')">
         <td><strong>${c.nombre}</strong></td>
         <td>${c.numero}</td>
         <td>
@@ -3028,11 +3039,15 @@ function abrirModalCalificacion(contexto) {
         document.getElementById("modal-calificacion").classList.add("active");
       }
 // Función para abrir el modal con la información y el QR
-    function abrirModalInfoCliente(nombre, telefono, categoria, credito) {
+    function abrirModalInfoCliente(id, nombre, telefono, dni, categoria, credito) {
+      document.getElementById('info-cliente-id').value = id || '';
+      document.getElementById('info-cliente-origen').value = 'guardados';
+
       // 1. Asignar los textos
       document.getElementById('info-nombre').innerText = nombre || 'Sin Nombre';
       document.getElementById('info-telefono').innerHTML = `<i class="bx bx-phone"></i> ${telefono || 'Sin número'}`;
-      
+      document.getElementById('info-dni-value').innerText = dni || 'No provisto';
+
       // 2. Construir los detalles (si no hay datos, se oculta o se pone genérico)
       let detalles = [];
       if (categoria) detalles.push(`Categoría: ${categoria}`);
@@ -3053,6 +3068,19 @@ function abrirModalCalificacion(contexto) {
 
       // 4. Mostrar el modal
       document.getElementById('modal-info-cliente').classList.add('active');
+    }
+
+    function abrirAccionesDesdeInfo() {
+      const id = document.getElementById('info-cliente-id').value;
+      const origen = document.getElementById('info-cliente-origen').value || 'guardados';
+
+      if (!id) {
+        showToast('No hay cliente seleccionado');
+        return;
+      }
+
+      cerrarModalInfo();
+      abrirModalAcciones(id, origen);
     }
 
     // Función para cerrar el modal
