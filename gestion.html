@@ -1589,6 +1589,38 @@
           </div>
         </div>
 
+        <div id="view-gestionadowhatsapp" class="view">
+          <div class="view-header">
+            <h1>Gestionado por WhatsApp</h1>
+            <button class="btn-export" onclick="exportarExcel('gestionadowhatsapp')">
+              <i class="bx bx-spreadsheet"></i> Exportar Excel
+            </button>
+          </div>
+          <p class="subtitle">
+            Contactos marcados como gestionados por WhatsApp y con seguimiento registrado.
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Teléfono</th>
+                  <th>DNI (Clic)</th>
+                  <th>Categoría</th>
+                  <th>Estado Crédito</th>
+                  <th>Observación</th>
+                  <th>Fecha</th>
+                  <th>Acciones de Reclasificación</th>
+                </tr>
+              </thead>
+              <tbody id="tabla-gestionadowhatsapp-body"></tbody>
+            </table>
+            <div id="empty-gestionadowhatsapp" class="empty-state" style="display: none">
+              <p>No hay registros aquí.</p>
+            </div>
+          </div>
+        </div>
+
         <div id="view-conteo" class="view">
           <div class="view-header">
             <h1>Conteo de Gestión</h1>
