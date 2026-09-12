@@ -1581,12 +1581,28 @@
         <div id="view-conteo" class="view">
           <div class="view-header">
             <h1>Conteo de Gestión</h1>
-            <button
-              class="btn-export"
-              onclick="actualizarContadoresYTarjetas()"
-            >
-              <i class="bx bx-refresh"></i> Actualizar
-            </button>
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+              <label
+                for="fecha-gestion-print"
+                style="font-size: 0.85rem; color: var(--text-soft);"
+                >Fecha</label
+              >
+              <input
+                id="fecha-gestion-print"
+                type="date"
+                value=""
+                style="padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg-soft); color: var(--text);"
+              />
+              <button class="btn-export" onclick="imprimirListaGestionPorFecha()">
+                <i class="bx bx-printer"></i> Imprimir lista por fecha
+              </button>
+              <button
+                class="btn-export"
+                onclick="actualizarContadoresYTarjetas()"
+              >
+                <i class="bx bx-refresh"></i> Actualizar
+              </button>
+            </div>
           </div>
           <p class="subtitle">Resumen de listas y contactos por gestionar.</p>
 
@@ -3048,6 +3064,174 @@
         link.click();
         document.body.removeChild(link);
       }
+
+      function convertirFechaClave(valor) {
+        if (!valor && valor !== 0) return "";
+        const texto = String(valor).trim();
+        if (!texto) return "";
+
+        const iso = texto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (iso) return `${iso[1]}-${iso[2]}-${iso[3]}`;
+
+        const formatoLatino = texto.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+        if (formatoLatino) {
+          const dia = Number(formatoLatino[1]);
+          const mes = Number(formatoLatino[2]);
+          let anio = Number(formatoLatino[3]);
+          if (anio < 100) anio += 2000;
+          return `${String(anio).padStart(4, "0")}-${String(mes).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+        }
+
+        const fecha = new Date(texto);
+        if (!Number.isNaN(fecha.getTime())) {
+          return fecha.toISOString().slice(0, 10);
+        }
+
+        return "";
+      }
+
+      function obtenerListaGestionPorFecha(fechaElegida) {
+        const fechaBase = fechaElegida || document.getElementById("fecha-gestion-print")?.value || new Date().toISOString().slice(0, 10);
+        const fechaObjetivo = convertirFechaClave(fechaBase);
+
+        const bloques = [
+          { nombre: "Lista en gestión", items: listasDeCola.flatMap((lista) => lista.clientes.map((cliente) => ({ ...cliente, estado: "En gestión", grupo: lista.nombre }))) },
+          { nombre: "Sistema viejo", items: queueViejo.map((cliente) => ({ ...cliente, estado: "Sistema viejo" })) },
+          { nombre: "Guardados", items: guardados.map((cliente) => ({ ...cliente, estado: "Guardado" })) },
+          { nombre: "Sobregirados", items: sobregirados.map((cliente) => ({ ...cliente, estado: "Sobregirado" })) },
+          { nombre: "Vendido", items: vendido.map((cliente) => ({ ...cliente, estado: "Vendido" })) },
+          { nombre: "No le interesa", items: noInteres.map((cliente) => ({ ...cliente, estado: "No le interesa" })) },
+          { nombre: "No contestó", items: noContesto.map((cliente) => ({ ...cliente, estado: "No contestó" })) },
+          { nombre: "En espera", items: enEspera.map((cliente) => ({ ...cliente, estado: "En espera" })) },
+          { nombre: "Sí interesados", items: siInteresados.map((cliente) => ({ ...cliente, estado: "Sí interesado" })) },
+        ];
+
+        const registros = [];
+
+        bloques.forEach((bloque) => {
+          bloque.items.forEach((cliente) => {
+            const fechaCliente = convertirFechaClave(cliente.fechaAccion || cliente.fecha || "");
+            if (!fechaCliente || fechaCliente !== fechaObjetivo) return;
+
+            registros.push({
+              identidad: cliente.dni || cliente.identidad || "No provisto",
+              nombre: cliente.nombre || "Sin nombre",
+              cel: cliente.numero || cliente.cel || "Sin número",
+              estado: cliente.estado || bloque.nombre,
+              observacion: cliente.observacion || cliente.comentario || cliente.notas || "Sin observación",
+              articulo: cliente.articuloInteres || cliente.articulo || "Sin artículo",
+            });
+          });
+        });
+
+        return registros.sort((a, b) => a.nombre.localeCompare(b.nombre));
+      }
+
+      function imprimirListaGestionPorFecha() {
+        const fechaInput = document.getElementById("fecha-gestion-print");
+        const fechaSeleccionada = fechaInput && fechaInput.value ? fechaInput.value : new Date().toISOString().slice(0, 10);
+        const registros = obtenerListaGestionPorFecha(fechaSeleccionada);
+
+        if (!registros.length) {
+          alert("No hay registros de gestión para la fecha seleccionada.");
+          return;
+        }
+
+        const fechaTitulo = new Date(`${fechaSeleccionada}T00:00:00`);
+        const encabezadoFecha = fechaTitulo.toLocaleDateString("es-ES", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        });
+
+        const filas = registros
+          .map(
+            (registro) => `
+              <tr>
+                <td>${(registro.identidad || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td>${(registro.nombre || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td>${(registro.cel || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td>${(registro.estado || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td>${(registro.observacion || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+                <td>${(registro.articulo || "").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</td>
+              </tr>
+            `,
+          )
+          .join("");
+
+        const html = `
+          <!DOCTYPE html>
+          <html lang="es">
+            <head>
+              <meta charset="UTF-8" />
+              <title>Lista de gestión - ${encabezadoFecha}</title>
+              <style>
+                body {
+                  font-family: Arial, sans-serif;
+                  margin: 24px;
+                  color: #111827;
+                }
+                h1 {
+                  font-size: 22px;
+                  margin-bottom: 8px;
+                }
+                .sub {
+                  margin-bottom: 18px;
+                  color: #4b5563;
+                }
+                table {
+                  width: 100%;
+                  border-collapse: collapse;
+                  font-size: 12px;
+                }
+                th, td {
+                  border: 1px solid #d1d5db;
+                  padding: 8px 10px;
+                  text-align: left;
+                  vertical-align: top;
+                }
+                th {
+                  background: #f3f4f6;
+                }
+                @media print {
+                  body { margin: 0; }
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Lista de gestión</h1>
+              <div class="sub">Fecha: ${encabezadoFecha} · Total: ${registros.length} registros</div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Identidad</th>
+                    <th>Nombre</th>
+                    <th>Cel</th>
+                    <th>Estado</th>
+                    <th>Observación</th>
+                    <th>Artículo de interés</th>
+                  </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+              </table>
+            </body>
+          </html>
+        `;
+
+        const nuevaVentana = window.open("", "_blank", "width=1200,height=900");
+        if (!nuevaVentana) {
+          alert("Se bloqueó la ventana emergente. Permite pop-ups para imprimir la lista.");
+          return;
+        }
+
+        nuevaVentana.document.write(html);
+        nuevaVentana.document.close();
+        nuevaVentana.focus();
+        setTimeout(() => {
+          nuevaVentana.print();
+        }, 250);
+      }
+
 // Función para alternar la selección de botones
       function selectOption(tipo, element) {
         // Remover la clase 'active' de todos los botones del mismo grupo
