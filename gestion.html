@@ -974,6 +974,14 @@
         transform: scale(1.15);
       }
 
+      .btn-observacion i {
+        color: #8b5cf6;
+      }
+
+      .btn-gestionado-whatsapp i {
+        color: #25d366;
+      }
+
       /* --- Colores Específicos por Acción (Iconos) --- */
       .btn-guardados i {
         color: #3b82f6;
@@ -1108,6 +1116,9 @@
           </div>
           <div class="nav-item" onclick="switchView('vendido', this)">
             <i class="bx bx-shopping-bag"></i>Vendido
+          </div>
+          <div class="nav-item" onclick="switchView('gestionadowhatsapp', this)">
+            <i class="bx bx-message-dots"></i>Gestionado por WhatsApp
           </div>
           <div class="nav-item" onclick="switchView('conteo', this)">
             <i class="bx bx-pie-chart-alt"></i>Conteo
@@ -2038,7 +2049,7 @@
             <i class="bx bx-folder-open"></i> Guardar
           </button>
 
-  <button
+          <button
             class="btn-action btn-interesa"
             id="accion-btn-interesa"
             onclick="ejecutarAccionModal('interesa')"
@@ -2087,6 +2098,22 @@
           </button>
 
           <button
+            class="btn-action btn-gestionado-whatsapp"
+            id="accion-btn-gestionadowhatsapp"
+            onclick="ejecutarAccionModal('gestionadowhatsapp')"
+          >
+            <i class="bx bx-message-dots"></i> Gestionado por WhatsApp
+          </button>
+
+          <button
+            class="btn-action btn-observacion"
+            id="accion-btn-observacion"
+            onclick="abrirModalObservacion()"
+          >
+            <i class="bx bx-note"></i> Observación
+          </button>
+
+          <button
             class="btn-action btn-guardados"
             onclick="abrirGenerarCartaDesdeAccion()"
           >
@@ -2103,6 +2130,31 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="modal-observacion">
+      <div class="modal-content">
+        <div class="modal-header">
+          <span>Agregar observación</span>
+          <i class="bx bx-x close-modal" onclick="cerrarModalObservacion()"></i>
+        </div>
+
+        <input type="hidden" id="observacion-modal-id" />
+        <input type="hidden" id="observacion-modal-origen" />
+
+        <div class="form-group" style="margin-bottom: 20px;">
+          <label class="form-label">Escribe la observación</label>
+          <textarea
+            id="input-observacion"
+            rows="5"
+            placeholder="Ej. Llamó por WhatsApp, quedó pendiente de confirmar compra..."
+            style="resize: vertical; min-height: 120px;"
+          ></textarea>
+        </div>
+
+        <button class="btn-primary" style="width: 100%" onclick="guardarObservacionCliente()">
+          <i class="bx bx-save"></i> Guardar observación
+        </button>
+      </div>
+    </div>
 
     <!-- Toast -->
     <div class="toast" id="toast-msg">
@@ -2123,6 +2175,7 @@
       let noContesto = [];
       let enEspera = [];
       let siInteresados = [];
+      let gestionadoWhatsApp = [];
       let ventasMeta = {
         creditoMeta: 0,
         contadoMeta: 0,
@@ -2184,6 +2237,8 @@
           enEspera = JSON.parse(localStorage.getItem("crm_enespera"));
         if (localStorage.getItem("crm_siinteresados"))
           siInteresados = JSON.parse(localStorage.getItem("crm_siinteresados"));
+        if (localStorage.getItem("crm_gestionado_whatsapp"))
+          gestionadoWhatsApp = JSON.parse(localStorage.getItem("crm_gestionado_whatsapp"));
         if (localStorage.getItem("crm_ventas_meta"))
           ventasMeta = JSON.parse(localStorage.getItem("crm_ventas_meta"));
 
@@ -2196,6 +2251,7 @@
           noContesto,
           enEspera,
           siInteresados,
+          gestionadoWhatsApp,
         ].forEach((arr) => {
           arr.forEach((c) => {
             if (!c.id) c.id = genID();
@@ -2225,6 +2281,10 @@
         localStorage.setItem(
           "crm_siinteresados",
           JSON.stringify(siInteresados),
+        );
+        localStorage.setItem(
+          "crm_gestionado_whatsapp",
+          JSON.stringify(gestionadoWhatsApp),
         );
         localStorage.setItem("crm_ventas_meta", JSON.stringify(ventasMeta));
       }
@@ -2510,6 +2570,7 @@
         if (listId === "nocontesto") return noContesto;
         if (listId === "enespera") return enEspera;
         if (listId === "siinteresados") return siInteresados;
+        if (listId === "gestionadowhatsapp") return gestionadoWhatsApp;
         return [];
       }
 
@@ -2779,6 +2840,9 @@
             destinoId !== "vendido"
           )
             delete cliente.articuloInteres;
+          if (destinoId === "gestionadowhatsapp") {
+            cliente.observacion = cliente.observacion || "Gestionado por WhatsApp";
+          }
           destinoArr.push(cliente);
           guardarLocalStorage();
           renderTodasLasTablas();
@@ -2799,6 +2863,10 @@
         const btnSobregirados = document.getElementById(
           "accion-btn-sobregirados",
         );
+        const btnGestionadoWhatsApp = document.getElementById(
+          "accion-btn-gestionadowhatsapp",
+        );
+        const btnObservacion = document.getElementById("accion-btn-observacion");
 
         btnGuardar.style.display = origenId === "guardados" ? "none" : "flex";
         btnVendido.style.display =
@@ -2813,6 +2881,9 @@
         btnEspera.style.display = origenId === "enespera" ? "none" : "flex";
         btnSobregirados.style.display =
           origenId === "sobregirados" ? "none" : "flex";
+        btnGestionadoWhatsApp.style.display =
+          origenId === "gestionadowhatsapp" ? "none" : "flex";
+        btnObservacion.style.display = "flex";
 
         document.getElementById("modal-acciones").classList.add("active");
       }
@@ -2839,6 +2910,51 @@
 
         moverClienteDinamico(id, origenId, destinoId);
         cerrarModalAcciones();
+      }
+
+      function abrirModalObservacion() {
+        const id = document.getElementById("accion-modal-id").value;
+        const origenId = document.getElementById("accion-modal-origen").value;
+        const cliente = obtenerClientePorId(id);
+
+        if (!id || !cliente) {
+          showToast("No hay cliente seleccionado");
+          return;
+        }
+
+        document.getElementById("observacion-modal-id").value = id;
+        document.getElementById("observacion-modal-origen").value = origenId;
+        document.getElementById("input-observacion").value = cliente.observacion || "";
+        document.getElementById("modal-observacion").classList.add("active");
+        cerrarModalAcciones();
+      }
+
+      function cerrarModalObservacion() {
+        document.getElementById("modal-observacion").classList.remove("active");
+      }
+
+      function guardarObservacionCliente() {
+        const id = document.getElementById("observacion-modal-id").value;
+        const origenId = document.getElementById("observacion-modal-origen").value;
+        const texto = document.getElementById("input-observacion").value.trim();
+
+        if (!texto) {
+          alert("Debes ingresar una observación.");
+          return;
+        }
+
+        let origenArr = mapListName(origenId);
+        const index = origenArr.findIndex((c) => c.id === id);
+
+        if (index !== -1) {
+          const cliente = origenArr[index];
+          cliente.observacion = texto;
+          cliente.fechaAccion = new Date().toLocaleDateString();
+          guardarLocalStorage();
+          cerrarModalObservacion();
+          renderTodasLasTablas();
+          showToast("Observación guardada");
+        }
       }
 
       function eliminarClienteDinamico(id, origenId) {
@@ -2976,6 +3092,14 @@
           tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
         });
 
+        const tbGW = document.getElementById("tabla-gestionadowhatsapp-body");
+        tbGW.innerHTML = "";
+        document.getElementById("empty-gestionadowhatsapp").style.display =
+          gestionadoWhatsApp.length === 0 ? "block" : "none";
+        gestionadoWhatsApp.forEach((c) => {
+          tbGW.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "gestionadowhatsapp")}</td></tr>`;
+        });
+
         const tbSG = document.getElementById("tabla-sobregirados-body");
         tbSG.innerHTML = "";
         document.getElementById("empty-sobregirados").style.display =
@@ -3018,6 +3142,8 @@
         if (listaId === "vendido") nombreArchivo = "Clientes_Vendidos.csv";
         if (listaId === "nointeres")
           nombreArchivo = "Clientes_No_Le_Interesa.csv";
+        if (listaId === "gestionadowhatsapp")
+          nombreArchivo = "Clientes_Gestionado_WhatsApp.csv";
 
         // Si es la lista de guardados, exportar la versión que se está viendo (filtrada)
         if (listaId === "guardados") {
@@ -3040,7 +3166,7 @@
         }
 
         let csvContent =
-          "\uFEFFNombre;Teléfono;DNI;Categoría;Estado Crédito;Artículo de Interés;Fecha\n";
+          "\uFEFFNombre;Teléfono;DNI;Categoría;Estado Crédito;Artículo de Interés;Observación;Fecha\n";
         datos.forEach((c) => {
           let nombre = c.nombre ? c.nombre.replace(/"/g, '""') : "";
           let numero = c.numero || "";
@@ -3050,8 +3176,9 @@
           let art = c.articuloInteres
             ? c.articuloInteres.replace(/"/g, '""')
             : "N/A";
+          let observ = c.observacion ? c.observacion.replace(/"/g, '""') : "";
           let fecha = c.fechaAccion || c.fecha || "En Cola";
-          csvContent += `"${nombre}";"${numero}";"${dni}";"${cat}";"${cred}";"${art}";"${fecha}"\n`;
+          csvContent += `"${nombre}";"${numero}";"${dni}";"${cat}";"${cred}";"${art}";"${observ}";"${fecha}"\n`;
         });
 
         const blob = new Blob([csvContent], {
@@ -3438,6 +3565,7 @@ function abrirModalCalificacion(contexto) {
         noContesto,
         enEspera,
         siInteresados,
+        gestionadoWhatsApp,
         queueViejo,
       ];
 
