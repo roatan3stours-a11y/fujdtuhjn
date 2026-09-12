@@ -2285,6 +2285,7 @@
           siInteresados,
           gestionadoWhatsApp,
         ].forEach((arr) => {
+          if (!Array.isArray(arr)) arr = [];
           arr.forEach((c) => {
             if (!c.id) c.id = genID();
           });
@@ -2872,9 +2873,18 @@
             destinoId !== "vendido"
           )
             delete cliente.articuloInteres;
+
           if (destinoId === "gestionadowhatsapp") {
+            if (!Array.isArray(gestionadoWhatsApp)) gestionadoWhatsApp = [];
             cliente.observacion = cliente.observacion || "Gestionado por WhatsApp";
+            cliente.estadoGestion = "Gestionado por WhatsApp";
+            gestionadoWhatsApp.push(cliente);
+            guardarLocalStorage();
+            renderTodasLasTablas();
+            showToast("Registrado en Gestionado por WhatsApp");
+            return;
           }
+
           destinoArr.push(cliente);
           guardarLocalStorage();
           renderTodasLasTablas();
@@ -2982,6 +2992,7 @@
           const cliente = origenArr[index];
           cliente.observacion = texto;
           cliente.fechaAccion = new Date().toLocaleDateString();
+          cliente.estadoGestion = "Con observación";
           guardarLocalStorage();
           cerrarModalObservacion();
           renderTodasLasTablas();
