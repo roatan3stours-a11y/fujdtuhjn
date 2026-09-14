@@ -824,6 +824,13 @@
         font-weight: 600;
         color: #374151;
       }
+      .obs-col {
+        min-width: 220px;
+        max-width: 260px;
+        white-space: normal;
+        word-break: break-word;
+        vertical-align: top;
+      }
       tr:hover td {
         background: #f9fafb;
       }
@@ -1331,6 +1338,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
                 </tr>
@@ -1418,6 +1426,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Acciones de Reclasificación</th>
                 </tr>
               </thead>
@@ -1446,6 +1455,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
                 </tr>
@@ -1481,6 +1491,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
                 </tr>
@@ -1510,6 +1521,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -1544,6 +1556,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -1576,6 +1589,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -3101,6 +3115,7 @@
         </td>
         <td>${obtenerBadgeCategoriaHtml(c.categoria)}</td>
         <td>${obtenerBadgeCreditoHtml(c.credito)}</td>
+        <td class="obs-col">${c.observacion || "-"}</td>
         <td onclick="event.stopPropagation()">
           ${crearFilaAccionesHtml(c.id, "guardados")}
         </td>
@@ -3116,7 +3131,7 @@
         document.getElementById("empty-nocontesto").style.display =
           noContesto.length === 0 ? "block" : "none";
         noContesto.forEach((c) => {
-          tbNC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nocontesto")}</td></tr>`;
+          tbNC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nocontesto")}</td></tr>`;
         });
 
         const tbEE = document.getElementById("tabla-enespera-body");
@@ -3124,7 +3139,7 @@
         document.getElementById("empty-enespera").style.display =
           enEspera.length === 0 ? "block" : "none";
         enEspera.forEach((c) => {
-          tbEE.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "enespera")}</td></tr>`;
+          tbEE.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "enespera")}</td></tr>`;
         });
 
         const tbSI = document.getElementById("tabla-siinteresados-body");
@@ -3132,7 +3147,7 @@
         document.getElementById("empty-siinteresados").style.display =
           siInteresados.length === 0 ? "block" : "none";
         siInteresados.forEach((c) => {
-          tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
+          tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
         });
 
         const tbGW = document.getElementById("tabla-gestionadowhatsapp-body");
@@ -3140,7 +3155,7 @@
         document.getElementById("empty-gestionadowhatsapp").style.display =
           gestionadoWhatsApp.length === 0 ? "block" : "none";
         gestionadoWhatsApp.forEach((c) => {
-          tbGW.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "gestionadowhatsapp")}</td></tr>`;
+          tbGW.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "gestionadowhatsapp")}</td></tr>`;
         });
 
         const tbSG = document.getElementById("tabla-sobregirados-body");
@@ -3148,7 +3163,7 @@
         document.getElementById("empty-sobregirados").style.display =
           sobregirados.length === 0 ? "block" : "none";
         sobregirados.forEach((c) => {
-          tbSG.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "sobregirados")}</td></tr>`;
+          tbSG.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "sobregirados")}</td></tr>`;
         });
 
         const tbV = document.getElementById("tabla-vendido-body");
@@ -3156,7 +3171,7 @@
         document.getElementById("empty-vendido").style.display =
           vendido.length === 0 ? "block" : "none";
         vendido.forEach((c) => {
-          tbV.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "vendido")}</td></tr>`;
+          tbV.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "vendido")}</td></tr>`;
         });
 
         const tbNI = document.getElementById("tabla-nointeres-body");
@@ -3164,7 +3179,7 @@
         document.getElementById("empty-nointeres").style.display =
           noInteres.length === 0 ? "block" : "none";
         noInteres.forEach((c) => {
-          tbNI.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nointeres")}</td></tr>`;
+          tbNI.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nointeres")}</td></tr>`;
         });
       }
 
