@@ -1375,6 +1375,9 @@
           <div class="view-header">
             <h1>Lista de Guardados</h1>
             <div class="header-actions">
+              <button class="btn-export" onclick="eliminarGuardadosSeleccionados()">
+                <i class="bx bx-trash"></i> Eliminar seleccionados
+              </button>
               <button class="btn-export" onclick="actualizarListaGuardados()">
                 <i class="bx bx-refresh"></i> Actualizar lista
               </button>
@@ -1439,6 +1442,7 @@
             <table>
               <thead>
                 <tr>
+                  <th><input type="checkbox" id="seleccionar-todos-guardados" onchange="seleccionarTodosGuardados(this.checked)" title="Seleccionar todos" /></th>
                   <th>Nombre</th>
                   <th>Teléfono</th>
                   <th>DNI (Clic)</th>
@@ -2954,6 +2958,30 @@
         showToast("Lista de Guardados actualizada");
       }
 
+      function seleccionarTodosGuardados(seleccionado) {
+        document.querySelectorAll(".seleccionar-guardado").forEach((casilla) => {
+          casilla.checked = seleccionado;
+        });
+      }
+
+      function eliminarGuardadosSeleccionados() {
+        const ids = Array.from(document.querySelectorAll(".seleccionar-guardado:checked"))
+          .map((casilla) => casilla.value);
+
+        if (ids.length === 0) {
+          showToast("Selecciona al menos un registro");
+          return;
+        }
+
+        if (!confirm(`¿Eliminar ${ids.length} registro(s) seleccionado(s)?`)) return;
+
+        guardados = guardados.filter((cliente) => !ids.includes(cliente.id));
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        renderTodasLasTablas();
+        showToast(`${ids.length} registro(s) eliminado(s)`);
+      }
+
       function obtenerListasPorGestion() {
         return [
           ...listasDeCola.map((lista) => ({
@@ -3270,6 +3298,7 @@
 
     tbG.innerHTML += `
       <tr style="cursor:pointer" onclick="abrirModalInfoCliente('${c.id}', '${nombreSafe}', '${telefonoSafe}', '${dniSafe}', '${catSafe}', '${credSafe}')">
+        <td onclick="event.stopPropagation()"><input type="checkbox" class="seleccionar-guardado" value="${c.id}" onchange="actualizarSelectorTodosGuardados()" /></td>
         <td><strong>${c.nombre}</strong></td>
         <td>${c.numero}</td>
         <td>
@@ -3287,6 +3316,16 @@
         </td>
       </tr>`;
   });
+
+  actualizarSelectorTodosGuardados();
+}
+
+function actualizarSelectorTodosGuardados() {
+  const selector = document.getElementById("seleccionar-todos-guardados");
+  const casillas = Array.from(document.querySelectorAll(".seleccionar-guardado"));
+  if (!selector) return;
+  selector.checked = casillas.length > 0 && casillas.every((casilla) => casilla.checked);
+  selector.indeterminate = casillas.some((casilla) => casilla.checked) && !selector.checked;
 }
       function renderTodasLasTablas() {
         // Renderizar la tabla de Guardados con sus filtros actuales
