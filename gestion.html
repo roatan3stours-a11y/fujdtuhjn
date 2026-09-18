@@ -1375,6 +1375,9 @@
           <div class="view-header">
             <h1>Lista de Guardados</h1>
             <div class="header-actions">
+              <button class="btn-export" onclick="actualizarListaGuardados()">
+                <i class="bx bx-refresh"></i> Actualizar lista
+              </button>
               <button class="btn-export" onclick="document.getElementById('import-guardados-input').click()">
                 <i class="bx bx-import"></i> Importar Excel
               </button>
@@ -2940,6 +2943,15 @@
         });
 
         if (huboCambios) guardarLocalStorage();
+      }
+
+      function actualizarListaGuardados() {
+        asignarCarterasFaltantes();
+        sincronizarEstadoGuardados();
+        guardarLocalStorage();
+        actualizarContadoresYTarjetas();
+        renderTodasLasTablas();
+        showToast("Lista de Guardados actualizada");
       }
 
       function obtenerListasPorGestion() {
