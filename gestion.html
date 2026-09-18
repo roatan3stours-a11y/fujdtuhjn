@@ -782,6 +782,10 @@
         background: #f3f4f6;
         color: #6b7280;
       }
+      .badge-gestionado {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
 
       .copyable-id {
         cursor: pointer;
@@ -1338,6 +1342,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Estado Gestión</th>
                   <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -1426,6 +1431,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Acciones de Reclasificación</th>
                 </tr>
@@ -1455,6 +1461,9 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Estado Gestión</th>
+                  <th>Cartera</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -1491,6 +1500,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -1521,6 +1531,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
@@ -1556,6 +1567,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
@@ -1589,6 +1601,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th class="obs-col">Observación</th>
                   <th>Artículo</th>
                   <th>Fecha</th>
@@ -1622,6 +1635,7 @@
                   <th>DNI (Clic)</th>
                   <th>Categoría</th>
                   <th>Estado Crédito</th>
+                  <th>Cartera</th>
                   <th>Observación</th>
                   <th>Fecha</th>
                   <th>Acciones de Reclasificación</th>
@@ -2310,6 +2324,7 @@
           });
         });
 
+        asignarCarterasFaltantes();
         guardarLocalStorage();
         actualizarContadoresYTarjetas();
         renderTodasLasTablas();
@@ -2377,6 +2392,7 @@
           nombre: nombre || "Cliente importado",
           numero,
           dni,
+          cartera: rawCliente.cartera || "Importada",
           categoria,
           credito,
           fecha: rawCliente.fecha || new Date().toLocaleDateString(),
@@ -2684,7 +2700,13 @@
 
           if (nombre && nombre.toLowerCase() !== "nombre") {
             if (!numero) numero = "Sin número";
-            nuevosClientes.push({ id: genID(), nombre, numero, dni });
+            nuevosClientes.push({
+              id: genID(),
+              nombre,
+              numero,
+              dni,
+              cartera: inputNombre || `Lista ${listasDeCola.length + 1}`,
+            });
           }
         });
 
@@ -2867,6 +2889,71 @@
         if (cred === "Crédito Activo")
           return `<span class="badge badge-credito-activo"><i class='bx bx-check'></i> Activo</span>`;
         return `<span class="badge badge-sin-credito"><i class='bx bx-minus-circle'></i> Sin Crédito</span>`;
+      }
+
+      function normalizarIdentidad(valor) {
+        if (!valor) return "";
+        const identidad = String(valor).trim().toUpperCase();
+        if (!identidad || identidad === "NO PROVISTO" || identidad === "N/A") return "";
+        return identidad.replace(/[^A-Z0-9]/g, "");
+      }
+
+      function sincronizarEstadoGuardados() {
+        const identidadesEnOtrasListas = new Set();
+        const listasExternas = [
+          ...listasDeCola.map((lista) => lista.clientes),
+          queueViejo,
+          sobregirados,
+          vendido,
+          noInteres,
+          noContesto,
+          enEspera,
+          siInteresados,
+          gestionadoWhatsApp,
+        ];
+
+        listasExternas.flat().forEach((cliente) => {
+          const identidad = normalizarIdentidad(cliente.dni || cliente.identidad);
+          if (identidad) identidadesEnOtrasListas.add(identidad);
+        });
+
+        let huboCambios = false;
+        guardados.forEach((cliente) => {
+          const identidad = normalizarIdentidad(cliente.dni || cliente.identidad);
+          const estaGestionado = identidad && identidadesEnOtrasListas.has(identidad);
+          const nuevoEstado = estaGestionado ? "Gestionado" : "Pendiente";
+
+          if (cliente.estadoGestion !== nuevoEstado) {
+            cliente.estadoGestion = nuevoEstado;
+            huboCambios = true;
+          }
+        });
+
+        if (huboCambios) guardarLocalStorage();
+      }
+
+      function asignarCarterasFaltantes() {
+        listasDeCola.forEach((lista) => {
+          lista.clientes.forEach((cliente) => {
+            if (!cliente.cartera) cliente.cartera = lista.nombre;
+          });
+        });
+
+        [
+          [queueViejo, "Base antigua"],
+          [sobregirados, "Sobregirados"],
+          [vendido, "Vendido"],
+          [noInteres, "No le interesa"],
+          [noContesto, "No contestaron"],
+          [enEspera, "En espera"],
+          [siInteresados, "Sí interesados"],
+          [gestionadoWhatsApp, "Gestionado por WhatsApp"],
+          [guardados, "Importada"],
+        ].forEach(([lista, cartera]) => {
+          lista.forEach((cliente) => {
+            if (!cliente.cartera) cliente.cartera = cartera;
+          });
+        });
       }
 
       function crearFilaAccionesHtml(id, currentListId) {
@@ -3070,7 +3157,8 @@
       }
 
       // MOTOR DE TABLAS
-   function renderTablaGuardados() {
+  function renderTablaGuardados() {
+  sincronizarEstadoGuardados();
   const tbG = document.getElementById("tabla-guardados-body");
   const filtroCat = document.getElementById("filtro-cat-guardados").value;
   const filtroCred = document.getElementById("filtro-cred-guardados").value;
@@ -3115,6 +3203,8 @@
         </td>
         <td>${obtenerBadgeCategoriaHtml(c.categoria)}</td>
         <td>${obtenerBadgeCreditoHtml(c.credito)}</td>
+        <td><span class="badge ${c.estadoGestion === "Gestionado" ? "badge-gestionado" : "badge-desconocido"}">${c.estadoGestion || "Pendiente"}</span></td>
+        <td>${c.cartera || "Sin cartera"}</td>
         <td class="obs-col">${c.observacion || "-"}</td>
         <td onclick="event.stopPropagation()">
           ${crearFilaAccionesHtml(c.id, "guardados")}
@@ -3131,7 +3221,7 @@
         document.getElementById("empty-nocontesto").style.display =
           noContesto.length === 0 ? "block" : "none";
         noContesto.forEach((c) => {
-          tbNC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nocontesto")}</td></tr>`;
+          tbNC.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nocontesto")}</td></tr>`;
         });
 
         const tbEE = document.getElementById("tabla-enespera-body");
@@ -3139,7 +3229,7 @@
         document.getElementById("empty-enespera").style.display =
           enEspera.length === 0 ? "block" : "none";
         enEspera.forEach((c) => {
-          tbEE.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "enespera")}</td></tr>`;
+          tbEE.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "enespera")}</td></tr>`;
         });
 
         const tbSI = document.getElementById("tabla-siinteresados-body");
@@ -3147,7 +3237,7 @@
         document.getElementById("empty-siinteresados").style.display =
           siInteresados.length === 0 ? "block" : "none";
         siInteresados.forEach((c) => {
-          tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
+          tbSI.innerHTML += `<tr><td><strong>${c.nombre}</strong></td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "siinteresados")}</td></tr>`;
         });
 
         const tbGW = document.getElementById("tabla-gestionadowhatsapp-body");
@@ -3155,7 +3245,7 @@
         document.getElementById("empty-gestionadowhatsapp").style.display =
           gestionadoWhatsApp.length === 0 ? "block" : "none";
         gestionadoWhatsApp.forEach((c) => {
-          tbGW.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "gestionadowhatsapp")}</td></tr>`;
+          tbGW.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "gestionadowhatsapp")}</td></tr>`;
         });
 
         const tbSG = document.getElementById("tabla-sobregirados-body");
@@ -3163,7 +3253,7 @@
         document.getElementById("empty-sobregirados").style.display =
           sobregirados.length === 0 ? "block" : "none";
         sobregirados.forEach((c) => {
-          tbSG.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "sobregirados")}</td></tr>`;
+          tbSG.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "sobregirados")}</td></tr>`;
         });
 
         const tbV = document.getElementById("tabla-vendido-body");
@@ -3171,7 +3261,7 @@
         document.getElementById("empty-vendido").style.display =
           vendido.length === 0 ? "block" : "none";
         vendido.forEach((c) => {
-          tbV.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "vendido")}</td></tr>`;
+          tbV.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "vendido")}</td></tr>`;
         });
 
         const tbNI = document.getElementById("tabla-nointeres-body");
@@ -3179,7 +3269,7 @@
         document.getElementById("empty-nointeres").style.display =
           noInteres.length === 0 ? "block" : "none";
         noInteres.forEach((c) => {
-          tbNI.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nointeres")}</td></tr>`;
+          tbNI.innerHTML += `<tr><td>${c.nombre}</td><td>${c.numero}</td><td><div class="copyable-id" onclick="ejecutarCopiado('${c.dni}')"><i class='bx bx-copy'></i> ${c.dni}</div></td><td>${obtenerBadgeCategoriaHtml(c.categoria)}</td><td>${obtenerBadgeCreditoHtml(c.credito)}</td><td>${c.cartera || "Sin cartera"}</td><td class="obs-col">${c.observacion || "-"}</td><td style="color:var(--primary); font-weight:600;"><i class='bx bx-purchase-tag-alt'></i> ${c.articuloInteres || "-"}</td><td>${c.fechaAccion || c.fecha || "-"}</td><td>${crearFilaAccionesHtml(c.id, "nointeres")}</td></tr>`;
         });
       }
 
