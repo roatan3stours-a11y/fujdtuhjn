@@ -786,6 +786,16 @@
         background: #dbeafe;
         color: #1d4ed8;
       }
+      .btn-ir-gestion {
+        margin-top: 5px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        cursor: pointer;
+      }
+      .btn-ir-gestion:hover {
+        background: #dbeafe;
+      }
 
       .copyable-id {
         cursor: pointer;
@@ -2932,6 +2942,60 @@
         if (huboCambios) guardarLocalStorage();
       }
 
+      function obtenerListasPorGestion() {
+        return [
+          ...listasDeCola.map((lista) => ({
+            id: lista.id,
+            vista: "gestion",
+            nombre: lista.nombre,
+            clientes: lista.clientes,
+          })),
+          { id: "viejo", vista: "sistemaviejo", nombre: "Sistema Viejo", clientes: queueViejo },
+          { id: "sobregirados", vista: "sobregirados", nombre: "Sobregirados", clientes: sobregirados },
+          { id: "vendido", vista: "vendido", nombre: "Vendido", clientes: vendido },
+          { id: "nointeres", vista: "nointeres", nombre: "No le interesa", clientes: noInteres },
+          { id: "nocontesto", vista: "nocontesto", nombre: "No contestaron", clientes: noContesto },
+          { id: "enespera", vista: "enespera", nombre: "En espera", clientes: enEspera },
+          { id: "siinteresados", vista: "siinteresados", nombre: "Sí interesados", clientes: siInteresados },
+          { id: "gestionadowhatsapp", vista: "gestionadowhatsapp", nombre: "Gestionado por WhatsApp", clientes: gestionadoWhatsApp },
+        ];
+      }
+
+      function obtenerCoincidenciaGestionada(cliente) {
+        const identidad = normalizarIdentidad(cliente.dni || cliente.identidad);
+        if (!identidad) return null;
+
+        for (const lista of obtenerListasPorGestion()) {
+          const encontrado = lista.clientes.find(
+            (registro) => normalizarIdentidad(registro.dni || registro.identidad) === identidad,
+          );
+          if (encontrado) return { ...lista, cliente: encontrado };
+        }
+
+        return null;
+      }
+
+      function obtenerObservacionGestionHtml(cliente) {
+        const coincidencia = obtenerCoincidenciaGestionada(cliente);
+        const observacion = cliente.observacion || "";
+
+        if (!coincidencia) {
+          return `<span class="badge badge-desconocido">No gestionado</span>${observacion ? `<br>${observacion}` : ""}`;
+        }
+
+        return `<span class="badge badge-gestionado">Gestionado</span><br><small>En: ${coincidencia.nombre}</small><br><button class="btn-row btn-ir-gestion" onclick="event.stopPropagation(); irAListaGestionada('${coincidencia.id}', '${coincidencia.vista}')"><i class='bx bx-link-external'></i> Ver lista</button>${observacion ? `<br>${observacion}` : ""}`;
+      }
+
+      function irAListaGestionada(listaId, vista) {
+        if (vista === "gestion") {
+          listaActivaId = listaId;
+          guardarLocalStorage();
+        }
+
+        switchView(vista);
+        showToast("Lista de gestión abierta");
+      }
+
       function asignarCarterasFaltantes() {
         listasDeCola.forEach((lista) => {
           lista.clientes.forEach((cliente) => {
@@ -3205,7 +3269,7 @@
         <td>${obtenerBadgeCreditoHtml(c.credito)}</td>
         <td><span class="badge ${c.estadoGestion === "Gestionado" ? "badge-gestionado" : "badge-desconocido"}">${c.estadoGestion || "Pendiente"}</span></td>
         <td>${c.cartera || "Sin cartera"}</td>
-        <td class="obs-col">${c.observacion || "-"}</td>
+        <td class="obs-col">${obtenerObservacionGestionHtml(c)}</td>
         <td onclick="event.stopPropagation()">
           ${crearFilaAccionesHtml(c.id, "guardados")}
         </td>
