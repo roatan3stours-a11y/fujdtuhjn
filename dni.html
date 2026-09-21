@@ -274,6 +274,29 @@
             transition: 0.2s;
         }
 
+        .section-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin: 0 0 12px;
+        }
+
+        .btn-clear-all {
+            background-color: #FFE5E5;
+            color: var(--danger);
+            border: 1px solid rgba(226, 84, 84, 0.25);
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.2s;
+        }
+
+        .btn-clear-all:active { transform: scale(0.98); }
         .btn-edit   { background-color: #E9EDFF; color: var(--primary); }
         .btn-delete { background-color: #FFE5E5; color: var(--danger); }
         .btn-card:active { transform: scale(0.95); }
@@ -578,6 +601,11 @@
 
             <!-- FRENTE -->
             <div id="seccion-dni" style="display:block">
+            <div class="section-actions">
+                <button class="btn-clear-all" onclick="borrarTodoDNI()">
+                    <i class='bx bx-trash'></i> Borrar todas las imágenes
+                </button>
+            </div>
             <div class="card">
                 <div class="card-header">
                     <h2><i class='bx bx-id-card'></i> Frente (Derecho)</h2>
@@ -632,6 +660,11 @@
 
             <!-- ══════ SECCIÓN LICENCIA ══════ -->
             <div id="seccion-licencia" style="display:none">
+                <div class="section-actions">
+                    <button class="btn-clear-all" onclick="borrarTodoLicencia()">
+                        <i class='bx bx-trash'></i> Borrar todas las imágenes
+                    </button>
+                </div>
 
                 <div class="card">
                     <div class="card-header">
@@ -679,6 +712,11 @@
 
             </div><!-- /seccion-licencia -->
             <div id="seccion-ip">
+                <div class="section-actions">
+                    <button class="btn-clear-all" onclick="borrarTodoIP()">
+                        <i class='bx bx-trash'></i> Borrar todas las hojas
+                    </button>
+                </div>
 
                 <!-- HOJA 1 -->
                 <div class="card">
@@ -1007,6 +1045,38 @@
         memImages[esLic ? cara.replace('lic-','') : cara] = null;
         limpiarVista(cara);
         await actualizarBadges();
+    }
+
+    async function borrarTodoDNI() {
+        const caras = trabajoActual === 'LICENCIA'
+            ? ['lic-frente', 'lic-reverso']
+            : ['frente', 'reverso'];
+
+        for (const cara of caras) {
+            const esLic = cara.startsWith('lic-');
+            const trabajo = esLic ? 'LICENCIA' : trabajoActual;
+            await idbBorrar(`${trabajo}_${cara}`);
+            memImages[esLic ? cara.replace('lic-', '') : cara] = null;
+            limpiarVista(cara);
+        }
+
+        await actualizarBadges();
+        mostrarToast(`Se borraron todas las imágenes de ${trabajoActual}`);
+    }
+
+    async function borrarTodoLicencia() {
+        await borrarTodoDNI();
+    }
+
+    async function borrarTodoIP() {
+        for (const hoja of ['hoja1', 'hoja2']) {
+            await idbBorrar(`IP_${hoja}`);
+            memIP[hoja] = null;
+            ipLimpiarVista(hoja);
+        }
+
+        await actualizarBadges();
+        mostrarToast('Se borraron todas las hojas del escáner');
     }
 
     // ══════════════════════════════════════════════
