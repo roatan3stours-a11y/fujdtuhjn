@@ -250,9 +250,9 @@
 
           <p>
             Para constancia de conocimiento firmo el presente Adendum a los
-            <span class="underline">12</span> del mes
-            <span class="underline">SEPTIEMBRE</span> del
-            <span class="underline">2026</span>, en la ciudad de
+            <span class="underline" id="adendumDia">12</span> del mes
+            <span class="underline" id="adendumMes">SEPTIEMBRE</span> del
+            <span class="underline" id="adendumAnio">2026</span>, en la ciudad de
             <span class="underline">ROATAN, ISLA DE LA BAHIA</span>.
           </p>
         </div>
@@ -311,6 +311,34 @@
         fechaDoc: document.getElementById('fechaTxt'),
       };
 
+      const monthNames = [
+        'ENERO', 'FEBRERO', 'MARZO', 'ABRIL', 'MAYO', 'JUNIO',
+        'JULIO', 'AGOSTO', 'SEPTIEMBRE', 'OCTUBRE', 'NOVIEMBRE', 'DICIEMBRE'
+      ];
+
+      const updateCurrentDate = () => {
+        const now = new Date();
+        const day = now.getDate();
+        const month = monthNames[now.getMonth()];
+        const year = now.getFullYear();
+
+        const formattedDate = `${day} de ${month} del ${year}`;
+
+        document.getElementById('adendumDia').textContent = day;
+        document.getElementById('adendumMes').textContent = month;
+        document.getElementById('adendumAnio').textContent = year;
+
+        const fechaInput = document.getElementById('fechaDoc');
+        if (fechaInput && !fechaInput.value.trim()) {
+          fechaInput.value = formattedDate;
+        }
+
+        const fechaTarget = document.getElementById('fechaTxt');
+        if (fechaTarget) {
+          fechaTarget.textContent = formattedDate;
+        }
+      };
+
       Object.entries(fields).forEach(([key, input]) => {
         input.addEventListener('input', () => {
           const value = input.value.trim() || '_________________';
@@ -320,6 +348,8 @@
           }
         });
       });
+
+      updateCurrentDate();
     </script>
   </body>
 </html>
