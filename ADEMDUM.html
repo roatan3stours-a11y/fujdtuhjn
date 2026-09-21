@@ -29,16 +29,16 @@
       }
 
       .layout {
-        display: flex;
-        align-items: flex-start;
-        justify-content: center;
+        display: grid;
+        grid-template-columns: 360px minmax(0, 1fr);
+        align-items: start;
         gap: 24px;
         max-width: 1500px;
         margin: 0 auto;
       }
 
       .form-panel {
-        width: 360px;
+        width: 100%;
         background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
         border: 1px solid #d7deea;
         border-radius: 18px;
@@ -59,13 +59,13 @@
       }
 
       .document {
-        flex: 1;
         width: min(100%, 210mm);
         min-height: 297mm;
         background: #fff;
         border: 1px solid #d9e0e7;
         box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
         padding: 14mm 16mm 18mm;
+        justify-self: center;
       }
 
       .header {
@@ -377,7 +377,7 @@
         document.getElementById('adendumAnio').textContent = year;
 
         const fechaInput = document.getElementById('fechaDoc');
-        if (fechaInput && !fechaInput.value.trim()) {
+        if (fechaInput) {
           fechaInput.value = formattedDate;
         }
 
