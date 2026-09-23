@@ -4340,12 +4340,8 @@ AAAAAAAAAAAAAAAABwIAAGRycy9kb3ducmV2LnhtbFBLBQYAAAAAAwADALcAAAD4AgAAAAA=
    .propietario-acciones button:hover { background: #115e59; }
    @media (max-width: 640px) { .propietario-formulario { margin: 16px; padding: 18px; } .propietario-campos { grid-template-columns: 1fr; } .propietario-campo.completo { grid-column: auto; } }
    @media print {
-      @page { margin: 1.5cm; }
-      .formulario-impresion { display: none !important; }
-      .WordSection1 { display: block !important; }
-      .propietario-formulario { max-width: none; margin: 0; padding: 0; border: 0; }
-      .propietario-acciones { display: none; }
-      .propietario-campo input { border-color: #64748b; }
+      body > .formulario-impresion { display: none !important; visibility: hidden !important; }
+      body > .WordSection1 { display: block !important; visibility: visible !important; }
    }
 </style>
 
@@ -4384,7 +4380,7 @@ AAAAAAAAAAAAAAAABwIAAGRycy9kb3ducmV2LnhtbFBLBQYAAAAAAwADALcAAAD4AgAAAAA=
          <div class="propietario-campo completo"><label for="correo">Correo electrónico</label><input id="correo" name="correo" type="email" value="N/A"></div>
       </div>
 
-      <div class="propietario-acciones"><button type="button" onclick="imprimirFormulario()">Imprimir formulario</button></div>
+      <div class="propietario-acciones"><button type="button" onclick="imprimirFormulario()">Imprimir IP800</button></div>
    </form>
 </div>
 
