@@ -4324,6 +4324,72 @@ AAAAAAAAAAAAAAAABwIAAGRycy9kb3ducmV2LnhtbFBLBQYAAAAAAwADALcAAAD4AgAAAAA=
 
 </div>
 
+<style>
+   .propietario-formulario { max-width: 900px; margin: 32px auto; padding: 28px; border: 1px solid #cbd5e1; border-radius: 8px; background: #fff; color: #1e293b; font-family: Arial, sans-serif; }
+   .propietario-formulario h1 { margin: 0 0 24px; color: #0f3d56; font-size: 24px; }
+   .propietario-formulario h2 { margin: 24px 0 16px; padding-bottom: 8px; border-bottom: 2px solid #0f766e; color: #0f3d56; font-size: 18px; }
+   .propietario-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+   .propietario-campo { display: flex; flex-direction: column; gap: 6px; }
+   .propietario-campo.completo { grid-column: 1 / -1; }
+   .propietario-campo label, .propietario-sexo legend { font-weight: 700; font-size: 14px; }
+   .propietario-campo input { box-sizing: border-box; width: 100%; min-height: 38px; padding: 8px 10px; border: 1px solid #94a3b8; border-radius: 4px; font: inherit; }
+   .propietario-fecha { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+   .propietario-sexo { margin: 0; padding: 0; border: 0; }
+   .propietario-sexo-opciones { display: flex; gap: 20px; margin-top: 12px; }
+   .propietario-sexo-opciones label { display: flex; align-items: center; gap: 6px; font-weight: 400; }
+   .propietario-acciones { display: flex; justify-content: flex-end; margin-top: 28px; }
+   .propietario-acciones button { padding: 10px 18px; border: 0; border-radius: 4px; background: #0f766e; color: #fff; cursor: pointer; font: inherit; font-weight: 700; }
+   .propietario-acciones button:hover { background: #115e59; }
+   @media (max-width: 640px) { .propietario-formulario { margin: 16px; padding: 18px; } .propietario-campos { grid-template-columns: 1fr; } .propietario-campo.completo { grid-column: auto; } }
+   @media print {
+      @page { margin: 1.5cm; }
+      body > :not(.formulario-impresion) { display: none !important; }
+      .formulario-impresion { display: block !important; }
+      .propietario-formulario { max-width: none; margin: 0; padding: 0; border: 0; }
+      .propietario-acciones { display: none; }
+      .propietario-campo input { border-color: #64748b; }
+   }
+</style>
+
+<div class="formulario-impresion">
+   <form class="propietario-formulario" aria-labelledby="titulo-propietario">
+      <h1 id="titulo-propietario">Información de Propietario (Persona Natural)</h1>
+
+      <h2>Nombre completo</h2>
+      <div class="propietario-campos">
+         <div class="propietario-campo"><label for="primer-nombre">Primer nombre</label><input id="primer-nombre" name="primer-nombre" type="text" value="CARLOS"></div>
+         <div class="propietario-campo"><label for="segundo-nombre">Segundo nombre</label><input id="segundo-nombre" name="segundo-nombre" type="text" value="RODOLFO"></div>
+         <div class="propietario-campo"><label for="primer-apellido">Primer apellido</label><input id="primer-apellido" name="primer-apellido" type="text" value="HERRERA"></div>
+         <div class="propietario-campo"><label for="segundo-apellido">Segundo apellido</label><input id="segundo-apellido" name="segundo-apellido" type="text" value="HYNDS"></div>
+         <div class="propietario-campo completo"><label for="rtn">Número (RTN)</label><input id="rtn" name="rtn" type="text" value="1103196700024" inputmode="numeric"></div>
+      </div>
+
+      <h2>Fecha de nacimiento y sexo</h2>
+      <div class="propietario-campos">
+         <div class="propietario-campo"><label>Fecha de nacimiento</label><div class="propietario-fecha"><input aria-label="Día" name="dia-nacimiento" type="number" min="1" max="31" value="16"><input aria-label="Mes" name="mes-nacimiento" type="number" min="1" max="12" value="08"><input aria-label="Año" name="ano-nacimiento" type="number" min="1900" max="2100" value="1967"></div></div>
+         <fieldset class="propietario-sexo"><legend>Sexo</legend><div class="propietario-sexo-opciones"><label><input type="radio" name="sexo" value="Femenino"> Femenino</label><label><input type="radio" name="sexo" value="Masculino" checked> Masculino</label></div></fieldset>
+      </div>
+
+      <h2>Domicilio</h2>
+      <div class="propietario-campos">
+         <div class="propietario-campo"><label for="departamento">Departamento</label><input id="departamento" name="departamento" type="text" value="ROATAN"></div>
+         <div class="propietario-campo"><label for="municipio">Municipio</label><input id="municipio" name="municipio" type="text" value="ISLAS DE LA BAHIA"></div>
+         <div class="propietario-campo completo"><label for="barrio">Barrio/Colonia</label><input id="barrio" name="barrio" type="text" value="FIRST BIGHT DESPUES DE COLONIA MI ESPERANZA AL PAR ERA OASIS"></div>
+         <div class="propietario-campo"><label for="casa">Número de casa o apto</label><input id="casa" name="casa" type="text" value="N/T"></div>
+         <div class="propietario-campo"><label for="calle">Calle</label><input id="calle" name="calle" type="text" value="N/T"></div>
+      </div>
+
+      <h2>Contacto</h2>
+      <div class="propietario-campos">
+         <div class="propietario-campo"><label for="movil">Teléfono móvil</label><input id="movil" name="movil" type="tel" value="9927-00024"></div>
+         <div class="propietario-campo"><label for="fijo">Teléfono fijo</label><input id="fijo" name="fijo" type="tel" value="N/T"></div>
+         <div class="propietario-campo completo"><label for="correo">Correo electrónico</label><input id="correo" name="correo" type="email" value="N/A"></div>
+      </div>
+
+      <div class="propietario-acciones"><button type="button" onclick="window.print()">Imprimir formulario</button></div>
+   </form>
+</div>
+
 </body>
 
 </html>
