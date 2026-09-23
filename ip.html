@@ -1363,7 +1363,7 @@ mso-bidi-font-size:11.0pt;letter-spacing:-.1pt'>Natural)</span></b><b
 style='mso-bidi-font-weight:normal'><span lang=ES style='font-size:10.0pt;
 mso-bidi-font-size:11.0pt;text-decoration:none;text-underline:none'><o:p></o:p></span></b></p>
 
-<table class=TableNormal border=1 cellspacing=0 cellpadding=0 style='margin-left:
+<table id=tabla-propietario class=TableNormal border=1 cellspacing=0 cellpadding=0 style='margin-left:
  10.65pt;border-collapse:collapse;mso-table-layout-alt:fixed;border:none;
  mso-border-alt:solid black .5pt;mso-yfti-tbllook:480;mso-padding-alt:0cm 0cm 0cm 0cm;
  mso-border-insideh:.5pt solid black;mso-border-insidev:.5pt solid black'>
@@ -4387,7 +4387,7 @@ AAAAAAAAAAAAAAAABwIAAGRycy9kb3ducmV2LnhtbFBLBQYAAAAAAwADALcAAAD4AgAAAAA=
 <script>
    function imprimirFormulario() {
       const formulario = document.querySelector('.propietario-formulario');
-      const tabla = document.querySelector('.WordSection1 table');
+      const tabla = document.querySelector('#tabla-propietario');
       const filas = tabla.rows;
       const valor = (nombre) => formulario.elements[nombre].value;
       const escribir = (celda, texto) => {
