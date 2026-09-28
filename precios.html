@@ -389,7 +389,7 @@
     .price-text {
       font-size: calc(var(--base-price-size, 48px) * var(--price-scale, 1));
       font-weight: 900;
-      color: #dc2626;
+      color: var(--price-color, #dc2626);
       letter-spacing: -1px;
       line-height: 1;
       word-break: break-all;
@@ -853,6 +853,17 @@
       </div>
 
       <div class="panel-card">
+        <div class="panel-card-title">💲 Color del Precio</div>
+        <div class="form-group">
+          <label for="priceColorSelect">Color del precio de contado:</label>
+          <select id="priceColorSelect" class="form-control">
+            <option value="red">Rojo</option>
+            <option value="black">Negro</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="panel-card">
         <div class="panel-card-title">🖼️ Imagen de Fondo</div>
         <div class="form-group">
           <input type="file" id="bgInput" accept="image/*" class="form-control">
@@ -1117,6 +1128,7 @@
       skuScale: 100,
       descScale: 100,
       priceScale: 100,
+      priceColor: 'red',
       validityScale: 100,
       products: [
         { id: 1, sku: '151555', description: 'TV HISENSE 55 SMART 4K UHD LED CON CONTROL POR VOZ', price: 2023.03 }
@@ -1157,6 +1169,7 @@
       document.getElementById('layoutSelect').value = appState.layout || 4;
       document.getElementById('bgFitSelect').value = appState.bgFit || '100% 100%';
       document.getElementById('orientationSelect').value = appState.orientation || 'portrait';
+      document.getElementById('priceColorSelect').value = appState.priceColor === 'black' ? 'black' : 'red';
 
       updateSliderUI('boxWidth', appState.boxWidth, '%');
       updateSliderUI('boxPosY', appState.boxPosY, '%');
@@ -1189,6 +1202,11 @@
 
       document.getElementById('orientationSelect').addEventListener('change', (e) => {
         appState.orientation = e.target.value;
+        saveAndRender();
+      });
+
+      document.getElementById('priceColorSelect').addEventListener('change', (e) => {
+        appState.priceColor = e.target.value === 'black' ? 'black' : 'red';
         saveAndRender();
       });
 
@@ -1780,6 +1798,7 @@
         pageSheet.style.setProperty('--sku-scale', appState.skuScale / 100);
         pageSheet.style.setProperty('--desc-scale', appState.descScale / 100);
         pageSheet.style.setProperty('--price-scale', appState.priceScale / 100);
+        pageSheet.style.setProperty('--price-color', appState.priceColor === 'black' ? '#000000' : '#dc2626');
         pageSheet.style.setProperty('--validity-scale', appState.validityScale / 100);
 
         const pageProducts = activePrints.slice(pageIdx * itemsPerPage, (pageIdx + 1) * itemsPerPage);
