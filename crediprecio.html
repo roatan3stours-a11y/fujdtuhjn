@@ -656,6 +656,24 @@
         flex: 1;
       }
 
+      .global-prima-field {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+      }
+
+      .global-prima-field input {
+        width: 112px;
+        padding: 7px 9px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font-size: 13px;
+      }
+
       /* Historial compacto */
       .history-box {
         background: white;
@@ -899,6 +917,21 @@
       }
       .fm-input:focus {
         border-color: #009746;
+      }
+
+      #bulkImportModal {
+        z-index: 1200;
+      }
+
+      #bulkImportModal .form-modal-container {
+        width: 700px;
+      }
+
+      #bulkProductText {
+        min-height: 240px;
+        resize: vertical;
+        font-family: monospace;
+        line-height: 1.5;
       }
 
       .fm-label {
@@ -1322,6 +1355,13 @@
             <button class="btn-add-product" id="btnNewProduct">
               ＋ Nuevo Producto
             </button>
+            <button class="btn-action-sm" id="btnOpenBulkImport">
+              📋 Pegar productos
+            </button>
+            <label class="global-prima-field" for="globalPrimaInput">
+              Prima global (L)
+              <input id="globalPrimaInput" type="number" min="0" step="0.01" value="0" />
+            </label>
             <button class="btn-action-sm" id="btnNuevaLista" title="Guarda la lista actual y empieza una nueva vacía">📋 Nueva Lista</button>
             <button class="btn-action-sm" id="btnExportCSV">
               📊 Exportar CSV
@@ -1490,7 +1530,7 @@
                   class="fm-input"
                   type="text"
                   id="mPlazo2"
-                  value="18 MESES"
+                  value="24 MESES"
                   required
                 />
               </div>
@@ -1540,6 +1580,28 @@
           <button class="btn-fm-save" id="btnSaveProduct">
             💾 Guardar Producto
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-modal-overlay" id="bulkImportModal">
+      <div class="form-modal-container">
+        <div class="form-modal-header">
+          <h3>📋 Agregar productos desde texto</h3>
+          <button class="close-modal" id="btnCloseBulkImport" aria-label="Cerrar">&times;</button>
+        </div>
+        <div class="form-modal-body">
+          <label class="fm-label" for="bulkProductText">Filas de productos</label>
+          <textarea
+            class="fm-input"
+            id="bulkProductText"
+            rows="10"
+            placeholder="1&#9;12767&#9;REFRI SAMSUNG 11FT 2P RT31DG5124S9AP S/D&#9;17,899.00&#10;1&#9;12733&#9;REFRI.SAMSUNG 14FT WIFI/RT38DG6224S9AP&#9;21,249.00"
+          ></textarea>
+        </div>
+        <div class="form-modal-footer">
+          <button class="btn-fm-cancel" id="btnCancelBulkImport">Cancelar</button>
+          <button class="btn-fm-save" id="btnImportBulkProducts">Agregar productos</button>
         </div>
       </div>
     </div>
@@ -1595,6 +1657,9 @@
       const btnOpenModal = document.getElementById("btnOpenModal");
       const btnCloseModal = document.getElementById("btnCloseModal");
       const btnNewProduct = document.getElementById("btnNewProduct");
+      const bulkImportModal = document.getElementById("bulkImportModal");
+      const bulkProductText = document.getElementById("bulkProductText");
+      const globalPrimaInput = document.getElementById("globalPrimaInput");
       const btnCloseFormModal = document.getElementById("btnCloseFormModal");
       const modalProductForm = document.getElementById("modalProductForm");
       const productTableBody = document.getElementById("productTableBody");
@@ -1603,6 +1668,10 @@
       const btnResetConfig = document.getElementById("btnResetConfig");
       const prodSearchInput = document.getElementById("prodSearchInput");
       const prodCountBadge = document.getElementById("prodCountBadge");
+      globalPrimaInput.value = localStorage.getItem("preciador_global_prima") || "0";
+      globalPrimaInput.addEventListener("change", () => {
+        localStorage.setItem("preciador_global_prima", globalPrimaInput.value || "0");
+      });
 
       // DRAWER CONFIGURACIONES
       function openConfigDrawer() {
@@ -1631,7 +1700,7 @@
           aplicaRegalo: true,
           plazo1: "12 MESES",
           cuotaPrimaria: "943",
-          plazo2: "18 MESES",
+          plazo2: "24 MESES",
           cuotaSecundaria: "1193",
           precioNormal: "1000",
           descuento: 10,
@@ -1663,6 +1732,19 @@
         resetModalForm();
         openFormModal();
       });
+      document.getElementById("btnOpenBulkImport").addEventListener("click", () => {
+        bulkImportModal.style.display = "flex";
+        bulkProductText.focus();
+      });
+      function closeBulkImportModal() {
+        bulkImportModal.style.display = "none";
+      }
+      document.getElementById("btnCloseBulkImport").addEventListener("click", closeBulkImportModal);
+      document.getElementById("btnCancelBulkImport").addEventListener("click", closeBulkImportModal);
+      bulkImportModal.addEventListener("click", (event) => {
+        if (event.target === bulkImportModal) closeBulkImportModal();
+      });
+      document.getElementById("btnImportBulkProducts").addEventListener("click", importBulkProducts);
       btnCloseFormModal.addEventListener("click", closeFormModal);
       productFormModal.addEventListener("click", (e) => {
         if (e.target === productFormModal) closeFormModal();
@@ -1792,6 +1874,124 @@
         }).format(Math.round(cleanVal));
       }
 
+      function parseImportedMoney(value) {
+        let normalized = String(value || "")
+          .replace(/\s*=(?:codigo|descripci[oó]n|precio(?:\s+normal)?)\s*$/i, "")
+          .replace(/[^\d,.-]/g, "");
+        if (normalized.includes(",") && normalized.includes(".")) {
+          normalized = normalized.lastIndexOf(",") > normalized.lastIndexOf(".")
+            ? normalized.replace(/\./g, "").replace(",", ".")
+            : normalized.replace(/,/g, "");
+        } else if (normalized.includes(",")) {
+          normalized = /,\d{1,2}$/.test(normalized)
+            ? normalized.replace(",", ".")
+            : normalized.replace(/,/g, "");
+        }
+        const amount = Number(normalized);
+        return Number.isFinite(amount) ? amount : NaN;
+      }
+
+      function cleanImportedCell(value) {
+        return value
+          .trim()
+          .replace(/\s*=(?:codigo|descripci[oó]n|precio(?:\s+normal)?)\s*$/i, "")
+          .trim();
+      }
+
+      function parseImportedProductLine(line) {
+        let cells;
+        if (line.includes("\t")) {
+          cells = line.split("\t").map(cleanImportedCell).filter(Boolean);
+        } else {
+          const priceMatch = line.match(/((?:L\.?\s*)?[\d,]+(?:\.\d{1,2})?)(?:\s*=.*)?$/i);
+          if (!priceMatch) return null;
+          const productFields = line.slice(0, priceMatch.index).trim();
+          const withQuantity = productFields.match(/^(\d+)\s+(\d+)\s+(.+)$/);
+          const withoutQuantity = productFields.match(/^(\S+)\s+(.+)$/);
+          const match = withQuantity || withoutQuantity;
+          if (!match) return null;
+          return {
+            codigo: cleanImportedCell(withQuantity ? match[2] : match[1]),
+            descripcion: cleanImportedCell(withQuantity ? match[3] : match[2]),
+            precioNormal: parseImportedMoney(priceMatch[1]),
+          };
+        }
+
+        const hasQuantity = cells.length >= 4 && /^\d+$/.test(cells[0]);
+        const offset = hasQuantity ? 1 : 0;
+        if (cells.length < offset + 3) return null;
+        return {
+          codigo: cells[offset],
+          descripcion: cells[offset + 1],
+          precioNormal: parseImportedMoney(cells[offset + 2]),
+        };
+      }
+
+      function calcularCuotaAmortizada(principal, tasaMensual, meses) {
+        if (principal <= 0) return 0;
+        const cuota = principal * tasaMensual / (1 - Math.pow(1 + tasaMensual, -meses));
+        return Math.round(cuota);
+      }
+
+      function importBulkProducts() {
+        const lines = bulkProductText.value.split(/\r?\n/).filter((line) => line.trim());
+        if (!lines.length) {
+          alert("Pegue las filas de productos para importarlas.");
+          return;
+        }
+
+        const prima = parseImportedMoney(globalPrimaInput.value);
+        if (!Number.isFinite(prima) || prima < 0) {
+          alert("Ingrese una prima global válida.");
+          globalPrimaInput.focus();
+          return;
+        }
+
+        const parsedProducts = [];
+        const invalidLines = [];
+        lines.forEach((line, index) => {
+          const item = parseImportedProductLine(line.trim());
+          if (!item || !item.codigo || !item.descripcion || !Number.isFinite(item.precioNormal) || item.precioNormal <= prima) {
+            invalidLines.push(index + 1);
+            return;
+          }
+          parsedProducts.push(item);
+        });
+
+        if (invalidLines.length) {
+          alert(`Revise las filas ${invalidLines.join(", ")}: se requiere código, descripción y un precio mayor que la prima.`);
+          return;
+        }
+
+        const now = Date.now();
+        parsedProducts.forEach((item, index) => {
+          const saldoFinanciado = item.precioNormal - prima;
+          const id = now + index;
+          products.push({
+            id,
+            codigo: item.codigo,
+            descripcion: item.descripcion,
+            prima: String(prima),
+            aplicaRegalo: true,
+            plazo1: "12 MESES",
+            cuotaPrimaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.1145, 12)),
+            plazo2: "24 MESES",
+            cuotaSecundaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.082, 24)),
+            precioNormal: String(item.precioNormal),
+            descuento: 10,
+          });
+          selectedProductIds.add(id);
+        });
+
+        localStorage.setItem("preciador_global_prima", String(prima));
+        localStorage.setItem("preciador_products_list", JSON.stringify(products));
+        bulkProductText.value = "";
+        closeBulkImportModal();
+        renderProductTable(prodSearchInput.value.trim().toLowerCase());
+        updatePrintLayout();
+        alert(`Se agregaron ${parsedProducts.length} producto${parsedProducts.length === 1 ? "" : "s"}.`);
+      }
+
       function createCardHTML(product) {
         if (!product)
           return `<div class="tag-card" style="visibility:hidden;"></div>`;
@@ -1801,7 +2001,7 @@
         const prima = parseAndFormat(product.prima);
         const chkRegalo = product.aplicaRegalo !== false;
         const plazo1Val = product.plazo1 || "12 MESES";
-        const plazo2Val = product.plazo2 || "18 MESES";
+        const plazo2Val = product.plazo2 || "24 MESES";
         const cuotaPromo = parseAndFormat(product.cuotaPrimaria);
         const cuotaNormal = parseAndFormat(product.cuotaSecundaria);
 
@@ -2157,7 +2357,7 @@
         document.getElementById("mEditId").value = "";
         document.getElementById("mDescuento").value = 10;
         document.getElementById("mPlazo1").value = "12 MESES";
-        document.getElementById("mPlazo2").value = "18 MESES";
+        document.getElementById("mPlazo2").value = "24 MESES";
         document.getElementById("mChkRegalo").checked = true;
         document.getElementById("formModalTitle").textContent = "➕ Nuevo Producto";
         document.getElementById("btnSaveProduct").textContent = "💾 Guardar Producto";
@@ -2266,7 +2466,7 @@
           document.getElementById("mChkRegalo").checked = prod.aplicaRegalo !== false;
           document.getElementById("mPlazo1").value = prod.plazo1 || "12 MESES";
           document.getElementById("mCuotaPrimaria").value = prod.cuotaPrimaria;
-          document.getElementById("mPlazo2").value = prod.plazo2 || "18 MESES";
+          document.getElementById("mPlazo2").value = prod.plazo2 || "24 MESES";
           document.getElementById("mCuotaSecundaria").value = prod.cuotaSecundaria;
           document.getElementById("mPrecioNormal").value = prod.precioNormal;
           document.getElementById("mDescuento").value = prod.descuento;
@@ -2330,7 +2530,7 @@
               p.aplicaRegalo ? "SI" : "NO",
               `"${p.plazo1 || "12 MESES"}"`,
               `"${p.cuotaPrimaria || ""}"`,
-              `"${p.plazo2 || "18 MESES"}"`,
+              `"${p.plazo2 || "24 MESES"}"`,
               `"${p.cuotaSecundaria || ""}"`,
               `"${p.precioNormal || ""}"`,
               p.descuento || 10,
@@ -2374,7 +2574,7 @@
                   aplicaRegalo: cols[3] ? cols[3].toUpperCase() === "SI" : true,
                   plazo1: cols[4] || "12 MESES",
                   cuotaPrimaria: cols[5] || "0",
-                  plazo2: cols[6] || "18 MESES",
+                  plazo2: cols[6] || "24 MESES",
                   cuotaSecundaria: cols[7] || "0",
                   precioNormal: cols[8] || "0",
                   descuento: parseFloat(cols[9]) || 10,
