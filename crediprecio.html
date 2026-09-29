@@ -1943,6 +1943,7 @@
       }
 
       function getProductRateSettings() {
+        if ([primaPercentInput, rate12Input, rate24Input].some((input) => !input.value.trim())) return null;
         const settings = {
           primaPercent: Number(primaPercentInput.value),
           rate12: Number(rate12Input.value),
