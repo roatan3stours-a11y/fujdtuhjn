@@ -1194,6 +1194,12 @@
               />
             </div>
             <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="chkShowGiftCredit" checked />
+                Mostrar regalo al crédito en todos los preciadores
+              </label>
+            </div>
+            <div class="form-group">
               <label for="sMainCuotaTitleSize"
                 >Título Molicuota (<span id="lblMainCuotaTitleSize">3.5</span
                 >cqw)</label
@@ -1265,6 +1271,12 @@
             </div>
 
             <div class="section-title">4. Cuadro Verde de Cuotas (Diseño)</div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="chkShowGreenBox" checked />
+                Mostrar cuadro verde de cuotas
+              </label>
+            </div>
             <div class="form-group">
               <label for="sGreenBoxWidth"
                 >Ancho Cuadro (<span id="lblGreenBoxWidth">100</span>%)</label
@@ -1592,11 +1604,14 @@
         </div>
         <div class="form-modal-body">
           <label class="fm-label" for="bulkProductText">Filas de productos</label>
+          <p style="font-size: 12px; color: #64748b; line-height: 1.45;">
+            Acepta el formato simple existente o el CSV completo con encabezados. En el CSV se respetan primas y cuotas; los códigos existentes se actualizan.
+          </p>
           <textarea
             class="fm-input"
             id="bulkProductText"
             rows="10"
-            placeholder="1&#9;12767&#9;REFRI SAMSUNG 11FT 2P RT31DG5124S9AP S/D&#9;17,899.00&#10;1&#9;12733&#9;REFRI.SAMSUNG 14FT WIFI/RT38DG6224S9AP&#9;21,249.00"
+            placeholder="Codigo,Descripcion,Prima,Regalo,Plazo1,CuotaPrimaria,Plazo2,CuotaSecundaria,PrecioNormal,Descuento&#10;12767,\"REFRI SAMSUNG 11FT 2P RT31DG5124S9AP S/D\",2000,SI,12 MESES,2499,24 MESES,1616,17899,10"
           ></textarea>
         </div>
         <div class="form-modal-footer">
@@ -1616,6 +1631,7 @@
         sTitleSize: "5.2",
         sMetaSize: "3.2",
         sGiftSize: "2.8",
+        chkShowGiftCredit: true,
         sMainCuotaTitleSize: "3.5",
         sliderCuotaSize: "13",
         sSecondaryCuotaSize: "2.7",
@@ -1625,6 +1641,7 @@
         sGreenBoxHeight: "2",
         sGreenBoxBorder: "4",
         sGreenBoxRadius: "12",
+        chkShowGreenBox: true,
       };
 
       // INDEXEDDB DATABASE HELPER
@@ -1760,7 +1777,7 @@
         const uiConfig = {};
         Object.keys(defaultConfig).forEach((id) => {
           const el = document.getElementById(id);
-          if (el) uiConfig[id] = el.value;
+          if (el) uiConfig[id] = el.type === "checkbox" ? el.checked : el.value;
         });
         localStorage.setItem("preciador_ui_config", JSON.stringify(uiConfig));
       }
@@ -1772,7 +1789,12 @@
         Object.keys(defaultConfig).forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            el.value = saved[id] !== undefined ? saved[id] : defaultConfig[id];
+            const value = saved[id] !== undefined ? saved[id] : defaultConfig[id];
+            if (el.type === "checkbox") {
+              el.checked = Boolean(value);
+            } else {
+              el.value = value;
+            }
           }
         });
         updateLabelsAndPreview();
@@ -1898,6 +1920,52 @@
           .trim();
       }
 
+      function parseImportedCsv(text) {
+        const rows = [];
+        let row = [];
+        let cell = "";
+        let insideQuotes = false;
+
+        for (let index = 0; index < text.length; index++) {
+          const character = text[index];
+          if (character === '"') {
+            if (insideQuotes && text[index + 1] === '"') {
+              cell += '"';
+              index++;
+            } else if (!insideQuotes && !cell.trim()) {
+              insideQuotes = true;
+            } else if (insideQuotes && [",", "\r", "\n", undefined].includes(text[index + 1])) {
+              insideQuotes = false;
+            } else {
+              cell += character;
+            }
+          } else if (character === "," && !insideQuotes) {
+            row.push(cell.trim());
+            cell = "";
+          } else if ((character === "\r" || character === "\n") && !insideQuotes) {
+            if (character === "\r" && text[index + 1] === "\n") index++;
+            row.push(cell.trim());
+            if (row.some((value) => value !== "")) rows.push(row);
+            row = [];
+            cell = "";
+          } else {
+            cell += character;
+          }
+        }
+
+        row.push(cell.trim());
+        if (row.some((value) => value !== "")) rows.push(row);
+        return rows;
+      }
+
+      function normalizeImportHeader(value) {
+        return String(value || "")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .trim()
+          .toLowerCase();
+      }
+
       function parseImportedProductLine(line) {
         let cells;
         if (line.includes("\t")) {
@@ -1940,56 +2008,134 @@
           return;
         }
 
-        const prima = parseImportedMoney(globalPrimaInput.value);
-        if (!Number.isFinite(prima) || prima < 0) {
-          alert("Ingrese una prima global válida.");
-          globalPrimaInput.focus();
-          return;
-        }
-
         const parsedProducts = [];
         const invalidLines = [];
-        lines.forEach((line, index) => {
-          const item = parseImportedProductLine(line.trim());
-          if (!item || !item.codigo || !item.descripcion || !Number.isFinite(item.precioNormal) || item.precioNormal <= prima) {
-            invalidLines.push(index + 1);
+        const csvRows = parseImportedCsv(bulkProductText.value);
+        const csvHeaders = csvRows[0]?.map(normalizeImportHeader) || [];
+        const requiredHeaders = [
+          "codigo", "descripcion", "prima", "regalo", "plazo1",
+          "cuotaprimaria", "plazo2", "cuotasecundaria", "precionormal", "descuento",
+        ];
+        const isDetailedCsv = csvHeaders[0] === "codigo" && csvHeaders[1] === "descripcion";
+
+        if (isDetailedCsv) {
+          const columnIndexes = Object.fromEntries(
+            requiredHeaders.map((header) => [header, csvHeaders.indexOf(header)]),
+          );
+          const missingHeaders = requiredHeaders.filter((header) => columnIndexes[header] < 0);
+          if (missingHeaders.length) {
+            alert(`Faltan encabezados del CSV: ${missingHeaders.join(", ")}.`);
             return;
           }
-          parsedProducts.push(item);
-        });
+
+          csvRows.slice(1).forEach((cells, index) => {
+            const value = (header) => cells[columnIndexes[header]] || "";
+            const prima = parseImportedMoney(value("prima"));
+            const cuotaPrimaria = parseImportedMoney(value("cuotaprimaria"));
+            const cuotaSecundaria = parseImportedMoney(value("cuotasecundaria"));
+            const precioNormal = parseImportedMoney(value("precionormal"));
+            const descuento = parseImportedMoney(value("descuento"));
+            const regalo = value("regalo").trim().toLowerCase();
+            const aplicaRegalo = /^(si|sí|true|1|yes)$/i.test(regalo);
+            const numericFields = ["prima", "cuotaprimaria", "cuotasecundaria", "precionormal", "descuento"];
+            const producto = {
+              codigo: value("codigo").trim(),
+              descripcion: value("descripcion").trim(),
+              prima: String(prima),
+              aplicaRegalo,
+              plazo1: value("plazo1").trim(),
+              cuotaPrimaria: String(cuotaPrimaria),
+              plazo2: value("plazo2").trim(),
+              cuotaSecundaria: String(cuotaSecundaria),
+              precioNormal: String(precioNormal),
+              descuento,
+            };
+            const valid = producto.codigo && producto.descripcion && producto.plazo1 && producto.plazo2
+              && numericFields.every((header) => value(header).trim() !== "")
+              && /^(si|sí|no|true|false|1|0|yes)$/i.test(regalo)
+              && Number.isFinite(prima) && prima >= 0
+              && Number.isFinite(cuotaPrimaria) && cuotaPrimaria > 0
+              && Number.isFinite(cuotaSecundaria) && cuotaSecundaria > 0
+              && Number.isFinite(precioNormal) && precioNormal > prima
+              && Number.isFinite(descuento) && descuento >= 0 && descuento <= 100;
+            if (!valid || cells.length < csvHeaders.length) {
+              invalidLines.push(index + 2);
+              return;
+            }
+            parsedProducts.push(producto);
+          });
+        } else {
+          const prima = parseImportedMoney(globalPrimaInput.value);
+          if (!Number.isFinite(prima) || prima < 0) {
+            alert("Ingrese una prima global válida.");
+            globalPrimaInput.focus();
+            return;
+          }
+
+          lines.forEach((line, index) => {
+            const item = parseImportedProductLine(line.trim());
+            if (!item || !item.codigo || !item.descripcion || !Number.isFinite(item.precioNormal) || item.precioNormal <= prima) {
+              invalidLines.push(index + 1);
+              return;
+            }
+            parsedProducts.push(item);
+          });
+        }
 
         if (invalidLines.length) {
-          alert(`Revise las filas ${invalidLines.join(", ")}: se requiere código, descripción y un precio mayor que la prima.`);
+          alert(`Revise las filas ${invalidLines.join(", ")}: el formato está incompleto o contiene valores inválidos. No se importó ningún producto.`);
           return;
         }
 
         const now = Date.now();
+        let updatedCount = 0;
+        let addedCount = 0;
         parsedProducts.forEach((item, index) => {
-          const saldoFinanciado = item.precioNormal - prima;
-          const id = now + index;
-          products.push({
-            id,
-            codigo: item.codigo,
-            descripcion: item.descripcion,
-            prima: String(prima),
-            aplicaRegalo: true,
-            plazo1: "12 MESES",
-            cuotaPrimaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03498, 12)),
-            plazo2: "24 MESES",
-            cuotaSecundaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03502, 24)),
-            precioNormal: String(item.precioNormal),
-            descuento: 10,
-          });
+          const existingIndex = products.findIndex((product) => String(product.codigo) === String(item.codigo));
+          const existingProduct = existingIndex >= 0 ? products[existingIndex] : null;
+          const isDetailedProduct = Object.hasOwn(item, "prima");
+          let product;
+
+          if (isDetailedProduct) {
+            product = { ...item, id: existingProduct?.id ?? now + index };
+          } else {
+            const prima = parseImportedMoney(globalPrimaInput.value);
+            const saldoFinanciado = item.precioNormal - prima;
+            product = {
+              id: existingProduct?.id ?? now + index,
+              codigo: item.codigo,
+              descripcion: item.descripcion,
+              prima: String(prima),
+              aplicaRegalo: true,
+              plazo1: "12 MESES",
+              cuotaPrimaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03498, 12)),
+              plazo2: "24 MESES",
+              cuotaSecundaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03502, 24)),
+              precioNormal: String(item.precioNormal),
+              descuento: 10,
+            };
+          }
+
+          if (existingIndex >= 0) {
+            products[existingIndex] = product;
+            updatedCount++;
+          } else {
+            products.push(product);
+            addedCount++;
+          }
+          const id = product.id;
           selectedProductIds.add(id);
         });
 
-        localStorage.setItem("preciador_global_prima", String(prima));
+        if (!isDetailedCsv) {
+          localStorage.setItem("preciador_global_prima", String(parseImportedMoney(globalPrimaInput.value)));
+        }
         localStorage.setItem("preciador_products_list", JSON.stringify(products));
         bulkProductText.value = "";
         closeBulkImportModal();
         renderProductTable(prodSearchInput.value.trim().toLowerCase());
         updatePrintLayout();
-        alert(`Se agregaron ${parsedProducts.length} producto${parsedProducts.length === 1 ? "" : "s"}.`);
+        alert(`Se importaron ${parsedProducts.length} productos: ${addedCount} nuevos y ${updatedCount} actualizados.`);
       }
 
       function createCardHTML(product) {
@@ -2000,6 +2146,8 @@
         const codigo = product.codigo || "---";
         const prima = parseAndFormat(product.prima);
         const chkRegalo = product.aplicaRegalo !== false;
+        const showGiftCredit = document.getElementById("chkShowGiftCredit").checked;
+        const showGreenBox = document.getElementById("chkShowGreenBox").checked;
         const plazo1Val = product.plazo1 || "12 MESES";
         const plazo2Val = product.plazo2 || "24 MESES";
         const cuotaPromo = parseAndFormat(product.cuotaPrimaria);
@@ -2044,13 +2192,13 @@
                         <div class="item">PRIMA: L <span class="outPrima">${prima}</span></div>
                     </div>
 
-                    <div class="gift-box outGiftBox" style="display: ${chkRegalo ? "flex" : "none"};">
+                    <div class="gift-box outGiftBox" style="display: ${chkRegalo && showGiftCredit ? "flex" : "none"};">
                         <div class="gift-title">REGALO AL CRÉDITO</div>
                         <div class="gift-status" style="font-size: ${document.getElementById("sGiftSize").value}cqw;">APLICA</div>
                     </div>
                 </div>
 
-                <div class="green-box-container" style="width: ${document.getElementById("sGreenBoxWidth").value}%; padding: ${document.getElementById("sGreenBoxHeight").value}% 3%; border-width: ${document.getElementById("sGreenBoxBorder").value}px; border-radius: ${document.getElementById("sGreenBoxRadius").value}px;">
+                <div class="green-box-container" style="display: ${showGreenBox ? "flex" : "none"}; width: ${document.getElementById("sGreenBoxWidth").value}%; padding: ${document.getElementById("sGreenBoxHeight").value}% 3%; border-width: ${document.getElementById("sGreenBoxBorder").value}px; border-radius: ${document.getElementById("sGreenBoxRadius").value}px;">
                     <div class="main-cuota-title" style="font-size: ${document.getElementById("sMainCuotaTitleSize").value}cqw;">Molicuota: <span class="outPlazo1">${plazo1Val}</span></div>
                     
                     <div class="main-price" style="font-size: ${document.getElementById("sliderCuotaSize").value}cqw;">
