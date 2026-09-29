@@ -592,10 +592,40 @@
         flex-direction: column;
         gap: 0;
         flex: 1;
+        min-height: 0;
         overflow: hidden;
         padding: 20px 24px;
         gap: 16px;
         overflow-y: auto;
+      }
+
+      .product-rates-bar {
+        display: flex;
+        align-items: end;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 12px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+      }
+
+      .product-rate-field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 100px;
+        color: #475569;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .product-rate-field input {
+        width: 100%;
+        padding: 7px 9px;
+        border: 1px solid #cbd5e1;
+        border-radius: 7px;
+        font-size: 13px;
       }
 
       /* Barra de acciones superior del modal */
@@ -654,24 +684,6 @@
 
       .prod-action-bar .spacer {
         flex: 1;
-      }
-
-      .global-prima-field {
-        display: flex;
-        align-items: center;
-        gap: 7px;
-        color: #475569;
-        font-size: 11px;
-        font-weight: 700;
-        text-transform: uppercase;
-      }
-
-      .global-prima-field input {
-        width: 112px;
-        padding: 7px 9px;
-        border: 1px solid #cbd5e1;
-        border-radius: 7px;
-        font-size: 13px;
       }
 
       /* Historial compacto */
@@ -1362,6 +1374,22 @@
         </div>
 
         <div class="modal-body">
+          <div class="product-rates-bar">
+            <label class="product-rate-field" for="primaPercentInput">
+              Prima (%)
+              <input id="primaPercentInput" type="number" min="0" max="100" step="0.01" value="15" />
+            </label>
+            <label class="product-rate-field" for="rate12Input">
+              % de 12
+              <input id="rate12Input" type="number" min="0" max="100" step="0.01" value="10.35" />
+            </label>
+            <label class="product-rate-field" for="rate24Input">
+              % de 24
+              <input id="rate24Input" type="number" min="0" max="100" step="0.01" value="6.23" />
+            </label>
+            <button class="btn-action-sm" id="btnRecalculateProducts" type="button">⟳ Recalcular</button>
+          </div>
+
           <!-- Barra de acciones -->
           <div class="prod-action-bar">
             <button class="btn-add-product" id="btnNewProduct">
@@ -1370,10 +1398,6 @@
             <button class="btn-action-sm" id="btnOpenBulkImport">
               📋 Pegar productos
             </button>
-            <label class="global-prima-field" for="globalPrimaInput">
-              Prima global (L)
-              <input id="globalPrimaInput" type="number" min="0" step="0.01" value="0" />
-            </label>
             <button class="btn-action-sm" id="btnNuevaLista" title="Guarda la lista actual y empieza una nueva vacía">📋 Nueva Lista</button>
             <button class="btn-action-sm" id="btnExportCSV">
               📊 Exportar CSV
@@ -1676,7 +1700,9 @@
       const btnNewProduct = document.getElementById("btnNewProduct");
       const bulkImportModal = document.getElementById("bulkImportModal");
       const bulkProductText = document.getElementById("bulkProductText");
-      const globalPrimaInput = document.getElementById("globalPrimaInput");
+      const primaPercentInput = document.getElementById("primaPercentInput");
+      const rate12Input = document.getElementById("rate12Input");
+      const rate24Input = document.getElementById("rate24Input");
       const btnCloseFormModal = document.getElementById("btnCloseFormModal");
       const modalProductForm = document.getElementById("modalProductForm");
       const productTableBody = document.getElementById("productTableBody");
@@ -1685,10 +1711,10 @@
       const btnResetConfig = document.getElementById("btnResetConfig");
       const prodSearchInput = document.getElementById("prodSearchInput");
       const prodCountBadge = document.getElementById("prodCountBadge");
-      globalPrimaInput.value = localStorage.getItem("preciador_global_prima") || "0";
-      globalPrimaInput.addEventListener("change", () => {
-        localStorage.setItem("preciador_global_prima", globalPrimaInput.value || "0");
-      });
+      const savedProductRates = JSON.parse(localStorage.getItem("preciador_product_rates") || "{}");
+      primaPercentInput.value = savedProductRates.primaPercent ?? "15";
+      rate12Input.value = savedProductRates.rate12 ?? "10.35";
+      rate24Input.value = savedProductRates.rate24 ?? "6.23";
 
       // DRAWER CONFIGURACIONES
       function openConfigDrawer() {
@@ -1912,6 +1938,68 @@
         const amount = Number(normalized);
         return Number.isFinite(amount) ? amount : NaN;
       }
+
+      function getProductRateSettings() {
+        const settings = {
+          primaPercent: Number(primaPercentInput.value),
+          rate12: Number(rate12Input.value),
+          rate24: Number(rate24Input.value),
+        };
+        return Object.values(settings).every((value) => Number.isFinite(value) && value >= 0 && value <= 100)
+          ? settings
+          : null;
+      }
+
+      function calculateProductCredit(price, settings = getProductRateSettings()) {
+        const precioNormal = parseImportedMoney(price);
+        if (!settings || !Number.isFinite(precioNormal) || precioNormal <= 0) return null;
+        const prima = Math.round(precioNormal * settings.primaPercent) / 100;
+        const saldoFinanciado = precioNormal - prima;
+        return {
+          prima: String(prima),
+          cuotaPrimaria: String(Math.round(saldoFinanciado * settings.rate12 / 100)),
+          cuotaSecundaria: String(Math.round(saldoFinanciado * settings.rate24 / 100)),
+        };
+      }
+
+      function updateProductFormCalculations() {
+        const credit = calculateProductCredit(document.getElementById("mPrecioNormal").value);
+        if (!credit) return;
+        document.getElementById("mPrima").value = credit.prima;
+        document.getElementById("mCuotaPrimaria").value = credit.cuotaPrimaria;
+        document.getElementById("mCuotaSecundaria").value = credit.cuotaSecundaria;
+      }
+
+      [primaPercentInput, rate12Input, rate24Input].forEach((input) => {
+        input.addEventListener("change", () => {
+          const settings = getProductRateSettings();
+          if (settings) localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
+          updateProductFormCalculations();
+        });
+      });
+
+      document.getElementById("btnRecalculateProducts").addEventListener("click", () => {
+        const settings = getProductRateSettings();
+        if (!settings) {
+          alert("Ingrese porcentajes válidos entre 0 y 100.");
+          return;
+        }
+        const recalculatedProducts = products.map((product) => {
+          const credit = calculateProductCredit(product.precioNormal, settings);
+          return credit ? { ...product, ...credit } : null;
+        });
+        if (recalculatedProducts.some((product) => !product)) {
+          alert("No se recalculó la lista: revise que todos los productos tengan un precio normal válido.");
+          return;
+        }
+        products = recalculatedProducts;
+        localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
+        localStorage.setItem("preciador_products_list", JSON.stringify(products));
+        renderProductTable(prodSearchInput.value.trim().toLowerCase());
+        updatePrintLayout();
+      });
+
+      document.getElementById("mPrecioNormal").addEventListener("input", updateProductFormCalculations);
 
       function cleanImportedCell(value) {
         return value
