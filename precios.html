@@ -509,7 +509,36 @@
 
     .rate-input:focus { outline: 2px solid rgba(220, 38, 38, 0.2); border-color: var(--primary); }
 
-    .calculated-price { font-weight: 800; white-space: nowrap; }
+    .product-rates {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(70px, 1fr));
+      gap: 6px;
+      margin-top: 9px;
+      max-width: 360px;
+    }
+
+    .product-rates label {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      color: #64748b;
+      font-size: 9px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .product-rates .rate-input { width: 100%; }
+
+    .calculated-prices {
+      display: grid;
+      gap: 4px;
+      min-width: 145px;
+      color: #475569;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .calculated-prices strong { color: var(--dark-panel); }
 
     .recalculate-btn { background: #0f766e; color: white; border-color: #0f766e; }
     .recalculate-btn:hover { background: #115e59; }
@@ -624,7 +653,7 @@
     }
 
     .custom-table {
-      width: 100%; border-collapse: collapse; text-align: left; font-size: 0.82rem;
+      width: 100%; min-width: 760px; border-collapse: collapse; text-align: left; font-size: 0.82rem;
     }
 
     .custom-table thead th {
@@ -992,14 +1021,8 @@
                   <input type="checkbox" id="chkSelectAll" title="Seleccionar / Deseleccionar todos" style="width:15px;height:15px;accent-color:#dc2626;cursor:pointer;">
                 </th>
                 <th>SKU</th>
-                <th>Descripción</th>
-                <th>Precio Base</th>
-                <th>Prima %</th>
-                <th>Prima (L)</th>
-                <th>% de 24</th>
-                <th>Cuota 24</th>
-                <th>% de 12</th>
-                <th>Cuota 12</th>
+                <th>Producto y tasas</th>
+                <th>Precio y cuotas</th>
                 <th style="text-align:center;">Acciones</th>
               </tr>
             </thead>
@@ -1572,7 +1595,7 @@
       tbody.innerHTML = '';
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
         updateSelectAllCheckbox();
         updateSelBadge();
         return;
@@ -1590,14 +1613,20 @@
           <td><span class="sku-badge">${prod.sku}</span></td>
           <td>
             <div class="prod-name">${prod.description}</div>
+            <div class="product-rates">
+              <label>Prima %<input class="rate-input product-rate-input" data-id="${prod.id}" data-field="primaPercent" type="number" min="0" max="100" step="0.01" value="${prod.primaPercent ?? 15}" aria-label="Porcentaje de prima para ${prod.sku}"></label>
+              <label>% de 24<input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate24" type="number" min="0" step="0.01" value="${prod.rate24 ?? 0}" aria-label="Porcentaje de 24 meses para ${prod.sku}"></label>
+              <label>% de 12<input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate12" type="number" min="0" step="0.01" value="${prod.rate12 ?? 0}" aria-label="Porcentaje de 12 meses para ${prod.sku}"></label>
+            </div>
           </td>
-          <td>L ${prod.price.toFixed(2)}</td>
-          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="primaPercent" type="number" min="0" max="100" step="0.01" value="${prod.primaPercent ?? 15}" aria-label="Porcentaje de prima para ${prod.sku}">%</td>
-          <td class="calculated-price">${prod.primaAmount == null ? '—' : formatPriceLps(prod.primaAmount)}</td>
-          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate24" type="number" min="0" step="0.01" value="${prod.rate24 ?? 0}" aria-label="Porcentaje de 24 meses para ${prod.sku}">%</td>
-          <td class="calculated-price">${prod.payment24 == null ? '—' : formatPriceLps(prod.payment24)}</td>
-          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate12" type="number" min="0" step="0.01" value="${prod.rate12 ?? 0}" aria-label="Porcentaje de 12 meses para ${prod.sku}">%</td>
-          <td class="calculated-price">${prod.payment12 == null ? '—' : formatPriceLps(prod.payment12)}</td>
+          <td>
+            <div class="calculated-prices">
+              <span>Precio base: <strong>L ${prod.price.toFixed(2)}</strong></span>
+              <span>Prima: <strong>${prod.primaAmount == null ? '—' : formatPriceLps(prod.primaAmount)}</strong></span>
+              <span>Cuota 24: <strong>${prod.payment24 == null ? '—' : formatPriceLps(prod.payment24)}</strong></span>
+              <span>Cuota 12: <strong>${prod.payment12 == null ? '—' : formatPriceLps(prod.payment12)}</strong></span>
+            </div>
+          </td>
           <td>
             <div class="action-btns">
               <button class="tbl-btn edit" title="Editar" onclick="editProduct(${prod.id})">✏️</button>
