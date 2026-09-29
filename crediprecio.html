@@ -2096,13 +2096,14 @@
 
         const parsedProducts = [];
         const invalidLines = [];
-        const csvRows = parseImportedCsv(bulkProductText.value);
+        const isTabDelimited = lines.some((line) => line.includes("\t"));
+        const csvRows = isTabDelimited ? [] : parseImportedCsv(bulkProductText.value);
         const csvHeaders = csvRows[0]?.map(normalizeImportHeader) || [];
         const requiredHeaders = [
           "codigo", "descripcion", "prima", "regalo", "plazo1",
           "cuotaprimaria", "plazo2", "cuotasecundaria", "precionormal", "descuento",
         ];
-        const isDetailedCsv = csvHeaders[0] === "codigo" && csvHeaders[1] === "descripcion";
+        const isDetailedCsv = !isTabDelimited && csvHeaders[0] === "codigo" && csvHeaders[1] === "descripcion";
         const settings = getProductRateSettings();
 
         if (isDetailedCsv) {
