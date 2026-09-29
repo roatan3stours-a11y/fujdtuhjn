@@ -434,6 +434,7 @@
     .modal-container {
       background: #f8fafc;
       width: 96%; max-width: 1050px; max-height: 90vh;
+      max-height: 90dvh;
       height: 90vh;
       border-radius: 16px;
       box-shadow: 0 25px 50px -12px rgba(0,0,0,0.35);
@@ -483,10 +484,26 @@
     .modal-close:hover { color: white; background: rgba(255,255,255,0.22); }
 
     .modal-body {
-      padding: 18px 22px; overflow-y: auto; flex: 1;
+      padding: 18px 22px; overflow-y: auto; overscroll-behavior: contain; flex: 1;
       min-height: 0;
       display: flex; flex-direction: column; gap: 14px;
     }
+
+    .rate-input {
+      width: 76px;
+      padding: 6px 7px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .rate-input:focus { outline: 2px solid rgba(220, 38, 38, 0.2); border-color: var(--primary); }
+
+    .calculated-price { font-weight: 800; white-space: nowrap; }
+
+    .recalculate-btn { background: #0f766e; color: white; border-color: #0f766e; }
+    .recalculate-btn:hover { background: #115e59; }
 
     /* Barra de acciones */
     .prod-action-bar {
@@ -933,6 +950,7 @@
         <!-- Barra de acciones -->
         <div class="prod-action-bar">
           <button class="btn-add-product" id="btnNewProduct">＋ Nuevo Producto</button>
+          <button class="btn-action-sm recalculate-btn" id="recalculateProductsBtn" type="button">🔄 Recalcular</button>
           <button class="btn-action-sm" id="openPasteImportBtn" type="button">📥 Importar lista</button>
           <button class="btn-action-sm" id="btnNuevaLista" title="Guarda la lista actual y empieza una nueva vacía">📋 Nueva Lista</button>
           <button class="btn-action-sm" id="exportXmlBtn">📊 Exportar XML</button>
@@ -967,7 +985,12 @@
                 <th>SKU</th>
                 <th>Descripción</th>
                 <th>Precio Base</th>
-                <th>Impreso</th>
+                <th>Prima %</th>
+                <th>Prima (L)</th>
+                <th>% de 24</th>
+                <th>Cuota 24</th>
+                <th>% de 12</th>
+                <th>Cuota 12</th>
                 <th style="text-align:center;">Acciones</th>
               </tr>
             </thead>
@@ -1215,6 +1238,8 @@
         saveAndRender();
       });
 
+      document.getElementById('recalculateProductsBtn').addEventListener('click', recalculateProducts);
+
       bindSlider('boxWidthInput', 'boxWidth', '%');
       bindSlider('boxPosYInput', 'boxPosY', '%');
       bindSlider('boxHeightInput', 'boxHeight', '%');
@@ -1290,10 +1315,10 @@
         if (!skuVal || !descVal || isNaN(priceVal)) { alert('Por favor completa todos los campos.'); return; }
         if (editId) {
           const idx = appState.products.findIndex(p => p.id == editId);
-          if (idx !== -1) appState.products[idx] = { id: Number(editId), sku: skuVal, description: descVal, price: priceVal };
+          if (idx !== -1) appState.products[idx] = { ...appState.products[idx], sku: skuVal, description: descVal, price: priceVal };
         } else {
           const newId = Date.now();
-          appState.products.push({ id: newId, sku: skuVal, description: descVal, price: priceVal });
+          appState.products.push({ id: newId, sku: skuVal, description: descVal, price: priceVal, primaPercent: 15, rate24: 0, rate12: 0 });
           selectedProductIds.add(newId);
         }
         closeFormModal();
@@ -1444,6 +1469,24 @@
       renderProductTable(document.getElementById('prodSearchInput').value.trim().toLowerCase());
     }
 
+    async function recalculateProducts() {
+      appState.products.forEach(product => {
+        const price = Number(product.price) || 0;
+        const primaPercent = Number(product.primaPercent ?? 15) || 0;
+        const rate24 = Number(product.rate24) || 0;
+        const rate12 = Number(product.rate12) || 0;
+        const financedAmount = price - (price * primaPercent / 100);
+
+        product.primaAmount = price * primaPercent / 100;
+        product.payment24 = financedAmount * rate24 / 100;
+        product.payment12 = financedAmount * rate12 / 100;
+      });
+
+      await saveAndRender(false);
+      renderProductTable(document.getElementById('prodSearchInput').value.trim().toLowerCase());
+      showToast('🔄 Productos recalculados');
+    }
+
     function resetModalForm() {
       document.getElementById('editProductId').value = '';
       document.getElementById('sku').value = '';
@@ -1520,7 +1563,7 @@
       tbody.innerHTML = '';
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
         updateSelectAllCheckbox();
         updateSelBadge();
         return;
@@ -1540,7 +1583,12 @@
             <div class="prod-name">${prod.description}</div>
           </td>
           <td>L ${prod.price.toFixed(2)}</td>
-          <td><span class="price-pill">${formatPriceLps(prod.price)}</span></td>
+          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="primaPercent" type="number" min="0" max="100" step="0.01" value="${prod.primaPercent ?? 15}" aria-label="Porcentaje de prima para ${prod.sku}">%</td>
+          <td class="calculated-price">${prod.primaAmount == null ? '—' : formatPriceLps(prod.primaAmount)}</td>
+          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate24" type="number" min="0" step="0.01" value="${prod.rate24 ?? 0}" aria-label="Porcentaje de 24 meses para ${prod.sku}">%</td>
+          <td class="calculated-price">${prod.payment24 == null ? '—' : formatPriceLps(prod.payment24)}</td>
+          <td><input class="rate-input product-rate-input" data-id="${prod.id}" data-field="rate12" type="number" min="0" step="0.01" value="${prod.rate12 ?? 0}" aria-label="Porcentaje de 12 meses para ${prod.sku}">%</td>
+          <td class="calculated-price">${prod.payment12 == null ? '—' : formatPriceLps(prod.payment12)}</td>
           <td>
             <div class="action-btns">
               <button class="tbl-btn edit" title="Editar" onclick="editProduct(${prod.id})">✏️</button>
@@ -1561,6 +1609,15 @@
           updateSelectAllCheckbox();
           updateSelBadge();
           render();
+        });
+      });
+
+      tbody.querySelectorAll('.product-rate-input').forEach(input => {
+        input.addEventListener('input', () => {
+          const product = appState.products.find(item => item.id === Number(input.dataset.id));
+          if (!product) return;
+          product[input.dataset.field] = Number(input.value) || 0;
+          dbSet('appState', 'currentConfig', appState).catch(error => console.error('Error guardando porcentajes:', error));
         });
       });
 
