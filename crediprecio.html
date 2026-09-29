@@ -1525,6 +1525,7 @@
                   id="mPrima"
                   placeholder="1000"
                   required
+                  readonly
                 />
               </div>
             </div>
@@ -1556,6 +1557,7 @@
                   id="mCuotaPrimaria"
                   placeholder="943"
                   required
+                  readonly
                 />
               </div>
             </div>
@@ -1580,6 +1582,7 @@
                   id="mCuotaSecundaria"
                   placeholder="1193"
                   required
+                  readonly
                 />
               </div>
             </div>
@@ -2083,12 +2086,6 @@
         };
       }
 
-      function calcularCuotaAmortizada(principal, tasaMensual, meses) {
-        if (principal <= 0) return 0;
-        const cuota = principal * tasaMensual / (1 - Math.pow(1 + tasaMensual, -meses));
-        return Math.round(cuota);
-      }
-
       function importBulkProducts() {
         const lines = bulkProductText.value.split(/\r?\n/).filter((line) => line.trim());
         if (!lines.length) {
@@ -2105,6 +2102,7 @@
           "cuotaprimaria", "plazo2", "cuotasecundaria", "precionormal", "descuento",
         ];
         const isDetailedCsv = csvHeaders[0] === "codigo" && csvHeaders[1] === "descripcion";
+        const settings = getProductRateSettings();
 
         if (isDetailedCsv) {
           const columnIndexes = Object.fromEntries(
@@ -2153,16 +2151,14 @@
             parsedProducts.push(producto);
           });
         } else {
-          const prima = parseImportedMoney(globalPrimaInput.value);
-          if (!Number.isFinite(prima) || prima < 0) {
-            alert("Ingrese una prima global válida.");
-            globalPrimaInput.focus();
+          if (!settings) {
+            alert("Ingrese porcentajes válidos entre 0 y 100.");
             return;
           }
 
           lines.forEach((line, index) => {
             const item = parseImportedProductLine(line.trim());
-            if (!item || !item.codigo || !item.descripcion || !Number.isFinite(item.precioNormal) || item.precioNormal <= prima) {
+            if (!item || !item.codigo || !item.descripcion || !calculateProductCredit(item.precioNormal, settings)) {
               invalidLines.push(index + 1);
               return;
             }
@@ -2187,18 +2183,15 @@
           if (isDetailedProduct) {
             product = { ...item, id: existingProduct?.id ?? now + index };
           } else {
-            const prima = parseImportedMoney(globalPrimaInput.value);
-            const saldoFinanciado = item.precioNormal - prima;
+            const credit = calculateProductCredit(item.precioNormal, settings);
             product = {
               id: existingProduct?.id ?? now + index,
               codigo: item.codigo,
               descripcion: item.descripcion,
-              prima: String(prima),
+              ...credit,
               aplicaRegalo: true,
               plazo1: "12 MESES",
-              cuotaPrimaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03498, 12)),
               plazo2: "24 MESES",
-              cuotaSecundaria: String(calcularCuotaAmortizada(saldoFinanciado, 0.03502, 24)),
               precioNormal: String(item.precioNormal),
               descuento: 10,
             };
@@ -2215,9 +2208,7 @@
           selectedProductIds.add(id);
         });
 
-        if (!isDetailedCsv) {
-          localStorage.setItem("preciador_global_prima", String(parseImportedMoney(globalPrimaInput.value)));
-        }
+        if (settings) localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
         localStorage.setItem("preciador_products_list", JSON.stringify(products));
         bulkProductText.value = "";
         closeBulkImportModal();
@@ -2559,16 +2550,20 @@
             return;
           }
 
+          const credit = calculateProductCredit(document.getElementById("mPrecioNormal").value);
+          if (!credit) {
+            alert("Ingrese un precio normal válido y porcentajes entre 0 y 100.");
+            return;
+          }
+
           const newProd = {
             id: editId ? parseInt(editId, 10) : Date.now(),
             descripcion: document.getElementById("mDescripcion").value,
             codigo: document.getElementById("mCodigo").value,
-            prima: document.getElementById("mPrima").value,
+            ...credit,
             aplicaRegalo: document.getElementById("mChkRegalo").checked,
             plazo1: document.getElementById("mPlazo1").value,
-            cuotaPrimaria: document.getElementById("mCuotaPrimaria").value,
             plazo2: document.getElementById("mPlazo2").value,
-            cuotaSecundaria: document.getElementById("mCuotaSecundaria").value,
             precioNormal: document.getElementById("mPrecioNormal").value,
             descuento: document.getElementById("mDescuento").value || 10,
           };
@@ -2698,13 +2693,11 @@
           document.getElementById("mEditId").value = prod.id;
           document.getElementById("mDescripcion").value = prod.descripcion;
           document.getElementById("mCodigo").value = prod.codigo;
-          document.getElementById("mPrima").value = prod.prima;
           document.getElementById("mChkRegalo").checked = prod.aplicaRegalo !== false;
           document.getElementById("mPlazo1").value = prod.plazo1 || "12 MESES";
-          document.getElementById("mCuotaPrimaria").value = prod.cuotaPrimaria;
           document.getElementById("mPlazo2").value = prod.plazo2 || "24 MESES";
-          document.getElementById("mCuotaSecundaria").value = prod.cuotaSecundaria;
           document.getElementById("mPrecioNormal").value = prod.precioNormal;
+          updateProductFormCalculations();
           document.getElementById("mDescuento").value = prod.descuento;
 
           document.getElementById("formModalTitle").textContent = "✏️ Editar Producto";
