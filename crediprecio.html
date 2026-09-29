@@ -1274,7 +1274,7 @@
             <div class="form-group">
               <label style="display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" id="chkShowGreenBox" checked />
-                Mostrar cuadro verde de cuotas
+                Mostrar borde verde del cuadro de cuotas
               </label>
             </div>
             <div class="form-group">
@@ -2198,7 +2198,7 @@
                     </div>
                 </div>
 
-                <div class="green-box-container" style="display: ${showGreenBox ? "flex" : "none"}; width: ${document.getElementById("sGreenBoxWidth").value}%; padding: ${document.getElementById("sGreenBoxHeight").value}% 3%; border-width: ${document.getElementById("sGreenBoxBorder").value}px; border-radius: ${document.getElementById("sGreenBoxRadius").value}px;">
+                <div class="green-box-container" style="width: ${document.getElementById("sGreenBoxWidth").value}%; padding: ${document.getElementById("sGreenBoxHeight").value}% 3%; border-width: ${document.getElementById("sGreenBoxBorder").value}px; border-color: ${showGreenBox ? "#009746" : "transparent"}; border-radius: ${document.getElementById("sGreenBoxRadius").value}px;">
                     <div class="main-cuota-title" style="font-size: ${document.getElementById("sMainCuotaTitleSize").value}cqw;">Molicuota: <span class="outPlazo1">${plazo1Val}</span></div>
                     
                     <div class="main-price" style="font-size: ${document.getElementById("sliderCuotaSize").value}cqw;">
