@@ -1374,16 +1374,16 @@
         <div class="modal-body">
           <div class="product-rates-bar">
             <label class="product-rate-field" for="primaPercentInput">
-              Prima (%)
-              <input id="primaPercentInput" type="number" min="0" max="100" step="0.01" value="15" />
+              Tasa de prima
+              <input id="primaPercentInput" type="number" min="0" max="1" step="0.000000001" value="0.15" />
             </label>
             <label class="product-rate-field" for="rate12Input">
-              % de 12
-              <input id="rate12Input" type="number" min="0" max="100" step="0.01" value="10.35" />
+              Tasa 12 meses
+              <input id="rate12Input" type="number" min="0" max="1" step="0.000000001" value="0.1035" />
             </label>
             <label class="product-rate-field" for="rate24Input">
-              % de 24
-              <input id="rate24Input" type="number" min="0" max="100" step="0.01" value="6.23" />
+              Tasa 24 meses
+              <input id="rate24Input" type="number" min="0" max="1" step="0.000000001" value="0.0623" />
             </label>
             <button class="btn-action-sm" id="btnRecalculateProducts" type="button">⟳ Recalcular</button>
           </div>
@@ -1713,9 +1713,16 @@
       const prodSearchInput = document.getElementById("prodSearchInput");
       const prodCountBadge = document.getElementById("prodCountBadge");
       const savedProductRates = JSON.parse(localStorage.getItem("preciador_product_rates") || "{}");
-      primaPercentInput.value = savedProductRates.primaPercent ?? "15";
-      rate12Input.value = savedProductRates.rate12 ?? "10.35";
-      rate24Input.value = savedProductRates.rate24 ?? "6.23";
+      if (localStorage.getItem("preciador_product_rates_format") !== "decimal-v1") {
+        ["primaPercent", "rate12", "rate24"].forEach((key) => {
+          if (savedProductRates[key] !== undefined) savedProductRates[key] = Number(savedProductRates[key]) / 100;
+        });
+        localStorage.setItem("preciador_product_rates", JSON.stringify(savedProductRates));
+        localStorage.setItem("preciador_product_rates_format", "decimal-v1");
+      }
+      primaPercentInput.value = savedProductRates.primaPercent ?? "0.15";
+      rate12Input.value = savedProductRates.rate12 ?? "0.1035";
+      rate24Input.value = savedProductRates.rate24 ?? "0.0623";
 
       // DRAWER CONFIGURACIONES
       function openConfigDrawer() {
@@ -1947,7 +1954,7 @@
           rate12: Number(rate12Input.value),
           rate24: Number(rate24Input.value),
         };
-        return Object.values(settings).every((value) => Number.isFinite(value) && value >= 0 && value <= 100)
+        return Object.values(settings).every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
           ? settings
           : null;
       }
@@ -1955,12 +1962,12 @@
       function calculateProductCredit(price, settings = getProductRateSettings()) {
         const precioNormal = parseImportedMoney(price);
         if (!settings || !Number.isFinite(precioNormal) || precioNormal <= 0) return null;
-        const prima = Math.round(precioNormal * settings.primaPercent) / 100;
+        const prima = Math.round(precioNormal * settings.primaPercent * 100) / 100;
         const saldoFinanciado = precioNormal - prima;
         return {
           prima: String(prima),
-          cuotaPrimaria: String(Math.round(saldoFinanciado * settings.rate12 / 100)),
-          cuotaSecundaria: String(Math.round(saldoFinanciado * settings.rate24 / 100)),
+          cuotaPrimaria: String(Math.round(saldoFinanciado * settings.rate12)),
+          cuotaSecundaria: String(Math.round(saldoFinanciado * settings.rate24)),
         };
       }
 
@@ -1983,7 +1990,7 @@
       document.getElementById("btnRecalculateProducts").addEventListener("click", () => {
         const settings = getProductRateSettings();
         if (!settings) {
-          alert("Ingrese porcentajes válidos entre 0 y 100.");
+          alert("Ingrese tasas válidas entre 0 y 1.");
           return;
         }
         const recalculatedProducts = products.map((product) => {
