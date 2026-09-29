@@ -386,6 +386,15 @@
       margin: 2px 0;
     }
 
+    .price-details {
+      margin-top: 5px;
+      color: #475569;
+      font-size: calc(var(--base-validity-size, 12px) * 0.72);
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+    }
+
     .price-text {
       font-size: calc(var(--base-price-size, 48px) * var(--price-scale, 1));
       font-weight: 900;
@@ -1455,7 +1464,7 @@
       const prod = appState.products.find(p => p.id == id);
       if (prod) {
         const dupId = Date.now();
-        appState.products.push({ id: dupId, sku: prod.sku, description: prod.description, price: prod.price });
+        appState.products.push({ ...prod, id: dupId });
         selectedProductIds.add(dupId);
         saveAndRender(false);
         renderProductTable(document.getElementById('prodSearchInput').value.trim().toLowerCase());
@@ -1879,6 +1888,7 @@
               </div>
               <div class="price-container">
                 <div class="price-text">${formatPriceLps(prod.price)}</div>
+                ${prod.primaAmount == null ? '' : `<div class="price-details">Prima: ${formatPriceLps(prod.primaAmount)}<br>24 meses: ${formatPriceLps(prod.payment24)} | 12 meses: ${formatPriceLps(prod.payment12)}</div>`}
               </div>
               <div class="validity-text">${appState.vigencia || 'Vigencia limitada'}</div>
             </div>
