@@ -821,6 +821,18 @@
         border: 1px solid #e5e7eb;
         overflow-x: auto;
       }
+      .table-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 16px;
+        border-top: 1px solid #e5e7eb;
+      }
+      .table-page-status {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
       table {
         width: 100%;
         border-collapse: collapse;
@@ -1407,7 +1419,7 @@
               >
               <select
                 id="filtro-cat-guardados"
-                onchange="renderTablaGuardados()"
+                onchange="paginaGuardados = 1; renderTablaGuardados()"
               >
                 <option value="Todos">Todas las categorías</option>
                 <option value="Oro">Oro</option>
@@ -1421,7 +1433,7 @@
               >
               <select
                 id="filtro-cred-guardados"
-                onchange="renderTablaGuardados()"
+                onchange="paginaGuardados = 1; renderTablaGuardados()"
               >
                 <option value="Todos">Todos los estados</option>
                 <option value="Crédito Activo">Crédito Activo</option>
@@ -1430,7 +1442,7 @@
             </div>
             <div class="filter-item">
               <label><i class="bx bx-sort"></i> Ordenar por:</label>
-              <select id="orden-guardados" onchange="renderTablaGuardados()">
+              <select id="orden-guardados" onchange="paginaGuardados = 1; renderTablaGuardados()">
                 <option value="defecto">Orden de guardado (Por defecto)</option>
                 <option value="cat-asc">Categoría (A-Z)</option>
                 <option value="cred-asc">Estado Crédito (A-Z)</option>
@@ -1457,6 +1469,17 @@
             </table>
             <div id="empty-guardados" class="empty-state" style="display: none">
               <p>No hay registros que coincidan con los filtros.</p>
+            </div>
+            <div class="table-pagination">
+              <span class="table-page-status" id="estado-pagina-guardados" aria-live="polite"></span>
+              <div>
+                <button class="btn-export" id="pagina-anterior-guardados" onclick="cambiarPaginaGuardados(-1)" title="Página anterior" aria-label="Página anterior">
+                  <i class="bx bx-chevron-left"></i>
+                </button>
+                <button class="btn-export" id="pagina-siguiente-guardados" onclick="cambiarPaginaGuardados(1)" title="Página siguiente" aria-label="Página siguiente">
+                  <i class="bx bx-chevron-right"></i>
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2192,6 +2215,14 @@
 
           <button
             class="btn-action btn-guardados"
+            id="accion-btn-editar-numero"
+            onclick="abrirModalEditarNumero()"
+          >
+            <i class="bx bx-edit-alt"></i> Editar número
+          </button>
+
+          <button
+            class="btn-action btn-guardados"
             onclick="abrirGenerarCartaDesdeAccion()"
           >
             <i class="bx bx-file"></i> Generar Carta
@@ -2233,6 +2264,20 @@
       </div>
     </div>
 
+    <div class="modal-overlay" id="modal-editar-numero">
+      <div class="modal-content" style="max-width: 420px">
+        <div class="modal-header">
+          <span>Editar número</span>
+          <i class="bx bx-x close-modal" onclick="cerrarModalEditarNumero()"></i>
+        </div>
+        <label class="form-label" for="input-numero-editado">Número de teléfono</label>
+        <input type="tel" id="input-numero-editado" autocomplete="tel" />
+        <button class="btn-primary" style="width: 100%; margin-top: 18px" onclick="guardarNumeroEditado()">
+          <i class="bx bx-save"></i> Guardar número
+        </button>
+      </div>
+    </div>
+
     <!-- Toast -->
     <div class="toast" id="toast-msg">
       <i class="bx bx-check-circle" style="color: var(--success)"></i>
@@ -2243,6 +2288,8 @@
       // VARIABLES GLOBALES
       let listasDeCola = [];
       let listaActivaId = null;
+      let paginaGuardados = 1;
+      const registrosPorPaginaGuardados = 100;
 
       let queueViejo = [];
       let guardados = [];
@@ -2462,17 +2509,26 @@
               return;
             }
 
-            const clientesImportados = datos
-              .map((cliente) => normalizarClienteImportado(cliente))
-              .filter((cliente) => {
-                const yaExiste = guardados.some(
-                  (g) =>
-                    g.dni === cliente.dni &&
-                    g.numero === cliente.numero &&
-                    g.nombre === cliente.nombre,
-                );
-                return !yaExiste;
-              });
+            const clavesGuardados = new Set(
+              guardados.map((cliente) =>
+                JSON.stringify([cliente.dni, cliente.numero, cliente.nombre]),
+              ),
+            );
+            const clientesImportados = [];
+
+            datos.forEach((cliente) => {
+              const clienteNormalizado = normalizarClienteImportado(cliente);
+              const clave = JSON.stringify([
+                clienteNormalizado.dni,
+                clienteNormalizado.numero,
+                clienteNormalizado.nombre,
+              ]);
+
+              if (!clavesGuardados.has(clave)) {
+                clavesGuardados.add(clave);
+                clientesImportados.push(clienteNormalizado);
+              }
+            });
 
             if (clientesImportados.length === 0) {
               alert("Los registros importados ya existen en la lista de guardados.");
@@ -2480,8 +2536,8 @@
             }
 
             guardados.push(...clientesImportados);
-            guardarLocalStorage();
-            renderTodasLasTablas();
+            localStorage.setItem("crm_guardados", JSON.stringify(guardados));
+            renderTablaGuardados();
             actualizarContadoresYTarjetas();
             showToast(`Se importaron ${clientesImportados.length} clientes a Guardados`);
           } catch (error) {
@@ -3001,22 +3057,28 @@
         ];
       }
 
-      function obtenerCoincidenciaGestionada(cliente) {
-        const identidad = normalizarIdentidad(cliente.dni || cliente.identidad);
-        if (!identidad) return null;
+      function crearIndiceGestion() {
+        const indice = new Map();
 
-        for (const lista of obtenerListasPorGestion()) {
-          const encontrado = lista.clientes.find(
-            (registro) => normalizarIdentidad(registro.dni || registro.identidad) === identidad,
-          );
-          if (encontrado) return { ...lista, cliente: encontrado };
-        }
+        obtenerListasPorGestion().forEach((lista) => {
+          lista.clientes.forEach((registro) => {
+            const identidad = normalizarIdentidad(registro.dni || registro.identidad);
+            if (identidad && !indice.has(identidad)) {
+              indice.set(identidad, { ...lista, cliente: registro });
+            }
+          });
+        });
 
-        return null;
+        return indice;
       }
 
-      function obtenerObservacionGestionHtml(cliente) {
-        const coincidencia = obtenerCoincidenciaGestionada(cliente);
+      function obtenerCoincidenciaGestionada(cliente, indice) {
+        const identidad = normalizarIdentidad(cliente.dni || cliente.identidad);
+        return identidad ? indice.get(identidad) || null : null;
+      }
+
+      function obtenerObservacionGestionHtml(cliente, indiceGestion) {
+        const coincidencia = obtenerCoincidenciaGestionada(cliente, indiceGestion);
         const observacion = cliente.observacion || "";
 
         if (!coincidencia) {
@@ -3114,6 +3176,7 @@
           "accion-btn-gestionadowhatsapp",
         );
         const btnObservacion = document.getElementById("accion-btn-observacion");
+        const btnEditarNumero = document.getElementById("accion-btn-editar-numero");
 
         btnGuardar.style.display = origenId === "guardados" ? "none" : "flex";
         btnVendido.style.display =
@@ -3131,8 +3194,58 @@
         btnGestionadoWhatsApp.style.display =
           origenId === "gestionadowhatsapp" ? "none" : "flex";
         btnObservacion.style.display = "flex";
+        btnEditarNumero.style.display = "flex";
 
         document.getElementById("modal-acciones").classList.add("active");
+      }
+
+      function abrirModalEditarNumero() {
+        const id = document.getElementById("accion-modal-id").value;
+        const cliente = obtenerClientePorId(id);
+
+        if (!cliente) {
+          showToast("No hay cliente seleccionado");
+          return;
+        }
+
+        document.getElementById("input-numero-editado").value = cliente.numero || "";
+        document.getElementById("modal-editar-numero").classList.add("active");
+        cerrarModalAcciones();
+        document.getElementById("input-numero-editado").focus();
+      }
+
+      function cerrarModalEditarNumero() {
+        document.getElementById("modal-editar-numero").classList.remove("active");
+      }
+
+      function guardarNumeroEditado() {
+        const id = document.getElementById("accion-modal-id").value;
+        const origenId = document.getElementById("accion-modal-origen").value;
+        const numero = document.getElementById("input-numero-editado").value.trim();
+        const cliente = mapListName(origenId).find((registro) => registro.id === id);
+
+        if (!numero) {
+          alert("Ingresa un número de teléfono.");
+          return;
+        }
+
+        if (!cliente) {
+          showToast("No se encontró el cliente seleccionado");
+          cerrarModalEditarNumero();
+          return;
+        }
+
+        cliente.numero = numero;
+        guardarLocalStorage();
+        cerrarModalEditarNumero();
+
+        if (origenId === "guardados") {
+          renderTablaGuardados();
+        } else {
+          renderTodasLasTablas();
+        }
+        actualizarContadoresYTarjetas();
+        showToast("Número actualizado");
       }
 
       function cerrarModalAcciones() {
@@ -3267,6 +3380,7 @@
   const filtroCat = document.getElementById("filtro-cat-guardados").value;
   const filtroCred = document.getElementById("filtro-cred-guardados").value;
   const orden = document.getElementById("orden-guardados").value;
+  const indiceGestion = crearIndiceGestion();
 
   let listaVisual = [...guardados];
 
@@ -3285,18 +3399,29 @@
     );
   }
 
-  tbG.innerHTML = "";
+  const paginasTotales = Math.max(
+    1,
+    Math.ceil(listaVisual.length / registrosPorPaginaGuardados),
+  );
+  paginaGuardados = Math.min(Math.max(paginaGuardados, 1), paginasTotales);
+  const inicioPagina = (paginaGuardados - 1) * registrosPorPaginaGuardados;
+  const listaPagina = listaVisual.slice(
+    inicioPagina,
+    inicioPagina + registrosPorPaginaGuardados,
+  );
+
   document.getElementById("empty-guardados").style.display =
     listaVisual.length === 0 ? "block" : "none";
+  const filas = [];
 
-  listaVisual.forEach((c) => {
+  listaPagina.forEach((c) => {
     const nombreSafe = (c.nombre || "").replace(/'/g, "\\'");
     const telefonoSafe = (c.numero || "").replace(/'/g, "\\'");
     const dniSafe = (c.dni || "").replace(/'/g, "\\'");
     const catSafe = (c.categoria || "").replace(/'/g, "\\'");
     const credSafe = (c.credito || "").replace(/'/g, "\\'");
 
-    tbG.innerHTML += `
+    filas.push(`
       <tr style="cursor:pointer" onclick="abrirModalInfoCliente('${c.id}', '${nombreSafe}', '${telefonoSafe}', '${dniSafe}', '${catSafe}', '${credSafe}')">
         <td onclick="event.stopPropagation()"><input type="checkbox" class="seleccionar-guardado" value="${c.id}" onchange="actualizarSelectorTodosGuardados()" /></td>
         <td><strong>${c.nombre}</strong></td>
@@ -3310,14 +3435,32 @@
         <td>${obtenerBadgeCreditoHtml(c.credito)}</td>
         <td><span class="badge ${c.estadoGestion === "Gestionado" ? "badge-gestionado" : "badge-desconocido"}">${c.estadoGestion || "Pendiente"}</span></td>
         <td>${c.cartera || "Sin cartera"}</td>
-        <td class="obs-col">${obtenerObservacionGestionHtml(c)}</td>
+        <td class="obs-col">${obtenerObservacionGestionHtml(c, indiceGestion)}</td>
         <td onclick="event.stopPropagation()">
           ${crearFilaAccionesHtml(c.id, "guardados")}
         </td>
-      </tr>`;
+        </tr>`);
   });
 
+      tbG.innerHTML = filas.join("");
+  const finPagina = Math.min(
+    inicioPagina + registrosPorPaginaGuardados,
+    listaVisual.length,
+  );
+  document.getElementById("estado-pagina-guardados").innerText =
+    listaVisual.length === 0
+      ? "0 registros"
+      : `${inicioPagina + 1}-${finPagina} de ${listaVisual.length}`;
+  document.getElementById("pagina-anterior-guardados").disabled =
+    paginaGuardados === 1;
+  document.getElementById("pagina-siguiente-guardados").disabled =
+    paginaGuardados === paginasTotales;
   actualizarSelectorTodosGuardados();
+}
+
+function cambiarPaginaGuardados(direccion) {
+  paginaGuardados += direccion;
+  renderTablaGuardados();
 }
 
 function actualizarSelectorTodosGuardados() {
