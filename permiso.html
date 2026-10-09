@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Permiso Provisional - Molineros Comercial</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Import Calibri font stack or fallback to system sans-serif */
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        /* Specific Calibri style for the signature block */
+        .signature-font {
+            font-family: Calibri, 'Open Sans', sans-serif;
+        }
+
+        /* Letter size print optimization (8.5 x 11 inches) */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .main-container {
+                box-shadow: none !important;
+                border: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 !important;
+            }
+            .desktop-layout {
+                display: block !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-neutral-100 text-neutral-900 min-h-screen flex flex-col items-center justify-start p-3 sm:p-6">
+
+    <!-- Top Navigation / Action Bar -->
+    <header class="w-full max-w-7xl flex justify-between items-center mb-6 no-print">
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl font-bold text-neutral-900 tracking-tight"><i class="fa-solid fa-file-shield"></i> Permisos Provisionales Molineros</h1>
+        </div>
+        <div class="flex gap-2.5">
+            <button onclick="nuevoPermiso()" class="bg-white hover:bg-neutral-100 text-neutral-900 font-medium border border-neutral-300 px-4 py-2 rounded shadow-sm flex items-center gap-2 transition text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-plus"></i> Nuevo
+            </button>
+            <button onclick="openImageModal()" class="bg-white hover:bg-neutral-100 text-neutral-900 font-medium border border-neutral-300 px-4 py-2 rounded shadow-sm flex items-center gap-2 transition text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-image"></i> Imágenes
+            </button>
+            <button onclick="imprimirYGuardar()" class="bg-neutral-900 hover:bg-neutral-800 text-white font-medium px-4 py-2 rounded shadow-sm flex items-center gap-2 transition text-xs uppercase tracking-wider">
+                <i class="fa-solid fa-print"></i> Imprimir Carta
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Layout -->
+    <div class="w-full max-w-7xl desktop-layout flex flex-col lg:flex-row gap-6 items-start justify-center">
+        
+        <!-- LEFT COLUMN: Official Document Preview (Arial font, White background, black text) -->
+        <div class="w-full lg:w-7/12 flex justify-center">
+            <div class="w-full max-w-[750px] bg-white border border-neutral-300 rounded-lg p-6 sm:p-10 shadow-xl main-container text-neutral-900 relative">
+                
+                <!-- 5-Digit Code in Top Right Corner (Discreet folio) -->
+                <div class="absolute top-4 right-6 text-right">
+                    <span class="text-[9px] uppercase font-semibold text-neutral-500 block tracking-widest">CÓDIGO</span>
+                    <span id="lblCodigoTop" class="text-xs sm:text-sm font-mono font-bold text-neutral-900 tracking-widest">10001</span>
+                </div>
+
+                <!-- Header Images Section -->
+                <div class="flex flex-col items-center justify-center gap-4 mb-8 mt-2">
+                    <!-- Molineros Logo Container -->
+                    <div class="bg-white px-6 py-3 w-full flex justify-center items-center">
+                        <img id="logoMolineros" src="https://placehold.co/400x90/ffffff/000000?text=MOLINEROS+LOGO" alt="Molineros Logo" class="h-14 sm:h-16 object-contain" onerror="this.src='https://placehold.co/400x90/ffffff/000000?text=MOLINEROS'">
+                    </div>
+                    <!-- Ryder Motorcycle Logo Container -->
+                    <div class="bg-white px-4 py-2 flex justify-center items-center">
+                        <img id="logoRyder" src="https://placehold.co/220x45/ffffff/111111?text=RYDER+MOTORCYCLE" alt="Ryder Logo" class="h-8 sm:h-10 object-contain" onerror="this.src='https://placehold.co/220x45/ffffff/111111?text=RYDER'">
+                    </div>
+                </div>
+
+                <!-- Document Title -->
+                <h2 class="text-center font-bold text-base sm:text-lg tracking-wide uppercase mb-6 leading-snug">
+                    PERMISOS PROVISIONALES PARA CIRCULAR SIN PLACAS Y TARJETA DE CIRCULACIÓN
+                </h2>
+
+                <!-- First Paragraph -->
+                <p class="text-xs sm:text-sm uppercase leading-relaxed mb-6 text-justify">
+                    POR MEDIO DE LA PRESENTE LA EMPRESA <span class="font-bold">MOLINEROS COMERCIAL</span> CON NÚMERO DE RTN <span class="font-bold">01019995011846</span> HACE CONSTAR QUE ES DUEÑO DE UNA MOTOCICLETA Y LA MISMA FUE VENDIDA A <span id="lblCliente" class="font-bold">KENNER JOSUE AVILA LOPEZ</span> CON NUMERO <span id="lblIdCliente" class="font-bold">0209-2003-02082</span>
+                </p>
+
+                <!-- Vehicle Details Section -->
+                <div class="text-xs sm:text-sm uppercase space-y-1.5 mb-6 font-semibold">
+                    <p>MARCA: <span id="lblMarca" class="font-normal">RYDER</span></p>
+                    <p>MODELO: <span id="lblModelo" class="font-normal">HC200GY-18</span></p>
+                    <p>AÑO: <span id="lblAnio" class="font-normal">2026</span></p>
+                    <p>MOTOR: <span id="lblMotor" class="font-normal">169FML26A06640</span></p>
+                    <p>SERIE: <span id="lblSerie" class="font-normal">LHJYCLLA3TB619295</span></p>
+                    <p>COLOR: <span id="lblColor" class="font-normal">NEGRO</span></p>
+                    <p>CILINDRAJE: <span id="lblCilindraje" class="font-normal">200 CC</span></p>
+                    <p>PLACA: <span id="lblPlaca" class="font-normal">EN PROCESO</span></p>
+                </div>
+
+                <!-- Second Paragraph -->
+                <p class="text-xs sm:text-sm uppercase leading-relaxed mb-6 text-justify">
+                    EN BASE A LO ANTERIOR SOLICITAMOS LA COLABORACION A LAS AUTORIDADES CIVILES Y MILITARES EN BRINDAR SU APOYO AL PROPIETARIO DE ESTA UNIDAD YA SE QUE SE ENCUENTRA EN TRAMITES DE DOCUMENTOS.
+                </p>
+
+                <!-- Third Paragraph (Auto-updated Date) -->
+                <p class="text-xs sm:text-sm uppercase leading-relaxed mb-6 text-justify">
+                    PARA LOS FINES QUE AL INTERESADO CONVENGA SE LE EXTIENDE LA PRESENTE EN LA CIUDAD DE <span class="font-bold">ROATÁN, ISLAS DE LA BAHÍA</span> A LOS <span id="lblDia" class="font-bold">09</span> DÍAS DEL MES DE <span id="lblMes" class="font-bold">OCTUBRE</span> DEL <span id="lblAnioDoc" class="font-bold">2026</span>.
+                </p>
+
+                <!-- Validity Row -->
+                <div class="mb-8 border-t border-neutral-300 pt-6">
+                    <p class="text-xs sm:text-sm uppercase font-semibold">
+                        VALIDO POR <span class="font-bold">30</span> DIAS.
+                    </p>
+                </div>
+
+                <!-- Signature Footer (Calibri font explicitly applied) -->
+                <div class="flex flex-col items-center justify-center mt-8 signature-font">
+                    <div class="w-48 sm:w-64 border-t border-neutral-900 mb-2"></div>
+                    <p class="text-xs sm:text-sm uppercase font-bold tracking-wider">ADMINISTRACION</p>
+                    <p class="text-[11px] sm:text-xs uppercase tracking-widest text-neutral-600 mt-0.5">MOLINEROS LOS FUERTES</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Control Form & 5-Digit Code Lookup -->
+        <div class="w-full lg:w-5/12 bg-white border border-neutral-300 rounded-lg p-6 shadow-xl no-print flex flex-col gap-5">
+            
+            <div>
+                <h3 class="text-sm font-bold text-neutral-900 uppercase tracking-wide border-b border-neutral-200 pb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-neutral-700"></i> Panel de Control y Edición
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Gestione folios por código de 5 dígitos y edite los datos del dueño y de la motocicleta.</p>
+            </div>
+
+            <!-- Quick Lookup / Code Input (Clean Black & White) -->
+            <div class="bg-neutral-50 border border-neutral-300 p-4 rounded">
+                <label class="block font-semibold text-neutral-800 text-xs uppercase mb-1">
+                    <i class="fa-solid fa-barcode"></i> Código de 5 Dígitos (Folio):
+                </label>
+                <div class="flex gap-2">
+                    <input type="text" id="inpCodigo5" maxlength="5" placeholder="Ej. 10001" class="flex-1 bg-white border border-neutral-300 rounded px-3 py-1.5 text-neutral-900 text-xs focus:outline-none focus:border-neutral-900 font-mono font-bold">
+                    <button type="button" onclick="buscarPorCodigo()" class="bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-300 font-semibold px-4 py-1.5 rounded text-xs uppercase transition">
+                        Buscar
+                    </button>
+                </div>
+            </div>
+
+            <!-- Editable Fields Form -->
+            <form id="permitForm" onsubmit="event.preventDefault(); guardarRegistro();" class="space-y-4 text-xs">
+                
+                <div class="bg-neutral-50 p-3 rounded border border-neutral-300 space-y-3">
+                    <h4 class="font-bold text-neutral-900 uppercase tracking-wide text-xs border-b border-neutral-200 pb-1">
+                        <i class="fa-solid fa-user"></i> Datos del Dueño
+                    </h4>
+                    
+                    <div>
+                        <label class="block text-neutral-700 mb-1 font-medium">Nombre Completo del Dueño</label>
+                        <input type="text" id="inpCliente" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                    </div>
+
+                    <div>
+                        <label class="block text-neutral-700 mb-1 font-medium">Número de Identificación / RTN</label>
+                        <input type="text" id="inpIdCliente" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                    </div>
+                </div>
+
+                <div class="bg-neutral-50 p-3 rounded border border-neutral-300 space-y-3">
+                    <h4 class="font-bold text-neutral-900 uppercase tracking-wide text-xs border-b border-neutral-200 pb-1">
+                        <i class="fa-solid fa-motorcycle"></i> Datos de la Moto
+                    </h4>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Marca</label>
+                            <input type="text" id="inpMarca" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Modelo</label>
+                            <input type="text" id="inpModelo" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Año</label>
+                            <input type="text" id="inpAnio" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Cilindraje</label>
+                            <input type="text" id="inpCilindraje" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-neutral-700 mb-1 font-medium">Motor</label>
+                        <input type="text" id="inpMotor" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                    </div>
+
+                    <div>
+                        <label class="block text-neutral-700 mb-1 font-medium">Serie</label>
+                        <input type="text" id="inpSerie" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Color</label>
+                            <input type="text" id="inpColor" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                        <div>
+                            <label class="block text-neutral-700 mb-1 font-medium">Placa</label>
+                            <input type="text" id="inpPlaca" required class="w-full bg-white border border-neutral-300 rounded p-2 text-neutral-900 uppercase focus:outline-none focus:border-neutral-900">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="w-full bg-neutral-900 hover:bg-neutral-800 text-white font-semibold py-2.5 px-4 rounded shadow-sm transition text-xs uppercase tracking-wider flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar en LocalStorage
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <!-- Image Selection Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-neutral-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="bg-white rounded-lg shadow-2xl max-w-md w-full p-6 text-neutral-900 border border-neutral-300">
+            <div class="flex justify-between items-center mb-4 border-b border-neutral-200 pb-3">
+                <h3 class="font-bold text-sm text-neutral-900 uppercase tracking-wide flex items-center gap-2">
+                    <i class="fa-solid fa-image"></i> Seleccionar Imágenes del Equipo
+                </h3>
+                <button onclick="closeImageModal()" class="text-neutral-400 hover:text-neutral-900 font-bold text-xl">&times;</button>
+            </div>
+            
+            <div class="space-y-4 text-xs">
+                <div>
+                    <label class="block font-semibold text-neutral-800 mb-1">Logo Molineros (Cabecera Principal):</label>
+                    <input type="file" id="fileLogoMolineros" accept="image/*" class="w-full border border-neutral-300 rounded p-2 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-neutral-800 mb-1">Logo Ryder (Secundario):</label>
+                    <input type="file" id="fileLogoRyder" accept="image/*" class="w-full border border-neutral-300 rounded p-2 file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-neutral-900 file:text-white hover:file:bg-neutral-800">
+                </div>
+            </div>
+
+            <div class="flex justify-end gap-2 mt-6 border-t border-neutral-200 pt-3">
+                <button type="button" onclick="closeImageModal()" class="bg-white hover:bg-neutral-100 text-neutral-900 border border-neutral-300 px-4 py-2 rounded text-xs font-semibold uppercase">Cancelar</button>
+                <button type="button" onclick="applyLocalImages()" class="bg-neutral-900 hover:bg-neutral-800 text-white px-4 py-2 rounded text-xs font-semibold uppercase shadow-sm">Aplicar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const mesesEspanol = [
+            "ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO",
+            "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"
+        ];
+
+        const defaultRecord = {
+            codigo5: "10001",
+            cliente: "KENNER JOSUE AVILA LOPEZ",
+            idCliente: "0209-2003-02082",
+            marca: "RYDER",
+            modelo: "HC200GY-18",
+            anio: "2026",
+            cilindraje: "200 CC",
+            motor: "169FML26A06640",
+            serie: "LHJYCLLA3TB619295",
+            color: "NEGRO",
+            placa: "EN PROCESO",
+            logoMolineros: "",
+            logoRyder: ""
+        };
+
+        window.onload = function() {
+            setSystemDate();
+            initializeOrLoadLatest();
+        };
+
+        function setSystemDate() {
+            const now = new Date();
+            const diaNum = String(now.getDate()).padStart(2, '0');
+            const mesNombre = mesesEspanol[now.getMonth()];
+            const anioNum = String(now.getFullYear());
+
+            document.getElementById('lblDia').innerText = diaNum;
+            document.getElementById('lblMes').innerText = mesNombre;
+            document.getElementById('lblAnioDoc').innerText = anioNum;
+        }
+
+        function getNextSequentialCode() {
+            let db = {};
+            try { db = JSON.parse(localStorage.getItem('molineros_records_db')) || {}; } catch(e){}
+            const keys = Object.keys(db).map(k => parseInt(k)).filter(n => !isNaN(n));
+            if (keys.length === 0) return "10001";
+            const maxKey = Math.max(...keys);
+            return String(maxKey + 1).padStart(5, '0');
+        }
+
+        function initializeOrLoadLatest() {
+            const activeData = localStorage.getItem('molineros_current_record');
+            let data = defaultRecord;
+            if (activeData) {
+                try { data = JSON.parse(activeData); } catch(e){}
+            } else {
+                data.codigo5 = getNextSequentialCode();
+            }
+            populateForm(data);
+            renderDocument(data);
+        }
+
+        function nuevoPermiso() {
+            const nextCode = getNextSequentialCode();
+            const newRecord = {
+                codigo5: nextCode,
+                cliente: "",
+                idCliente: "",
+                marca: "",
+                modelo: "",
+                anio: "2026",
+                cilindraje: "",
+                motor: "",
+                serie: "",
+                color: "",
+                placa: "EN PROCESO",
+                logoMolineros: "",
+                logoRyder: ""
+            };
+            
+            const currentImgM = document.getElementById('logoMolineros').src;
+            const currentImgR = document.getElementById('logoRyder').src;
+            if (!currentImgM.includes('placehold.co')) newRecord.logoMolineros = currentImgM;
+            if (!currentImgR.includes('placehold.co')) newRecord.logoRyder = currentImgR;
+
+            populateForm(newRecord);
+            renderDocument(newRecord);
+            localStorage.setItem('molineros_current_record', JSON.stringify(newRecord));
+        }
+
+        function populateForm(data) {
+            document.getElementById('inpCodigo5').value = data.codigo5 || "10001";
+            document.getElementById('inpCliente').value = data.cliente || "";
+            document.getElementById('inpIdCliente').value = data.idCliente || "";
+            document.getElementById('inpMarca').value = data.marca || "";
+            document.getElementById('inpModelo').value = data.modelo || "";
+            document.getElementById('inpAnio').value = data.anio || "";
+            document.getElementById('inpCilindraje').value = data.cilindraje || "";
+            document.getElementById('inpMotor').value = data.motor || "";
+            document.getElementById('inpSerie').value = data.serie || "";
+            document.getElementById('inpColor').value = data.color || "";
+            document.getElementById('inpPlaca').value = data.placa || "";
+        }
+
+        function renderDocument(data) {
+            document.getElementById('lblCliente').innerText = data.cliente || "---";
+            document.getElementById('lblIdCliente').innerText = data.idCliente || "---";
+            document.getElementById('lblMarca').innerText = data.marca || "---";
+            document.getElementById('lblModelo').innerText = data.modelo || "---";
+            document.getElementById('lblAnio').innerText = data.anio || "---";
+            document.getElementById('lblCilindraje').innerText = data.cilindraje || "---";
+            document.getElementById('lblMotor').innerText = data.motor || "---";
+            document.getElementById('lblSerie').innerText = data.serie || "---";
+            document.getElementById('lblColor').innerText = data.color || "---";
+            document.getElementById('lblPlaca').innerText = data.placa || "---";
+            document.getElementById('lblCodigoTop').innerText = data.codigo5 || "10001";
+
+            const imgMolineros = document.getElementById('logoMolineros');
+            if (data.logoMolineros && data.logoMolineros.trim() !== "") {
+                imgMolineros.src = data.logoMolineros;
+            } else {
+                imgMolineros.src = "https://placehold.co/400x90/ffffff/000000?text=MOLINEROS+LOGO";
+            }
+
+            const imgRyder = document.getElementById('logoRyder');
+            if (data.logoRyder && data.logoRyder.trim() !== "") {
+                imgRyder.src = data.logoRyder;
+            } else {
+                imgRyder.src = "https://placehold.co/220x45/ffffff/111111?text=RYDER+MOTORCYCLE";
+            }
+        }
+
+        function guardarRegistro() {
+            const codigo5 = document.getElementById('inpCodigo5').value.trim();
+            if (!codigo5 || codigo5.length < 5) {
+                alert("Por favor ingrese un código numérico válido de 5 dígitos.");
+                return;
+            }
+
+            let existingData = {};
+            try { existingData = JSON.parse(localStorage.getItem('molineros_current_record')) || {}; } catch(e){}
+
+            const data = {
+                codigo5: codigo5,
+                cliente: document.getElementById('inpCliente').value.toUpperCase(),
+                idCliente: document.getElementById('inpIdCliente').value.toUpperCase(),
+                marca: document.getElementById('inpMarca').value.toUpperCase(),
+                modelo: document.getElementById('inpModelo').value.toUpperCase(),
+                anio: document.getElementById('inpAnio').value.toUpperCase(),
+                cilindraje: document.getElementById('inpCilindraje').value.toUpperCase(),
+                motor: document.getElementById('inpMotor').value.toUpperCase(),
+                serie: document.getElementById('inpSerie').value.toUpperCase(),
+                color: document.getElementById('inpColor').value.toUpperCase(),
+                placa: document.getElementById('inpPlaca').value.toUpperCase(),
+                logoMolineros: existingData.logoMolineros || "",
+                logoRyder: existingData.logoRyder || ""
+            };
+
+            localStorage.setItem('molineros_current_record', JSON.stringify(data));
+
+            let db = {};
+            try { db = JSON.parse(localStorage.getItem('molineros_records_db')) || {}; } catch(e){}
+            db[codigo5] = data;
+            localStorage.setItem('molineros_records_db', JSON.stringify(db));
+
+            renderDocument(data);
+
+            const submitBtn = document.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Guardado Exitosamente';
+            setTimeout(() => {
+                submitBtn.innerHTML = originalText;
+            }, 2000);
+        }
+
+        function buscarPorCodigo() {
+            const codigo5 = document.getElementById('inpCodigo5').value.trim();
+            if (!codigo5) {
+                alert("Ingrese un código de 5 dígitos para buscar.");
+                return;
+            }
+
+            const savedDb = localStorage.getItem('molineros_records_db');
+            if (savedDb) {
+                try {
+                    const db = JSON.parse(savedDb);
+                    if (db[codigo5]) {
+                        const data = db[codigo5];
+                        populateForm(data);
+                        renderDocument(data);
+                        localStorage.setItem('molineros_current_record', JSON.stringify(data));
+                        alert("¡Registro encontrado y cargado con éxito!");
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Error reading DB", e);
+                }
+            }
+            alert("No se encontró ningún registro guardado con el código: " + codigo5);
+        }
+
+        function imprimirYGuardar() {
+            guardarRegistro();
+            window.print();
+        }
+
+        function openImageModal() {
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        function applyLocalImages() {
+            const fileMolineros = document.getElementById('fileLogoMolineros').files[0];
+            const fileRyder = document.getElementById('fileLogoRyder').files[0];
+
+            let activeData = defaultRecord;
+            const savedCurrent = localStorage.getItem('molineros_current_record');
+            if (savedCurrent) {
+                try { activeData = JSON.parse(savedCurrent); } catch(e){}
+            }
+
+            let pendingReads = 0;
+            if (fileMolineros) pendingReads++;
+            if (fileRyder) pendingReads++;
+
+            if (pendingReads === 0) {
+                closeImageModal();
+                return;
+            }
+
+            if (fileMolineros) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    activeData.logoMolineros = e.target.result;
+                    checkFinish();
+                };
+                reader.readAsDataURL(fileMolineros);
+            }
+
+            if (fileRyder) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    activeData.logoRyder = e.target.result;
+                    checkFinish();
+                };
+                reader.readAsDataURL(fileRyder);
+            }
+
+            function checkFinish() {
+                pendingReads--;
+                if (pendingReads === 0) {
+                    localStorage.setItem('molineros_current_record', JSON.stringify(activeData));
+                    let db = {};
+                    try { db = JSON.parse(localStorage.getItem('molineros_records_db')) || {}; } catch(e){}
+                    if (db[activeData.codigo5]) {
+                        db[activeData.codigo5].logoMolineros = activeData.logoMolineros;
+                        db[activeData.codigo5].logoRyder = activeData.logoRyder;
+                        localStorage.setItem('molineros_records_db', JSON.stringify(db));
+                    }
+                    renderDocument(activeData);
+                    closeImageModal();
+                    alert("¡Imágenes de cabecera actualizadas correctamente!");
+                }
+            }
+        }
+    </script>
+</body>
+</html>
