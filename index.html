@@ -403,29 +403,320 @@
         background: #06685e;
         box-shadow: 0 6px 18px rgba(8, 126, 112, 0.35);
       }
+
+      body {
+        padding: 0;
+        background: var(--canvas);
+        color: var(--ink);
+      }
+
+      #menu-view {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .brand {
+        width: 100%;
+        max-width: none;
+        padding: 15px max(24px, calc((100vw - 1160px) / 2));
+        margin: 0 0 42px;
+        gap: 22px;
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand img {
+        flex: 0 0 auto;
+        width: 240px;
+        height: 54px;
+        max-height: 54px;
+        padding: 0;
+        background: transparent;
+        border: 0;
+        border-radius: 0;
+      }
+
+      .brand-copy {
+        padding-left: 22px;
+        border-left: 1px solid var(--line);
+      }
+
+      .brand h1 {
+        font-size: 15px;
+        line-height: 1.3;
+      }
+
+      .brand p {
+        margin-top: 3px;
+        font-size: 11px;
+      }
+
+      .welcome-badge {
+        margin-bottom: 4px;
+        font-size: 9px;
+        letter-spacing: 1px;
+      }
+
+      .welcome-badge::before {
+        width: 6px;
+        height: 6px;
+      }
+
+      .menu-toolbar,
+      .menu,
+      .footer-text,
+      .empty-state {
+        width: min(calc(100% - 48px), 1160px);
+      }
+
+      .menu-toolbar {
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .menu-heading h2 {
+        font-size: 24px;
+        line-height: 1.25;
+      }
+
+      .menu-heading p {
+        margin-top: 5px;
+        font-size: 13px;
+      }
+
+      .search-wrap {
+        width: min(100%, 340px);
+        flex: 0 1 340px;
+      }
+
+      .search-wrap::before {
+        width: 12px;
+        height: 12px;
+        border: 1.7px solid var(--muted);
+        border-radius: 50%;
+        content: "";
+        transform: translateY(-60%);
+      }
+
+      .search-wrap::after {
+        position: absolute;
+        top: 24px;
+        left: 25px;
+        width: 6px;
+        height: 1.7px;
+        background: var(--muted);
+        content: "";
+        transform: rotate(45deg);
+        transform-origin: left center;
+        pointer-events: none;
+      }
+
+      #menu-search {
+        height: 46px;
+        border-radius: 8px;
+        font-size: 13px;
+      }
+
+      .menu {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .menu-card {
+        min-height: 142px;
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        align-content: start;
+        align-items: start;
+        column-gap: 14px;
+        padding: 19px;
+        border-radius: 8px;
+        box-shadow: 0 2px 7px rgba(28, 43, 50, 0.045);
+      }
+
+      .menu-card:hover {
+        transform: translateY(-2px);
+        border-color: #a8c9be;
+        box-shadow: 0 9px 22px rgba(28, 43, 50, 0.09);
+      }
+
+      .card-icon {
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 44px;
+        height: 44px;
+        margin: 0;
+        border-radius: 8px;
+        font-size: 12px;
+      }
+
+      .menu-card:nth-child(3n + 2) .card-icon {
+        color: #9a641c;
+        background: #fff2dc;
+        border-color: #f1dfbf;
+      }
+
+      .menu-card:nth-child(3n) .card-icon {
+        color: #49658d;
+        background: #eaf0f8;
+        border-color: #d8e1ef;
+      }
+
+      .menu-card:nth-child(3n + 2):hover .card-icon {
+        color: #fff;
+        background: #a76a17;
+        border-color: #a76a17;
+      }
+
+      .menu-card:nth-child(3n):hover .card-icon {
+        color: #fff;
+        background: #49658d;
+        border-color: #49658d;
+      }
+
+      .card-title {
+        grid-column: 2;
+        margin: 1px 0 5px;
+        font-size: 13px;
+        line-height: 1.35;
+      }
+
+      .card-desc {
+        grid-column: 2;
+        font-size: 11px;
+        line-height: 1.55;
+      }
+
+      .card-arrow {
+        grid-column: 2;
+        margin-top: 10px;
+        padding-top: 0;
+        font-size: 10px;
+      }
+
+      .footer-text {
+        margin-top: 26px;
+        margin-bottom: 24px;
+        padding-top: 16px;
+        font-size: 11px;
+      }
+
+      .empty-state {
+        padding: 36px 16px;
+      }
+
+      @media (max-width: 900px) {
+        .menu {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .brand {
+          padding: 13px 18px;
+          margin-bottom: 30px;
+          gap: 14px;
+        }
+
+        .brand img {
+          width: 132px;
+          height: 42px;
+        }
+
+        .brand-copy {
+          padding-left: 14px;
+        }
+
+        .brand h1 {
+          font-size: 12px;
+        }
+
+        .brand p {
+          font-size: 10px;
+        }
+
+        .menu-toolbar,
+        .menu,
+        .footer-text,
+        .empty-state {
+          width: calc(100% - 36px);
+        }
+
+        .menu-toolbar {
+          align-items: stretch;
+          gap: 14px;
+          margin-bottom: 16px;
+        }
+
+        .menu-heading h2 {
+          font-size: 21px;
+        }
+
+        .search-wrap {
+          width: 100%;
+          flex: none;
+        }
+
+        .menu {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .menu-card {
+          min-height: 0;
+          padding: 16px;
+        }
+
+        .card-arrow {
+          margin-top: 8px;
+        }
+
+        .footer-text {
+          line-height: 1.6;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .brand {
+          gap: 10px;
+          padding-inline: 14px;
+        }
+
+        .brand img {
+          width: 108px;
+          height: 38px;
+        }
+
+        .brand-copy {
+          padding-left: 10px;
+        }
+      }
     </style>
   </head>
   <body>
-    <div id="menu-view">
-      <div class="brand">
+    <main id="menu-view">
+      <header class="brand">
         <img
           src="assets/fafYb6c.png"
           alt="Logo Comercial Insular"
         />
         <div class="brand-copy">
-          <div class="welcome-badge">Sistema Comercial</div>
+          <div class="welcome-badge">Portal Comercial</div>
           <h1>Comercial Insular de los Fuertes</h1>
           <p>Roatán, Islas de la Bahía</p>
         </div>
-      </div>
+      </header>
 
       <div class="menu-toolbar">
         <div class="menu-heading">
-          <h2>Aplicaciones y documentos</h2>
-          <p>Acceso rápido a las herramientas del sistema</p>
+          <h2>Herramientas de trabajo</h2>
+          <p>Aplicaciones, consultas y documentos</p>
         </div>
         <div class="search-wrap">
-          <input id="menu-search" type="search" placeholder="Buscar aplicación..." aria-label="Buscar aplicación" />
+          <input id="menu-search" type="search" placeholder="Buscar herramienta..." aria-label="Buscar herramienta" />
         </div>
       </div>
 
@@ -486,7 +777,7 @@
           <div class="card-icon">$</div>
           <div class="card-title">Gestion de llamada</div>
           <div class="card-desc">
-            Consultar la lista actualizada de precios y tarifas de productos.
+            Registrar y dar seguimiento a gestiones de llamadas.
           </div>
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
@@ -545,13 +836,13 @@
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
       </div>
-      <div id="empty-state" class="empty-state" role="status">No se encontraron aplicaciones con ese nombre.</div>
+      <div id="empty-state" class="empty-state" role="status">No se encontraron herramientas con ese nombre.</div>
 
       <div class="footer-text">
         Sistema de Documentos Internos &nbsp;&bull;&nbsp; Comercial Insular de
         los Fuertes
       </div>
-    </div>
+    </main>
 
     <button id="btn-back" onclick="volverMenu()">&#8592; Volver al Menu</button>
     <iframe id="app-frame" title="Aplicacion"></iframe>
