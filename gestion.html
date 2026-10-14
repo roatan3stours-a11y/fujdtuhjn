@@ -3949,7 +3949,7 @@ function abrirModalCalificacion(contexto) {
           }
 
           const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
-          const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=${encodeURIComponent(mensaje)}`;
+          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
           window.open(url, '_blank');
         })
         .catch(() => {
@@ -3960,7 +3960,7 @@ function abrirModalCalificacion(contexto) {
           }
 
           const mensaje = generarTextoInvitacionCliente(cliente, { nombre: 'Vendedor', celular: 'Sin celular' });
-          const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=${encodeURIComponent(mensaje)}`;
+          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
           window.open(url, '_blank');
         });
     }
