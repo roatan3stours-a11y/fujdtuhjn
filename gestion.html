@@ -4068,9 +4068,27 @@ function abrirModalCalificacion(contexto) {
     }
 
     function enviarInvitacionWhatsApp() {
-      const id = document.getElementById('info-cliente-id').value || document.getElementById('accion-modal-id').value;
-      const origenId = document.getElementById('info-cliente-origen').value || document.getElementById('accion-modal-origen').value || 'guardados';
-      const cliente = obtenerClientePorId(id);
+      const modalInfo = document.getElementById('modal-info-cliente');
+      const modalAcciones = document.getElementById('modal-acciones');
+      const modalCarta = document.getElementById('modal-carta-config');
+      let id;
+      let origenId;
+
+      if (modalInfo.classList.contains('active')) {
+        id = document.getElementById('info-cliente-id').value;
+        origenId = document.getElementById('info-cliente-origen').value;
+      } else if (modalAcciones.classList.contains('active')) {
+        id = document.getElementById('accion-modal-id').value;
+        origenId = document.getElementById('accion-modal-origen').value;
+      } else if (modalCarta.classList.contains('active')) {
+        id = document.getElementById('carta-cliente-id').value;
+      } else {
+        id = document.getElementById('info-cliente-id').value || document.getElementById('accion-modal-id').value;
+        origenId = document.getElementById('info-cliente-origen').value || document.getElementById('accion-modal-origen').value;
+      }
+
+      origenId = origenId || 'guardados';
+      const cliente = (id && mapListName(origenId).find((registro) => registro.id === id)) || obtenerClientePorId(id);
 
       if (!id || !cliente) {
         showToast('No hay cliente seleccionado');
@@ -4093,9 +4111,26 @@ function abrirModalCalificacion(contexto) {
       const abrirWhatsApp = (vendedor) => {
         const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
         const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=${encodeURIComponent(mensaje)}`;
+        const siguienteCliente = obtenerSiguienteClienteEnLista(origenId, id, 1);
+
         ventanaWhatsApp.location.href = url;
+        if (origenId !== 'gestionadowhatsapp') {
+          moverClienteDinamico(id, origenId, 'gestionadowhatsapp');
+        }
         cerrarModalInfo();
-        abrirSiguienteClienteTrasAccion(origenId, id);
+        cerrarModalAcciones();
+
+        if (siguienteCliente && siguienteCliente.id !== id) {
+          abrirModalInfoCliente(
+            siguienteCliente.id,
+            siguienteCliente.nombre,
+            siguienteCliente.numero,
+            siguienteCliente.dni,
+            siguienteCliente.categoria,
+            siguienteCliente.credito,
+            origenId,
+          );
+        }
       };
 
       abrirBaseDatosCarta()
