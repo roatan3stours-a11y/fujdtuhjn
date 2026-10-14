@@ -4093,7 +4093,7 @@ function abrirModalCalificacion(contexto) {
 
           const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
           const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
-          window.open(url, '_blank');
+          window.location.assign(url);
           cerrarModalInfo();
           abrirSiguienteClienteTrasAccion(origenId, id);
         })
@@ -4106,7 +4106,7 @@ function abrirModalCalificacion(contexto) {
 
           const mensaje = generarTextoInvitacionCliente(cliente, { nombre: 'Vendedor', celular: 'Sin celular' });
           const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
-          window.open(url, '_blank');
+          window.location.assign(url);
           cerrarModalInfo();
           abrirSiguienteClienteTrasAccion(origenId, id);
         });
