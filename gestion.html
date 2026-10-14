@@ -4077,38 +4077,37 @@ function abrirModalCalificacion(contexto) {
         return;
       }
 
+      const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
+      if (!numeroCliente) {
+        alert('Este cliente no tiene número de teléfono para enviar el mensaje.');
+        return;
+      }
+
+      const ventanaWhatsApp = window.open('about:blank', '_blank');
+      if (!ventanaWhatsApp) {
+        alert('El navegador bloqueó la apertura de WhatsApp. Permite las ventanas emergentes para este sitio e inténtalo de nuevo.');
+        return;
+      }
+      ventanaWhatsApp.opener = null;
+
+      const abrirWhatsApp = (vendedor) => {
+        const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
+        const url = `https://api.whatsapp.com/send?phone=${numeroCliente}&text=${encodeURIComponent(mensaje)}`;
+        ventanaWhatsApp.location.href = url;
+        cerrarModalInfo();
+        abrirSiguienteClienteTrasAccion(origenId, id);
+      };
+
       abrirBaseDatosCarta()
         .then((db) => leerDatosVendedor(db))
         .then((datos) => {
-          const vendedor = {
+          abrirWhatsApp({
             nombre: datos && datos.nombre ? datos.nombre : 'Vendedor',
             celular: datos && datos.celular ? datos.celular : 'Sin celular',
-          };
-
-          const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
-          if (!numeroCliente) {
-            alert('Este cliente no tiene número de teléfono para enviar el mensaje.');
-            return;
-          }
-
-          const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
-          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
-          window.top.location.href = url;
-          cerrarModalInfo();
-          abrirSiguienteClienteTrasAccion(origenId, id);
+          });
         })
         .catch(() => {
-          const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
-          if (!numeroCliente) {
-            alert('Este cliente no tiene número de teléfono para enviar el mensaje.');
-            return;
-          }
-
-          const mensaje = generarTextoInvitacionCliente(cliente, { nombre: 'Vendedor', celular: 'Sin celular' });
-          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
-          window.top.location.href = url;
-          cerrarModalInfo();
-          abrirSiguienteClienteTrasAccion(origenId, id);
+          abrirWhatsApp({ nombre: 'Vendedor', celular: 'Sin celular' });
         });
     }
 
