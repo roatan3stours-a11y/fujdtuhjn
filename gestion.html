@@ -2004,6 +2004,16 @@
         <input type="hidden" id="info-cliente-id" value="" />
         <input type="hidden" id="info-cliente-origen" value="guardados" />
 
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; margin-bottom: 8px;">
+          <button class="btn-primary" type="button" style="padding: 10px 12px; min-width: 44px; background: #e5e7eb; color: #111827;" onclick="navegarClienteInfo(-1)" aria-label="Cliente anterior">
+            <i class="bx bx-chevron-left"></i>
+          </button>
+          <div style="font-size: 0.8rem; font-weight: 700; color: #6b7280; letter-spacing: 0.08em; text-transform: uppercase;">Cliente</div>
+          <button class="btn-primary" type="button" style="padding: 10px 12px; min-width: 44px; background: #e5e7eb; color: #111827;" onclick="navegarClienteInfo(1)" aria-label="Cliente siguiente">
+            <i class="bx bx-chevron-right"></i>
+          </button>
+        </div>
+
         <div style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.95fr); gap: 20px; padding: 18px 8px 8px;">
           <div style="text-align: left;">
             <h3 id="info-nombre" style="font-size: 1.35rem; font-weight: 700; color: #1f2937; margin: 0 0 12px;">Nombre Cliente</h3>
@@ -3321,11 +3331,13 @@
         if (destinoId === "borrar") {
           eliminarClienteDinamico(id, origenId);
           cerrarModalAcciones();
+          abrirSiguienteClienteTrasAccion(origenId, id);
           return;
         }
 
         moverClienteDinamico(id, origenId, destinoId);
         cerrarModalAcciones();
+        abrirSiguienteClienteTrasAccion(origenId, id);
       }
 
       function abrirModalObservacion() {
@@ -3371,6 +3383,7 @@
           cerrarModalObservacion();
           renderTodasLasTablas();
           showToast("Observación guardada");
+          abrirSiguienteClienteTrasAccion(origenId, id);
         }
       }
 
@@ -3426,6 +3439,7 @@
           cerrarModal();
           renderTodasLasTablas();
           showToast("Asignado a: Sí Interesados");
+          abrirSiguienteClienteTrasAccion(origenId, id);
         }
       }
 
@@ -3858,6 +3872,70 @@ function abrirModalCalificacion(contexto) {
         document.getElementById("calif-contexto-origen").value = contexto;
         document.getElementById("modal-calificacion").classList.add("active");
       }
+    function obtenerSiguienteClienteEnLista(origenId, clienteId, sentido) {
+      const lista = Array.isArray(mapListName(origenId)) ? mapListName(origenId) : [];
+      if (!lista.length) return null;
+
+      const indexActual = lista.findIndex((cliente) => cliente.id === clienteId);
+      let siguienteIndex = 0;
+
+      if (indexActual === -1) {
+        siguienteIndex = sentido > 0 ? 0 : lista.length - 1;
+      } else {
+        siguienteIndex = indexActual + sentido;
+        if (siguienteIndex >= lista.length) siguienteIndex = 0;
+        if (siguienteIndex < 0) siguienteIndex = lista.length - 1;
+      }
+
+      return lista[siguienteIndex] || null;
+    }
+
+    function abrirSiguienteClienteTrasAccion(origenId, clienteId) {
+      const origen = origenId || document.getElementById('info-cliente-origen').value || 'guardados';
+      const origenLista = mapListName(origen);
+
+      if (!Array.isArray(origenLista) || origenLista.length === 0) {
+        cerrarModalInfo();
+        return;
+      }
+
+      const siguienteCliente = obtenerSiguienteClienteEnLista(origen, clienteId, 1);
+      if (!siguienteCliente) {
+        cerrarModalInfo();
+        return;
+      }
+
+      document.getElementById('info-cliente-origen').value = origen;
+      abrirModalInfoCliente(
+        siguienteCliente.id,
+        siguienteCliente.nombre,
+        siguienteCliente.numero,
+        siguienteCliente.dni,
+        siguienteCliente.categoria,
+        siguienteCliente.credito,
+      );
+    }
+
+    function navegarClienteInfo(sentido) {
+      const origenId = document.getElementById('info-cliente-origen').value || 'guardados';
+      const clienteId = document.getElementById('info-cliente-id').value;
+      const siguienteCliente = obtenerSiguienteClienteEnLista(origenId, clienteId, sentido);
+
+      if (!siguienteCliente) {
+        showToast('No hay más clientes en esta lista');
+        return;
+      }
+
+      abrirModalInfoCliente(
+        siguienteCliente.id,
+        siguienteCliente.nombre,
+        siguienteCliente.numero,
+        siguienteCliente.dni,
+        siguienteCliente.categoria,
+        siguienteCliente.credito,
+      );
+    }
+
 // Función para abrir el modal con la información del cliente y las acciones
     function abrirModalInfoCliente(id, nombre, telefono, dni, categoria, credito) {
       document.getElementById('info-cliente-id').value = id || '';
@@ -3927,6 +4005,7 @@ function abrirModalCalificacion(contexto) {
 
     function enviarInvitacionWhatsApp() {
       const id = document.getElementById('info-cliente-id').value || document.getElementById('accion-modal-id').value;
+      const origenId = document.getElementById('info-cliente-origen').value || document.getElementById('accion-modal-origen').value || 'guardados';
       const cliente = obtenerClientePorId(id);
 
       if (!id || !cliente) {
@@ -3951,6 +4030,8 @@ function abrirModalCalificacion(contexto) {
           const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
           const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
           window.open(url, '_blank');
+          cerrarModalInfo();
+          abrirSiguienteClienteTrasAccion(origenId, id);
         })
         .catch(() => {
           const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
@@ -3962,6 +4043,8 @@ function abrirModalCalificacion(contexto) {
           const mensaje = generarTextoInvitacionCliente(cliente, { nombre: 'Vendedor', celular: 'Sin celular' });
           const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
           window.open(url, '_blank');
+          cerrarModalInfo();
+          abrirSiguienteClienteTrasAccion(origenId, id);
         });
     }
 
