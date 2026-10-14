@@ -694,6 +694,17 @@
       .btn-guardados:hover {
         background: #e0e7ff;
       }
+      .btn-success {
+        background: #10b981;
+        color: white;
+        border: 1px solid #34d399;
+      }
+      .btn-success:hover {
+        background: #059669;
+      }
+      .btn-success i {
+        color: white;
+      }
       .btn-nocontesto {
         background: #f3f4f6;
         color: #4b5563;
@@ -1984,7 +1995,7 @@
 
 <!-- MODAL DE INFORMACIÓN Y QR -->
     <div class="modal-overlay" id="modal-info-cliente">
-      <div class="modal-content" style="max-width: 350px; text-align: center;">
+      <div class="modal-content" style="max-width: 840px; width: min(92vw, 840px);">
         <div class="modal-header">
           <span>Información del Cliente</span>
           <i class="bx bx-x close-modal" onclick="cerrarModalInfo()"></i>
@@ -1993,38 +2004,83 @@
         <input type="hidden" id="info-cliente-id" value="" />
         <input type="hidden" id="info-cliente-origen" value="guardados" />
 
-        <div style="padding: 10px 0;">
-          <h3 id="info-nombre" style="font-size: 1.25rem; font-weight: 700; color: #1f2937; margin-bottom: 5px;">Nombre Cliente</h3>
-          <p id="info-telefono" style="font-size: 1.1rem; color: #2563eb; font-weight: 600; margin-bottom: 5px;">
-            <i class="bx bx-phone"></i> <span>0000-0000</span>
-          </p>
-          <p id="info-dni" style="font-size: 0.9rem; color: #374151; margin: 8px 0 12px; font-weight: 600;">
-            <i class="bx bx-id-card"></i>
-            <span id="info-dni-value" style="text-decoration: underline; cursor: pointer;">No provisto</span>
-          </p>
-          <p id="info-detalles" style="font-size: 0.9rem; color: #6b7280; margin-bottom: 20px; font-weight: 500;">Categoría: Oro | Crédito: Activo</p>
+        <div style="display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.95fr); gap: 20px; padding: 18px 8px 8px;">
+          <div style="text-align: left;">
+            <h3 id="info-nombre" style="font-size: 1.35rem; font-weight: 700; color: #1f2937; margin: 0 0 12px;">Nombre Cliente</h3>
+            <p id="info-telefono" style="font-size: 1.12rem; color: #2563eb; font-weight: 600; margin: 0 0 10px;">
+              <i class="bx bx-phone"></i>
+              <span id="info-telefono-value" style="cursor: pointer; text-decoration: underline;" onclick="copiarTelefonoInfo()" title="Haz clic para copiar el teléfono">0000-0000</span>
+            </p>
+            <p id="info-dni" style="font-size: 0.95rem; color: #374151; margin: 0 0 12px; font-weight: 600;">
+              <i class="bx bx-id-card"></i>
+              <span id="info-dni-value" style="text-decoration: underline; cursor: pointer;" onclick="copiarDniPanel('info-dni-value')">No provisto</span>
+            </p>
+            <p id="info-detalles" style="font-size: 0.95rem; color: #6b7280; margin: 0 0 18px; font-weight: 500;">Categoría: Oro | Crédito: Activo</p>
 
-          <div style="display: flex; justify-content: center; margin-bottom: 10px;">
-            <!-- La imagen del QR se generará dinámicamente aquí -->
-            <img id="info-qr" src="" alt="Código QR para llamar" style="width: 180px; height: 180px; border: 2px solid #e5e7eb; border-radius: 12px; padding: 10px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);" />
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+              <button class="btn-primary" style="flex: 1 1 180px; background-color: #0f766e;" onclick="copiarDniPanel('info-dni-value')">
+                <i class="bx bx-copy"></i> Copiar DNI
+              </button>
+              <button class="btn-primary" style="flex: 1 1 180px; background-color: #2563eb;" onclick="copiarTelefonoInfo()">
+                <i class="bx bx-copy"></i> Copiar Teléfono
+              </button>
+            </div>
           </div>
-          <p style="font-size: 0.85rem; color: #9ca3af;">
-            <i class="bx bx-scan"></i> Escanea para marcar rápidamente
-          </p>
-        </div>
 
-        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #0f766e;" onclick="copiarDniPanel('info-dni-value')">
-          <i class="bx bx-copy"></i> Copiar DNI
-        </button>
-        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #2563eb;" onclick="abrirAccionesDesdeInfo()">
-          <i class="bx bx-dots-horizontal-rounded"></i> Más acciones
-        </button>
-        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #14b8a6;" onclick="abrirModalCartaDesdeInfo()">
-          <i class="bx bx-file"></i> Generar Carta
-        </button>
-        <button class="btn-primary" style="width: 100%; margin-top: 10px; background-color: #ef4444;" onclick="cerrarModalInfo()">
-          Cerrar
-        </button>
+          <div style="background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 16px; padding: 16px;">
+            <h4 style="margin: 0 0 12px; font-size: 1rem; color: #111827; text-align: left;">Selecciona una acción</h4>
+
+            <div class="modal-body" style="display: grid; grid-template-columns: 1fr; gap: 10px; padding: 0;">
+              <button class="btn-action btn-guardados" id="accion-btn-guardar-info" onclick="ejecutarAccionModal('guardados')">
+                <i class="bx bx-folder-open"></i> Guardar
+              </button>
+
+              <button class="btn-action btn-interesa" id="accion-btn-interesa-info" onclick="ejecutarAccionModal('interesa')">
+                <i class="bx bx-shopping-bag"></i> Interesa
+              </button>
+
+              <button class="btn-action btn-vendido" id="accion-btn-vendido-info" onclick="ejecutarAccionModal('vendido')">
+                <i class="bx bx-check-circle"></i> Vendido
+              </button>
+
+              <button class="btn-action btn-nointeres" id="accion-btn-nointeres-info" onclick="ejecutarAccionModal('nointeres')">
+                <i class="bx bx-face-sad"></i> No le interesa por el momento
+              </button>
+
+              <button class="btn-action btn-nocontesto" id="accion-btn-nocontesto-info" onclick="ejecutarAccionModal('nocontesto')">
+                <i class="bx bx-phone-off"></i> No contestó
+              </button>
+
+              <button class="btn-action btn-espera" id="accion-btn-enespera-info" onclick="ejecutarAccionModal('enespera')">
+                <i class="bx bx-time"></i> En espera
+              </button>
+
+              <button class="btn-action btn-sobregirados" id="accion-btn-sobregirados-info" onclick="ejecutarAccionModal('sobregirados')">
+                <i class="bx bx-transfer-alt"></i> Sobregirados
+              </button>
+
+              <button class="btn-action btn-gestionado-whatsapp" id="accion-btn-gestionadowhatsapp-info" onclick="ejecutarAccionModal('gestionadowhatsapp')">
+                <i class="bx bx-message-dots"></i> Gestionado por WhatsApp
+              </button>
+
+              <button class="btn-action btn-observacion" id="accion-btn-observacion-info" onclick="abrirModalObservacion()">
+                <i class="bx bx-note"></i> Observación
+              </button>
+
+              <button class="btn-action btn-guardados" id="accion-btn-editar-numero-info" onclick="abrirModalEditarNumero()">
+                <i class="bx bx-edit-alt"></i> Editar número
+              </button>
+
+              <button class="btn-action btn-success" onclick="enviarInvitacionWhatsApp()">
+                <i class="bx bx-message-square-detail"></i> Enviar MSJ por WhatsApp
+              </button>
+
+              <button class="btn-action btn-erroneo" onclick="ejecutarAccionModal('borrar')">
+                <i class="bx bx-trash"></i> Borrar
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -2057,8 +2113,8 @@
           />
         </div>
 
-        <button class="btn-primary" style="width: 100%; margin-top: 18px;" onclick="guardarYGenerarCarta()">
-          <i class="bx bx-printer"></i> Generar carta lista para imprimir
+        <button class="btn-primary" style="width: 100%; margin-top: 18px; background: #10b981;" onclick="enviarInvitacionWhatsApp()">
+          <i class="bx bx-message-square-detail"></i> Enviar MSJ por WhatsApp
         </button>
       </div>
     </div>
@@ -2222,10 +2278,10 @@
           </button>
 
           <button
-            class="btn-action btn-guardados"
-            onclick="abrirGenerarCartaDesdeAccion()"
+            class="btn-action btn-success"
+            onclick="enviarInvitacionWhatsApp()"
           >
-            <i class="bx bx-file"></i> Generar Carta
+            <i class="bx bx-message-square-detail"></i> Enviar MSJ por WhatsApp
           </button>
 
           <button
@@ -3802,37 +3858,111 @@ function abrirModalCalificacion(contexto) {
         document.getElementById("calif-contexto-origen").value = contexto;
         document.getElementById("modal-calificacion").classList.add("active");
       }
-// Función para abrir el modal con la información y el QR
+// Función para abrir el modal con la información del cliente y las acciones
     function abrirModalInfoCliente(id, nombre, telefono, dni, categoria, credito) {
       document.getElementById('info-cliente-id').value = id || '';
       document.getElementById('info-cliente-origen').value = 'guardados';
+      document.getElementById('accion-modal-id').value = id || '';
+      document.getElementById('accion-modal-origen').value = 'guardados';
 
-      // 1. Asignar los textos
-      document.getElementById('info-nombre').innerText = nombre || 'Sin Nombre';
-      document.getElementById('info-telefono').innerHTML = `<i class="bx bx-phone"></i> ${telefono || 'Sin número'}`;
-      document.getElementById('info-dni-value').innerText = dni || 'No provisto';
-      document.getElementById('info-dni-value').onclick = () => ejecutarCopiado(dni || 'No provisto');
+      const nombreCliente = nombre || 'Sin Nombre';
+      const numeroTelefono = telefono || 'Sin número';
+      const dniCliente = dni || 'No provisto';
 
-      // 2. Construir los detalles (si no hay datos, se oculta o se pone genérico)
+      document.getElementById('info-nombre').innerText = nombreCliente;
+      const telefonoValue = document.getElementById('info-telefono-value');
+      telefonoValue.innerText = numeroTelefono;
+      telefonoValue.dataset.telefono = numeroTelefono === 'Sin número' ? '' : numeroTelefono;
+      telefonoValue.style.cursor = numeroTelefono === 'Sin número' ? 'default' : 'pointer';
+
+      const dniValue = document.getElementById('info-dni-value');
+      dniValue.innerText = dniCliente;
+      dniValue.dataset.dni = dniCliente;
+      dniValue.onclick = () => ejecutarCopiado(dni || 'No provisto');
+
       let detalles = [];
       if (categoria) detalles.push(`Categoría: ${categoria}`);
       if (credito) detalles.push(`Crédito: ${credito}`);
-      document.getElementById('info-detalles').innerText = detalles.join(' | ');
+      document.getElementById('info-detalles').innerText = detalles.length > 0 ? detalles.join(' | ') : 'Sin información adicional';
 
-      // 3. Generar el QR usando la API de qrserver
-      if (telefono) {
-        // Limpiamos el teléfono (quitamos espacios o guiones para que el celular lo lea bien)
-        let telLimpio = telefono.toString().replace(/[^0-9+]/g, '');
-        // Usamos tel: para que el celular sepa que es una llamada
-        let qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=tel:${telLimpio}`;
-        document.getElementById('info-qr').src = qrUrl;
-        document.getElementById('info-qr').style.display = 'block';
-      } else {
-        document.getElementById('info-qr').style.display = 'none'; // Ocultar si no hay número
+      document.getElementById('modal-info-cliente').classList.add('active');
+    }
+
+    function copiarTelefonoInfo() {
+      const telefonoValue = document.getElementById('info-telefono-value');
+      const texto = (telefonoValue && telefonoValue.dataset.telefono) || telefonoValue?.innerText || '';
+      if (!texto || texto === 'Sin número') {
+        showToast('No hay teléfono para copiar');
+        return;
+      }
+      ejecutarCopiado(texto);
+    }
+
+    function normalizarTelefonoWhatsApp(telefono) {
+      const limpio = String(telefono || '').replace(/[^0-9]/g, '');
+      if (!limpio) return '';
+      if (limpio.startsWith('52') && limpio.length > 10) return limpio;
+      if (limpio.length === 10) return `52${limpio}`;
+      return limpio;
+    }
+
+    function generarTextoInvitacionCliente(cliente, vendedor) {
+      const nombreCliente = cliente && cliente.nombre ? cliente.nombre : 'Cliente';
+      const nombreVendedor = vendedor && vendedor.nombre ? vendedor.nombre : 'Vendedor';
+      const celularVendedor = vendedor && vendedor.celular ? vendedor.celular : 'Sin celular';
+
+      return [
+        `Estimado/a ${nombreCliente},`,
+        '',
+        'Queremos tomarnos un momento para agradecerle sinceramente por su reciente compra en Molineros Comercial. Para nosotros, cada cliente es parte fundamental de nuestra familia y el motor que nos impulsa a seguir mejorando día a día.',
+        'Sabemos que tenía muchas opciones, y nos llena de orgullo y alegría que nos haya elegido. Esperamos que su producto supere todas sus expectativas y le sea de gran utilidad.',
+        'Estaremos encantados de atenderle nuevamente muy pronto. Si tiene alguna duda, comentario o necesita asesoría con algún otro producto, nuestro equipo está siempre a su completa disposición.',
+        '¡Gracias nuevamente por su confianza y preferencia!',
+        'Atentamente,',
+        'El equipo de Molineros Comercial',
+        `📞 ${celularVendedor}`,
+        `Vendedor: ${nombreVendedor}`,
+      ].join('\n\n');
+    }
+
+    function enviarInvitacionWhatsApp() {
+      const id = document.getElementById('info-cliente-id').value || document.getElementById('accion-modal-id').value;
+      const cliente = obtenerClientePorId(id);
+
+      if (!id || !cliente) {
+        showToast('No hay cliente seleccionado');
+        return;
       }
 
-      // 4. Mostrar el modal
-      document.getElementById('modal-info-cliente').classList.add('active');
+      abrirBaseDatosCarta()
+        .then((db) => leerDatosVendedor(db))
+        .then((datos) => {
+          const vendedor = {
+            nombre: datos && datos.nombre ? datos.nombre : 'Vendedor',
+            celular: datos && datos.celular ? datos.celular : 'Sin celular',
+          };
+
+          const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
+          if (!numeroCliente) {
+            alert('Este cliente no tiene número de teléfono para enviar el mensaje.');
+            return;
+          }
+
+          const mensaje = generarTextoInvitacionCliente(cliente, vendedor);
+          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
+          window.open(url, '_blank');
+        })
+        .catch(() => {
+          const numeroCliente = normalizarTelefonoWhatsApp(cliente.numero || document.getElementById('info-telefono-value')?.dataset.telefono || '');
+          if (!numeroCliente) {
+            alert('Este cliente no tiene número de teléfono para enviar el mensaje.');
+            return;
+          }
+
+          const mensaje = generarTextoInvitacionCliente(cliente, { nombre: 'Vendedor', celular: 'Sin celular' });
+          const url = `https://wa.me/${numeroCliente}?text=${encodeURIComponent(mensaje)}`;
+          window.open(url, '_blank');
+        });
     }
 
     function abrirAccionesDesdeInfo() {
@@ -3844,27 +3974,17 @@ function abrirModalCalificacion(contexto) {
         return;
       }
 
-      cerrarModalInfo();
-      abrirModalAcciones(id, origen);
+      document.getElementById('accion-modal-id').value = id;
+      document.getElementById('accion-modal-origen').value = origen;
+      document.getElementById('modal-info-cliente').classList.add('active');
     }
 
     function abrirModalCartaDesdeInfo() {
-      const id = document.getElementById('info-cliente-id').value;
-      if (!id) {
-        showToast('No hay cliente seleccionado');
-        return;
-      }
-      abrirModalCarta(id);
+      enviarInvitacionWhatsApp();
     }
 
     function abrirGenerarCartaDesdeAccion() {
-      const id = document.getElementById('accion-modal-id').value;
-      if (!id) {
-        showToast('No hay cliente seleccionado');
-        return;
-      }
-      cerrarModalAcciones();
-      abrirModalCarta(id);
+      enviarInvitacionWhatsApp();
     }
 
     function abrirModalCarta(clienteId) {
