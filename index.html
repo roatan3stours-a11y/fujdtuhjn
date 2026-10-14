@@ -6,6 +6,7 @@
     <title>Sistema Comercial Insular de los Fuertes</title>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap");
+
       *,
       *::before,
       *::after {
@@ -29,11 +30,12 @@
       body {
         font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
         background: var(--canvas);
+        color: var(--ink);
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         align-items: center;
-        padding: 54px 24px 32px;
+        padding: 0;
         position: relative;
         overflow-x: hidden;
       }
@@ -50,7 +52,7 @@
         z-index: 10;
       }
 
-      /* Patron de fondo sutil */
+      /* Patrón de fondo sutil */
       body::after {
         content: "";
         position: fixed;
@@ -66,44 +68,38 @@
         z-index: 0;
       }
 
-      .brand {
-        width: min(100%, 1120px);
+      #menu-view {
+        width: 100%;
         display: flex;
+        flex-direction: column;
         align-items: center;
-        gap: 22px;
-        margin-bottom: 32px;
         position: relative;
         z-index: 1;
       }
 
-      .brand-copy {
-        flex: 1;
+      .brand {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        padding: 18px 24px;
+        margin: 0 0 32px;
+        gap: 22px;
+        background: var(--paper);
+        border-bottom: 1px solid var(--line);
       }
 
       .brand img {
-        width: 150px;
-        height: 76px;
+        flex: 0 0 auto;
+        width: 180px;
+        height: 54px;
         object-fit: contain;
         display: block;
-        padding: 8px;
-        background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 8px;
       }
 
-      .brand h1 {
-        color: var(--ink);
-        font-size: 25px;
-        font-weight: 800;
-        letter-spacing: 0;
-        line-height: 1.4;
-      }
-
-      .brand p {
-        color: var(--muted);
-        font-size: 13px;
-        margin-top: 6px;
-        font-weight: 500;
+      .brand-copy {
+        flex: 1;
+        padding-left: 22px;
+        border-left: 1px solid var(--line);
       }
 
       .welcome-badge {
@@ -111,65 +107,84 @@
         align-items: center;
         gap: 8px;
         color: var(--accent);
-        font-size: 10px;
+        font-size: 9px;
         font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 1.2px;
-        margin-bottom: 8px;
+        letter-spacing: 1px;
+        margin-bottom: 4px;
       }
 
       .welcome-badge::before {
         content: "";
-        width: 7px;
-        height: 7px;
+        width: 6px;
+        height: 6px;
         background: var(--gold);
         border-radius: 50%;
       }
 
+      .brand h1 {
+        color: var(--ink);
+        font-size: 16px;
+        font-weight: 800;
+        line-height: 1.3;
+      }
+
+      .brand p {
+        color: var(--muted);
+        font-size: 11px;
+        margin-top: 3px;
+        font-weight: 500;
+      }
+
+      .menu-toolbar,
+      .menu,
+      .footer-text,
+      .empty-state {
+        width: min(100% - 48px, 1160px);
+      }
+
       .menu-toolbar {
-        width: min(100%, 1120px);
         display: flex;
         justify-content: space-between;
-        align-items: end;
+        align-items: center;
         gap: 20px;
-        margin-bottom: 16px;
-        position: relative;
-        z-index: 1;
+        margin-bottom: 20px;
       }
 
       .menu-heading h2 {
         color: var(--ink);
-        font-size: 17px;
+        font-size: 22px;
         font-weight: 700;
       }
 
       .menu-heading p {
         color: var(--muted);
-        font-size: 12px;
+        font-size: 13px;
         margin-top: 3px;
       }
 
       .search-wrap {
         position: relative;
-        width: min(100%, 300px);
+        width: min(100%, 340px);
+        flex: 0 1 340px;
       }
 
       .search-wrap::before {
         content: "⌕";
         position: absolute;
-        left: 12px;
+        left: 14px;
         top: 50%;
-        transform: translateY(-54%);
+        transform: translateY(-50%);
         color: var(--muted);
-        font-size: 21px;
+        font-size: 18px;
         pointer-events: none;
       }
 
       #menu-search {
         width: 100%;
-        height: 42px;
+        height: 44px;
         border: 1px solid var(--line);
-        border-radius: 6px;
+        border-radius: 8px;
         background: var(--paper);
         color: var(--ink);
         font: inherit;
@@ -185,30 +200,25 @@
       }
 
       .menu {
-        width: min(100%, 1120px);
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 12px;
-        position: relative;
-        z-index: 1;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
       }
 
       .menu-card {
-        min-height: 176px;
         background: var(--paper);
         border: 1px solid var(--line);
-        border-radius: 7px;
-        padding: 19px 18px 16px;
+        border-radius: 8px;
+        padding: 18px;
         text-decoration: none;
         color: var(--ink);
-        transition:
-          transform 0.18s ease,
-          box-shadow 0.18s ease,
-          border-color 0.18s ease;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
         cursor: pointer;
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: 44px minmax(0, 1fr);
+        grid-template-rows: auto auto auto;
+        align-items: start;
+        column-gap: 14px;
         box-shadow: 0 1px 2px rgba(28, 43, 50, 0.035);
         position: relative;
         overflow: hidden;
@@ -229,21 +239,18 @@
         outline-offset: 2px;
       }
 
-      .menu-card:active {
-        transform: translateY(0);
-      }
-
       .card-icon {
-        width: 38px;
-        height: 38px;
+        grid-column: 1;
+        grid-row: 1 / 4;
+        width: 44px;
+        height: 44px;
         background: var(--accent-soft);
         border: 1px solid #d6e9e1;
-        border-radius: 6px;
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-bottom: 14px;
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 800;
         color: var(--accent);
       }
@@ -255,116 +262,51 @@
       }
 
       .card-title {
+        grid-column: 2;
         font-size: 13px;
         font-weight: 700;
-        margin-bottom: 5px;
+        margin-bottom: 4px;
         color: var(--ink);
+        line-height: 1.35;
       }
 
       .card-desc {
+        grid-column: 2;
         font-size: 11px;
         color: var(--muted);
-        line-height: 1.55;
+        line-height: 1.5;
         font-weight: 400;
       }
 
       .card-arrow {
+        grid-column: 2;
         display: block;
-        margin-top: auto;
-        padding-top: 12px;
+        margin-top: 8px;
         font-size: 10px;
         font-weight: 700;
         color: var(--accent);
       }
 
       .footer-text {
-        width: min(100%, 1120px);
-        margin-top: 22px;
-        padding-top: 14px;
+        margin-top: 32px;
+        margin-bottom: 24px;
+        padding-top: 16px;
         border-top: 1px solid var(--line);
         color: var(--muted);
         font-size: 11px;
-        position: relative;
-        z-index: 1;
         font-weight: 500;
+        text-align: center;
       }
 
       .empty-state {
         display: none;
-        width: min(100%, 1120px);
-        padding: 28px 16px;
+        padding: 36px 16px;
         color: var(--muted);
         text-align: center;
         font-size: 13px;
       }
 
-      @media (max-width: 900px) {
-        .menu {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-        }
-      }
-
-      @media (max-width: 640px) {
-        body {
-          padding: 34px 16px 24px;
-        }
-
-        .brand {
-          align-items: flex-start;
-          gap: 14px;
-          margin-bottom: 24px;
-        }
-
-        .brand img {
-          width: 88px;
-          height: 62px;
-        }
-
-        .brand h1 {
-          font-size: 18px;
-        }
-
-        .brand p {
-          font-size: 11px;
-        }
-
-        .menu-toolbar {
-          align-items: stretch;
-          flex-direction: column;
-          gap: 12px;
-        }
-
-        .search-wrap {
-          width: 100%;
-        }
-
-        .menu {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-          gap: 9px;
-        }
-
-        .menu-card {
-          min-height: 164px;
-          padding: 15px 13px 13px;
-        }
-      }
-
-      @media (max-width: 360px) {
-        .menu {
-          grid-template-columns: 1fr;
-        }
-      }
-
-      @media (prefers-reduced-motion: reduce) {
-        *,
-        *::before,
-        *::after {
-          scroll-behavior: auto !important;
-          transition-duration: 0.01ms !important;
-        }
-      }
-
-      /* Navegacion interna via iframe */
+      /* Navegación interna vía iframe */
       #app-frame {
         display: none;
         position: fixed;
@@ -393,219 +335,13 @@
         cursor: pointer;
         letter-spacing: 0.5px;
         box-shadow: 0 4px 14px rgba(8, 126, 112, 0.25);
-        transition:
-          background 0.2s,
-          box-shadow 0.2s;
+        transition: background 0.2s, box-shadow 0.2s;
         font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
       }
 
       #btn-back:hover {
         background: #06685e;
         box-shadow: 0 6px 18px rgba(8, 126, 112, 0.35);
-      }
-
-      body {
-        padding: 0;
-        background: var(--canvas);
-        color: var(--ink);
-      }
-
-      #menu-view {
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .brand {
-        width: 100%;
-        max-width: none;
-        padding: 15px max(24px, calc((100vw - 1160px) / 2));
-        margin: 0 0 42px;
-        gap: 22px;
-        background: var(--paper);
-        border-bottom: 1px solid var(--line);
-      }
-
-      .brand img {
-        flex: 0 0 auto;
-        width: 240px;
-        height: 54px;
-        max-height: 54px;
-        padding: 0;
-        background: transparent;
-        border: 0;
-        border-radius: 0;
-      }
-
-      .brand-copy {
-        padding-left: 22px;
-        border-left: 1px solid var(--line);
-      }
-
-      .brand h1 {
-        font-size: 15px;
-        line-height: 1.3;
-      }
-
-      .brand p {
-        margin-top: 3px;
-        font-size: 11px;
-      }
-
-      .welcome-badge {
-        margin-bottom: 4px;
-        font-size: 9px;
-        letter-spacing: 1px;
-      }
-
-      .welcome-badge::before {
-        width: 6px;
-        height: 6px;
-      }
-
-      .menu-toolbar,
-      .menu,
-      .footer-text,
-      .empty-state {
-        width: min(calc(100% - 48px), 1160px);
-      }
-
-      .menu-toolbar {
-        align-items: center;
-        margin-bottom: 20px;
-      }
-
-      .menu-heading h2 {
-        font-size: 24px;
-        line-height: 1.25;
-      }
-
-      .menu-heading p {
-        margin-top: 5px;
-        font-size: 13px;
-      }
-
-      .search-wrap {
-        width: min(100%, 340px);
-        flex: 0 1 340px;
-      }
-
-      .search-wrap::before {
-        width: 12px;
-        height: 12px;
-        border: 1.7px solid var(--muted);
-        border-radius: 50%;
-        content: "";
-        transform: translateY(-60%);
-      }
-
-      .search-wrap::after {
-        position: absolute;
-        top: 24px;
-        left: 25px;
-        width: 6px;
-        height: 1.7px;
-        background: var(--muted);
-        content: "";
-        transform: rotate(45deg);
-        transform-origin: left center;
-        pointer-events: none;
-      }
-
-      #menu-search {
-        height: 46px;
-        border-radius: 8px;
-        font-size: 13px;
-      }
-
-      .menu {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 14px;
-      }
-
-      .menu-card {
-        min-height: 142px;
-        display: grid;
-        grid-template-columns: 44px minmax(0, 1fr);
-        grid-template-rows: auto auto auto;
-        align-content: start;
-        align-items: start;
-        column-gap: 14px;
-        padding: 19px;
-        border-radius: 8px;
-        box-shadow: 0 2px 7px rgba(28, 43, 50, 0.045);
-      }
-
-      .menu-card:hover {
-        transform: translateY(-2px);
-        border-color: #a8c9be;
-        box-shadow: 0 9px 22px rgba(28, 43, 50, 0.09);
-      }
-
-      .card-icon {
-        grid-column: 1;
-        grid-row: 1 / 4;
-        width: 44px;
-        height: 44px;
-        margin: 0;
-        border-radius: 8px;
-        font-size: 12px;
-      }
-
-      .menu-card:nth-child(3n + 2) .card-icon {
-        color: #9a641c;
-        background: #fff2dc;
-        border-color: #f1dfbf;
-      }
-
-      .menu-card:nth-child(3n) .card-icon {
-        color: #49658d;
-        background: #eaf0f8;
-        border-color: #d8e1ef;
-      }
-
-      .menu-card:nth-child(3n + 2):hover .card-icon {
-        color: #fff;
-        background: #a76a17;
-        border-color: #a76a17;
-      }
-
-      .menu-card:nth-child(3n):hover .card-icon {
-        color: #fff;
-        background: #49658d;
-        border-color: #49658d;
-      }
-
-      .card-title {
-        grid-column: 2;
-        margin: 1px 0 5px;
-        font-size: 13px;
-        line-height: 1.35;
-      }
-
-      .card-desc {
-        grid-column: 2;
-        font-size: 11px;
-        line-height: 1.55;
-      }
-
-      .card-arrow {
-        grid-column: 2;
-        margin-top: 10px;
-        padding-top: 0;
-        font-size: 10px;
-      }
-
-      .footer-text {
-        margin-top: 26px;
-        margin-bottom: 24px;
-        padding-top: 16px;
-        font-size: 11px;
-      }
-
-      .empty-state {
-        padding: 36px 16px;
       }
 
       @media (max-width: 900px) {
@@ -616,43 +352,25 @@
 
       @media (max-width: 640px) {
         .brand {
-          padding: 13px 18px;
-          margin-bottom: 30px;
+          padding: 14px 16px;
           gap: 14px;
+          margin-bottom: 24px;
         }
 
         .brand img {
-          width: 132px;
-          height: 42px;
+          width: 120px;
+          height: 40px;
         }
 
         .brand-copy {
           padding-left: 14px;
         }
 
-        .brand h1 {
-          font-size: 12px;
-        }
-
-        .brand p {
-          font-size: 10px;
-        }
-
-        .menu-toolbar,
-        .menu,
-        .footer-text,
-        .empty-state {
-          width: calc(100% - 36px);
-        }
-
         .menu-toolbar {
           align-items: stretch;
-          gap: 14px;
+          flex-direction: column;
+          gap: 12px;
           margin-bottom: 16px;
-        }
-
-        .menu-heading h2 {
-          font-size: 21px;
         }
 
         .search-wrap {
@@ -666,32 +384,7 @@
         }
 
         .menu-card {
-          min-height: 0;
           padding: 16px;
-        }
-
-        .card-arrow {
-          margin-top: 8px;
-        }
-
-        .footer-text {
-          line-height: 1.6;
-        }
-      }
-
-      @media (max-width: 360px) {
-        .brand {
-          gap: 10px;
-          padding-inline: 14px;
-        }
-
-        .brand img {
-          width: 108px;
-          height: 38px;
-        }
-
-        .brand-copy {
-          padding-left: 10px;
         }
       }
     </style>
@@ -736,28 +429,25 @@
 
         <a class="menu-card" href="dni.html" onclick="return abrirApp('dni.html')">
           <div class="card-icon">ID</div>
-          <div class="card-title">Escaner DNI</div>
+          <div class="card-title">Escáner DNI</div>
           <div class="card-desc">
-            Digitalizar y exportar documento de identidad en tamano carta o PDF.
+            Digitalizar y exportar documento de identidad en tamaño carta o PDF.
           </div>
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
 
-    
-
         <a class="menu-card" href="Cotizacion.html" onclick="return abrirApp('Cotizacion.html')">
           <div class="card-icon">Q</div>
-          <div class="card-title">Cotizacion de Contado</div>
+          <div class="card-title">Cotización de Contado</div>
           <div class="card-desc">
-            Crear cotizaciones formales con productos, precios y totales
-            automaticos.
+            Crear cotizaciones formales con productos, precios y totales automáticos.
           </div>
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
 
         <a class="menu-card" href="Cotizacion_credito.html" onclick="return abrirApp('Cotizacion_credito.html')">
-          <div class="card-icon">C</div>
-          <div class="card-title">Cotizacion de Credito</div>
+          <div class="card-icon">CC</div>
+          <div class="card-title">Cotización de Crédito</div>
           <div class="card-desc">
             Revisar productos con cuotas, valor de cuota y total final para clientes.
           </div>
@@ -771,17 +461,16 @@
             Consultar la lista actualizada de precios y tarifas de productos.
           </div>
           <span class="card-arrow">Abrir &rarr;</span>
-
         </a>
+
         <a class="menu-card" href="gestion.html" onclick="return abrirApp('gestion.html')">
-          <div class="card-icon">$</div>
-          <div class="card-title">Gestion de llamada</div>
+          <div class="card-icon">G</div>
+          <div class="card-title">Gestión de llamada</div>
           <div class="card-desc">
             Registrar y dar seguimiento a gestiones de llamadas.
           </div>
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
-
 
         <a class="menu-card" href="crediprecio.html" onclick="return abrirApp('crediprecio.html')">
           <div class="card-icon">CR</div>
@@ -794,7 +483,7 @@
 
         <a class="menu-card" href="ADEMDUM.html" onclick="return abrirApp('ADEMDUM.html')">
           <div class="card-icon">AD</div>
-          <div class="card-title">Adendum</div>
+          <div class="card-title">Adéndum</div>
           <div class="card-desc">
             Documento de aceptación para venta de celulares al crédito con Knox Guard.
           </div>
@@ -836,16 +525,16 @@
           <span class="card-arrow">Abrir &rarr;</span>
         </a>
       </div>
+
       <div id="empty-state" class="empty-state" role="status">No se encontraron herramientas con ese nombre.</div>
 
       <div class="footer-text">
-        Sistema de Documentos Internos &nbsp;&bull;&nbsp; Comercial Insular de
-        los Fuertes
+        Sistema de Documentos Internos &nbsp;&bull;&nbsp; Comercial Insular de los Fuertes
       </div>
     </main>
 
-    <button id="btn-back" onclick="volverMenu()">&#8592; Volver al Menu</button>
-    <iframe id="app-frame" title="Aplicacion"></iframe>
+    <button id="btn-back" onclick="volverMenu()">&#8592; Volver al Menú</button>
+    <iframe id="app-frame" title="Aplicación"></iframe>
 
     <script>
       const menuSearch = document.getElementById("menu-search");
