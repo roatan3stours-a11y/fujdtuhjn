@@ -1596,25 +1596,25 @@
             <div class="form-section-label">Precios (cupón / liquidación)</div>
             <div class="fm-row">
               <div class="fm-group">
-                <label class="fm-label" for="mPrecioBase"
-                  >Precio base / lista (L)</label
-                >
-                <input
-                  class="fm-input"
-                  type="text"
-                  id="mPrecioBase"
-                  placeholder="19759"
-                  required
-                />
-              </div>
-              <div class="fm-group">
                 <label class="fm-label" for="mSuperPrecio"
-                  >Súper precio / cupón (L)</label
+                  >Súper precio (1.er monto) (L)</label
                 >
                 <input
                   class="fm-input"
                   type="text"
                   id="mSuperPrecio"
+                  placeholder="19759"
+                  required
+                />
+              </div>
+              <div class="fm-group">
+                <label class="fm-label" for="mDescuentoMonto"
+                  >Monto descuento / cupón (2.º) (L)</label
+                >
+                <input
+                  class="fm-input"
+                  type="text"
+                  id="mDescuentoMonto"
                   placeholder="8834.78"
                   required
                 />
@@ -1647,9 +1647,10 @@
               </div>
             </div>
             <p style="font-size: 11px; color: #64748b; margin-top: -4px">
-              Precio normal = base + súper precio. % descuento = súper precio ÷
-              precio normal × 100. Molicuota = (súper × (1 − prima) × factor) ÷
-              divisor.
+              Súper precio = 1.er monto. Al 2.º monto se le suma 15% y se
+              redondea; precio normal = súper + ese monto ajustado (redondeado).
+              % descuento = monto ajustado ÷ precio normal × 100. Molicuota =
+              (súper × (1 − prima) × factor) ÷ divisor.
             </p>
           </form>
         </div>
@@ -1687,8 +1688,10 @@
             <code
               >&nbsp;&nbsp;&nbsp;&nbsp;Aplica Cupón PROM | ...&nbsp;&nbsp;8,834.78</code
             ><br />
-            Precio normal = 19,759 + 8,834.78 &nbsp;·&nbsp; Súper precio =
-            8,834.78 &nbsp;·&nbsp; % desc. = súper ÷ normal
+            Súper precio = <strong>19,759</strong> (1.er monto) · Monto cupón =
+            8,834.78 · A ese monto se le suma <strong>15%</strong> y se redondea
+            · Precio normal = 19,759 + (8,834.78 × 1.15) redondeado · % desc. =
+            monto ajustado ÷ normal
           </p>
           <textarea
             class="fm-input"
@@ -2021,18 +2024,28 @@
 
       /**
        * Cálculo de precios y molicuota
-       * precioNormal = base + super
-       * descuento%   = super / precioNormal * 100
-       * molicuota    = (super * (1 - prima%) * factor) / divisor
+       * superPrecio     = primer monto (ej. 19759)
+       * descuentoMonto  = segundo monto (ej. 8834.78)
+       * descAjustado    = descuentoMonto + 15%  →  redondeado
+       * precioNormal    = super + descAjustado  →  redondeado
+       * descuento%      = descAjustado / precioNormal * 100  →  redondeado
+       * molicuota       = (super * (1 - prima%) * factor) / divisor  →  redondeado
        */
-      function calculateFromPrices(precioBase, superPrecio, settings) {
-        const base = parseImportedMoney(precioBase);
+      function calculateFromPrices(superPrecio, descuentoMonto, settings) {
         const superP = parseImportedMoney(superPrecio);
-        if (!Number.isFinite(base) || !Number.isFinite(superP) || superP < 0)
+        const descMonto = parseImportedMoney(descuentoMonto);
+        if (
+          !Number.isFinite(superP) ||
+          superP < 0 ||
+          !Number.isFinite(descMonto) ||
+          descMonto < 0
+        )
           return null;
-        const precioNormal = base + superP;
+        // Al segundo monto se le suma el 15% y se redondea
+        const descAjustado = Math.round(descMonto * 1.15);
+        const precioNormal = Math.round(superP + descAjustado);
         if (precioNormal <= 0) return null;
-        const descuento = Math.round((superP / precioNormal) * 100);
+        const descuento = Math.round((descAjustado / precioNormal) * 100);
         let cuota = null;
         if (settings) {
           const financed = superP * (1 - settings.primaPercent);
@@ -2041,8 +2054,9 @@
           );
         }
         return {
-          precioBase: String(base),
-          superPrecio: String(superP),
+          superPrecio: String(Math.round(superP)),
+          descuentoMonto: String(descMonto),
+          descuentoAjustado: String(descAjustado),
           precioNormal: String(precioNormal),
           descuento,
           cuota: cuota !== null ? String(cuota) : null,
@@ -2052,8 +2066,8 @@
       function updateProductFormCalculations() {
         const settings = getProductRateSettings();
         const calc = calculateFromPrices(
-          document.getElementById("mPrecioBase").value,
           document.getElementById("mSuperPrecio").value,
+          document.getElementById("mDescuentoMonto").value,
           settings,
         );
         if (!calc) {
@@ -2089,15 +2103,15 @@
           }
           const recalculated = products.map((product) => {
             const calc = calculateFromPrices(
-              product.precioBase ?? product.precioNormal,
               product.superPrecio,
+              product.descuentoMonto,
               settings,
             );
             if (!calc) return null;
             return {
               ...product,
-              precioBase: calc.precioBase,
               superPrecio: calc.superPrecio,
+              descuentoMonto: calc.descuentoMonto,
               precioNormal: calc.precioNormal,
               descuento: calc.descuento,
               cuota: calc.cuota,
@@ -2122,7 +2136,7 @@
           updatePrintLayout();
         });
 
-      ["mPrecioBase", "mSuperPrecio"].forEach((id) => {
+      ["mSuperPrecio", "mDescuentoMonto"].forEach((id) => {
         document
           .getElementById(id)
           .addEventListener("input", updateProductFormCalculations);
@@ -2155,8 +2169,8 @@
 
       /**
        * Parser del formato de pegado:
-       * 1	13715	REFRI ...	19,759.00
-       * 		Aplica Cupón PROM | ...	8,834.78
+       * 1	13715	REFRI ...	19,759.00   ← súper precio
+       * 		Aplica Cupón PROM | ...	8,834.78   ← monto descuento
        */
       function parseCouponPasteText(text) {
         const lines = text
@@ -2170,7 +2184,7 @@
 
         while (i < lines.length) {
           const line = lines[i];
-          // Línea de producto: empieza con cantidad (número) + código
+          // Línea de producto: qty + código + descripción + súper precio
           const mainMatch = line.match(
             /^(\d+)\s+(\S+)\s+(.+?)\s+([\d,]+\.?\d*)\s*$/,
           );
@@ -2184,12 +2198,11 @@
               i++;
               continue;
             }
-            // sin qty
             const codigo = altMatch[1];
             const descripcion = altMatch[2].trim();
-            const precioBase = parseImportedMoney(altMatch[3]);
+            const superPrecio = parseImportedMoney(altMatch[3]);
             i++;
-            let superPrecio = NaN;
+            let descuentoMonto = NaN;
             let nota = "";
             if (i < lines.length) {
               const couponLine = lines[i];
@@ -2198,13 +2211,13 @@
               );
               if (cMatch && !/^\d+\s+\S+\s+/.test(couponLine.trim())) {
                 nota = cMatch[1].trim();
-                superPrecio = parseImportedMoney(cMatch[2]);
+                descuentoMonto = parseImportedMoney(cMatch[2]);
                 i++;
               }
             }
             if (
-              !Number.isFinite(precioBase) ||
-              !Number.isFinite(superPrecio)
+              !Number.isFinite(superPrecio) ||
+              !Number.isFinite(descuentoMonto)
             ) {
               invalid.push(i);
               continue;
@@ -2212,8 +2225,8 @@
             productsOut.push({
               codigo,
               descripcion,
-              precioBase,
               superPrecio,
+              descuentoMonto,
               nota,
             });
             continue;
@@ -2221,34 +2234,36 @@
 
           const codigo = mainMatch[2];
           const descripcion = mainMatch[3].trim();
-          const precioBase = parseImportedMoney(mainMatch[4]);
+          const superPrecio = parseImportedMoney(mainMatch[4]);
           i++;
 
-          let superPrecio = NaN;
+          let descuentoMonto = NaN;
           let nota = "";
           if (i < lines.length) {
             const couponLine = lines[i];
-            // Segunda línea: texto + monto (no empieza con qty+codigo)
             const cMatch = couponLine.match(/^(.+?)\s+([\d,]+\.?\d*)\s*$/);
             const looksLikeProduct = /^\d+\s+\S+\s+.+?\s+[\d,]+\.?\d*\s*$/.test(
               couponLine.trim(),
             );
             if (cMatch && !looksLikeProduct) {
               nota = cMatch[1].trim();
-              superPrecio = parseImportedMoney(cMatch[2]);
+              descuentoMonto = parseImportedMoney(cMatch[2]);
               i++;
             }
           }
 
-          if (!Number.isFinite(precioBase) || !Number.isFinite(superPrecio)) {
+          if (
+            !Number.isFinite(superPrecio) ||
+            !Number.isFinite(descuentoMonto)
+          ) {
             invalid.push(i);
             continue;
           }
           productsOut.push({
             codigo,
             descripcion,
-            precioBase,
             superPrecio,
+            descuentoMonto,
             nota,
           });
         }
@@ -2287,8 +2302,8 @@
 
         productsOut.forEach((item, index) => {
           const calc = calculateFromPrices(
-            item.precioBase,
             item.superPrecio,
+            item.descuentoMonto,
             settings,
           );
           if (!calc) return;
@@ -2302,8 +2317,8 @@
             id: existing?.id ?? now + index,
             codigo: item.codigo,
             descripcion: item.descripcion,
-            precioBase: calc.precioBase,
             superPrecio: calc.superPrecio,
+            descuentoMonto: calc.descuentoMonto,
             precioNormal: calc.precioNormal,
             descuento: calc.descuento,
             cuota: calc.cuota,
@@ -2692,12 +2707,12 @@
 
           const settings = getProductRateSettings();
           const calc = calculateFromPrices(
-            document.getElementById("mPrecioBase").value,
             document.getElementById("mSuperPrecio").value,
+            document.getElementById("mDescuentoMonto").value,
             settings,
           );
           if (!calc) {
-            alert("Ingrese precios base y súper precio válidos.");
+            alert("Ingrese súper precio y monto de descuento válidos.");
             return;
           }
 
@@ -2705,8 +2720,8 @@
             id: editId ? parseInt(editId, 10) : Date.now(),
             descripcion: document.getElementById("mDescripcion").value,
             codigo: document.getElementById("mCodigo").value,
-            precioBase: calc.precioBase,
             superPrecio: calc.superPrecio,
+            descuentoMonto: calc.descuentoMonto,
             precioNormal: calc.precioNormal,
             descuento: calc.descuento,
             cuota: calc.cuota,
@@ -2851,10 +2866,10 @@
           document.getElementById("mCodigo").value = prod.codigo;
           document.getElementById("mChkRegalo").checked =
             prod.aplicaRegalo !== false;
-          document.getElementById("mPrecioBase").value =
-            prod.precioBase ?? "";
           document.getElementById("mSuperPrecio").value =
             prod.superPrecio ?? "";
+          document.getElementById("mDescuentoMonto").value =
+            prod.descuentoMonto ?? "";
           updateProductFormCalculations();
 
           document.getElementById("formModalTitle").textContent =
@@ -2898,8 +2913,8 @@
         const headers = [
           "Codigo",
           "Descripcion",
-          "PrecioBase",
           "SuperPrecio",
+          "DescuentoMonto",
           "PrecioNormal",
           "Descuento",
           "Cuota",
@@ -2913,8 +2928,8 @@
             [
               `"${p.codigo || ""}"`,
               `"${(p.descripcion || "").replace(/"/g, '""')}"`,
-              `"${p.precioBase || ""}"`,
               `"${p.superPrecio || ""}"`,
+              `"${p.descuentoMonto || ""}"`,
               `"${p.precioNormal || ""}"`,
               p.descuento || 0,
               `"${p.cuota || ""}"`,
@@ -2965,11 +2980,11 @@
               cols.push(cur.trim());
 
               if (cols.length >= 5) {
-                const precioBase = cols[2];
-                const superPrecio = cols[3];
+                const superPrecio = cols[2];
+                const descuentoMonto = cols[3];
                 const calc = calculateFromPrices(
-                  precioBase,
                   superPrecio,
+                  descuentoMonto,
                   settings,
                 );
                 if (!calc) continue;
@@ -2977,8 +2992,8 @@
                   id: Date.now() + i,
                   codigo: cols[0] || "S/C",
                   descripcion: cols[1] || "Producto Sin Nombre",
-                  precioBase: calc.precioBase,
                   superPrecio: calc.superPrecio,
+                  descuentoMonto: calc.descuentoMonto,
                   precioNormal: calc.precioNormal,
                   descuento: calc.descuento,
                   cuota: calc.cuota,
