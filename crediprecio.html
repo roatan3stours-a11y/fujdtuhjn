@@ -132,6 +132,7 @@
 
       .form-group input[type="text"],
       .form-group input[type="number"],
+      .form-group input[type="date"],
       .form-group select,
       .form-group textarea {
         width: 100%;
@@ -276,7 +277,7 @@
 
       .tag-header {
         background-color: #009746;
-        height: 20%;
+        height: 18%;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -298,7 +299,7 @@
       }
 
       .tag-body {
-        padding: 2.5% 3.5%;
+        padding: 2% 3%;
         display: flex;
         flex-direction: column;
         flex: 1;
@@ -308,12 +309,12 @@
       }
 
       .product-title {
-        font-size: 5.2cqw;
+        font-size: 5cqw;
         font-weight: 900;
         color: #000;
         text-transform: uppercase;
         line-height: 1.1;
-        margin-bottom: 1.5%;
+        margin-bottom: 1%;
       }
 
       .meta-container {
@@ -368,7 +369,7 @@
         border: 4px solid #009746;
         border-radius: 12px;
         padding: 2% 3%;
-        margin: 0 auto 2% auto;
+        margin: 0 auto 1.5% auto;
         width: 100%;
         height: auto;
         display: flex;
@@ -407,20 +408,13 @@
 
       .cuota-bottom-row {
         display: flex;
-        justify-content: space-between;
+        justify-content: flex-end;
         align-items: center;
         width: 100%;
       }
 
-      .secondary-cuota-line {
-        font-size: 2.7cqw;
-        font-weight: 800;
-        color: #333;
-        text-align: left;
-      }
-
       .cuota-normal-label {
-        font-size: 2.3cqw;
+        font-size: 2.5cqw;
         color: #000;
         font-weight: 700;
         text-transform: uppercase;
@@ -502,6 +496,16 @@
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
+      }
+
+      .legal-footer {
+        font-size: 1.55cqw;
+        line-height: 1.25;
+        color: #222;
+        font-weight: 600;
+        margin-top: 1.5%;
+        text-align: left;
+        flex-shrink: 0;
       }
 
       .grey-line-separator-bottom {
@@ -612,7 +616,7 @@
         display: flex;
         flex-direction: column;
         gap: 4px;
-        min-width: 100px;
+        min-width: 110px;
         color: #475569;
         font-size: 11px;
         font-weight: 700;
@@ -626,7 +630,6 @@
         font-size: 13px;
       }
 
-      /* Barra de acciones superior del modal */
       .prod-action-bar {
         display: flex;
         align-items: center;
@@ -684,7 +687,6 @@
         flex: 1;
       }
 
-      /* Historial compacto */
       .history-box {
         background: white;
         border: 1px solid #e2e8f0;
@@ -733,7 +735,6 @@
         font-size: 12px;
       }
 
-      /* Tabla mejorada */
       .table-responsive {
         border: 1px solid #e2e8f0;
         border-radius: 10px;
@@ -934,14 +935,15 @@
       }
 
       #bulkImportModal .form-modal-container {
-        width: 700px;
+        width: 720px;
       }
 
       #bulkProductText {
-        min-height: 240px;
+        min-height: 260px;
         resize: vertical;
         font-family: monospace;
         line-height: 1.5;
+        font-size: 12px;
       }
 
       .fm-label {
@@ -1042,7 +1044,8 @@
           overflow: visible !important;
         }
         .top-toolbar,
-        .modal-overlay {
+        .modal-overlay,
+        #configModal {
           display: none !important;
         }
         .preview-area {
@@ -1127,21 +1130,35 @@
               </div>
             </div>
 
-            <div class="section-title">2. Imágenes (Logotipo y Garantía)</div>
+            <div class="section-title">2. Vigencia y texto legal</div>
+            <div class="form-group">
+              <label for="inpValidUntil">Válido hasta (fecha)</label>
+              <input type="date" id="inpValidUntil" value="2026-10-31" />
+            </div>
+            <div class="form-group">
+              <label for="inpLegalNote">Nota legal extra (opcional)</label>
+              <textarea
+                id="inpLegalNote"
+                rows="2"
+                placeholder="Texto adicional opcional..."
+              ></textarea>
+            </div>
+
+            <div class="section-title">3. Imágenes (Logotipo y Garantía)</div>
             <div class="form-group">
               <label for="inpHeaderImg">Imagen Superior (Encabezado)</label>
               <input type="file" id="inpHeaderImg" accept="image/*" />
             </div>
             <div class="form-group">
               <label for="sliderHeaderHeight"
-                >Alto Encabezado (<span id="lblHeaderHeight">20</span>%)</label
+                >Alto Encabezado (<span id="lblHeaderHeight">18</span>%)</label
               >
               <input
                 type="range"
                 id="sliderHeaderHeight"
                 min="10"
                 max="40"
-                value="20"
+                value="18"
               />
             </div>
 
@@ -1151,21 +1168,21 @@
             </div>
             <div class="form-group">
               <label for="sliderGarantiaSize"
-                >Ancho Garantía (<span id="lblGarantiaSize">20</span>%)</label
+                >Ancho Garantía (<span id="lblGarantiaSize">18</span>%)</label
               >
               <input
                 type="range"
                 id="sliderGarantiaSize"
                 min="10"
                 max="40"
-                value="20"
+                value="18"
               />
             </div>
 
-            <div class="section-title">3. Tamaño de Textos Individuales</div>
+            <div class="section-title">4. Tamaño de Textos Individuales</div>
             <div class="form-group">
               <label for="sTitleSize"
-                >Descripción Producto (<span id="lblTitleSize">5.2</span
+                >Descripción Producto (<span id="lblTitleSize">5.0</span
                 >cqw)</label
               >
               <input
@@ -1174,12 +1191,12 @@
                 min="2"
                 max="10"
                 step="0.2"
-                value="5.2"
+                value="5.0"
               />
             </div>
             <div class="form-group">
               <label for="sMetaSize"
-                >Código y Prima (<span id="lblMetaSize">3.2</span>cqw)</label
+                >Código (<span id="lblMetaSize">3.2</span>cqw)</label
               >
               <input
                 type="range"
@@ -1204,7 +1221,7 @@
               />
             </div>
             <div class="form-group">
-              <label style="display: flex; align-items: center; gap: 8px;">
+              <label style="display: flex; align-items: center; gap: 8px">
                 <input type="checkbox" id="chkShowGiftCredit" checked />
                 Mostrar regalo al crédito en todos los preciadores
               </label>
@@ -1238,20 +1255,6 @@
               />
             </div>
             <div class="form-group">
-              <label for="sSecondaryCuotaSize"
-                >Cuota Secundaria (<span id="lblSecondaryCuotaSize">2.7</span
-                >cqw)</label
-              >
-              <input
-                type="range"
-                id="sSecondaryCuotaSize"
-                min="1"
-                max="6"
-                step="0.1"
-                value="2.7"
-              />
-            </div>
-            <div class="form-group">
               <label for="sliderSuperPrecioSize"
                 >Súper Precio (<span id="lblSuperPrecioSize">6.5</span
                 >cqw)</label
@@ -1279,10 +1282,23 @@
                 value="2.2"
               />
             </div>
-
-            <div class="section-title">4. Cuadro Verde de Cuotas (Diseño)</div>
             <div class="form-group">
-              <label style="display: flex; align-items: center; gap: 8px;">
+              <label for="sLegalSize"
+                >Texto legal (<span id="lblLegalSize">1.55</span>cqw)</label
+              >
+              <input
+                type="range"
+                id="sLegalSize"
+                min="1"
+                max="3"
+                step="0.05"
+                value="1.55"
+              />
+            </div>
+
+            <div class="section-title">5. Cuadro Verde de Cuotas (Diseño)</div>
+            <div class="form-group">
+              <label style="display: flex; align-items: center; gap: 8px">
                 <input type="checkbox" id="chkShowGreenBox" checked />
                 Mostrar borde verde del cuadro de cuotas
               </label>
@@ -1374,18 +1390,44 @@
         <div class="modal-body">
           <div class="product-rates-bar">
             <label class="product-rate-field" for="primaPercentInput">
-              Tasa de prima
-              <input id="primaPercentInput" type="number" min="0" max="1" step="0.000000001" value="0.15" />
+              % Prima (0–1)
+              <input
+                id="primaPercentInput"
+                type="number"
+                min="0"
+                max="1"
+                step="0.01"
+                value="0.20"
+              />
             </label>
-            <label class="product-rate-field" for="rate12Input">
-              Tasa 12 meses
-              <input id="rate12Input" type="number" min="0" max="1" step="0.000000001" value="0.1035" />
+            <label class="product-rate-field" for="rateCuotaInput">
+              Factor cuota
+              <input
+                id="rateCuotaInput"
+                type="number"
+                min="0"
+                max="1"
+                step="0.0000000001"
+                value="0.0712970795"
+              />
             </label>
-            <label class="product-rate-field" for="rate24Input">
-              Tasa 24 meses
-              <input id="rate24Input" type="number" min="0" max="1" step="0.000000001" value="0.0623" />
+            <label class="product-rate-field" for="weeklyDivInput">
+              Divisor (semanal)
+              <input
+                id="weeklyDivInput"
+                type="number"
+                min="0.1"
+                step="0.01"
+                value="4.59"
+              />
             </label>
-            <button class="btn-action-sm" id="btnRecalculateProducts" type="button">⟳ Recalcular</button>
+            <button
+              class="btn-action-sm"
+              id="btnRecalculateProducts"
+              type="button"
+            >
+              ⟳ Recalcular
+            </button>
           </div>
 
           <!-- Barra de acciones -->
@@ -1396,7 +1438,13 @@
             <button class="btn-action-sm" id="btnOpenBulkImport">
               📋 Pegar productos
             </button>
-            <button class="btn-action-sm" id="btnNuevaLista" title="Guarda la lista actual y empieza una nueva vacía">📋 Nueva Lista</button>
+            <button
+              class="btn-action-sm"
+              id="btnNuevaLista"
+              title="Guarda la lista actual y empieza una nueva vacía"
+            >
+              📋 Nueva Lista
+            </button>
             <button class="btn-action-sm" id="btnExportCSV">
               📊 Exportar CSV
             </button>
@@ -1462,14 +1510,25 @@
             <table class="products-table">
               <thead>
                 <tr>
-                  <th style="width:38px;text-align:center;">
-                    <input type="checkbox" id="chkSelectAll" title="Seleccionar / Deseleccionar todos" style="width:15px;height:15px;accent-color:#009746;cursor:pointer;">
+                  <th style="width: 38px; text-align: center">
+                    <input
+                      type="checkbox"
+                      id="chkSelectAll"
+                      title="Seleccionar / Deseleccionar todos"
+                      style="
+                        width: 15px;
+                        height: 15px;
+                        accent-color: #009746;
+                        cursor: pointer;
+                      "
+                    />
                   </th>
                   <th>Código</th>
                   <th>Producto</th>
-                  <th>Cuota Primaria</th>
+                  <th>Molicuota</th>
+                  <th>Súper Precio</th>
                   <th>Precio Normal</th>
-                  <th>Descuento</th>
+                  <th>Desc.</th>
                   <th style="text-align: center">Acciones</th>
                 </tr>
               </thead>
@@ -1500,7 +1559,7 @@
                 class="fm-input"
                 type="text"
                 id="mDescripcion"
-                placeholder="Ej: LG Smart TV 32 LR65"
+                placeholder="Ej: REFRI SXS FRIGIDAIRE 15FT/2P"
                 required
               />
             </div>
@@ -1511,18 +1570,19 @@
                   class="fm-input"
                   type="text"
                   id="mCodigo"
-                  placeholder="12669"
+                  placeholder="13715"
                   required
                 />
               </div>
               <div class="fm-group">
-                <label class="fm-label" for="mPrima">Prima (L)</label>
+                <label class="fm-label" for="mCuota"
+                  >Molicuota (L) — se calcula sola</label
+                >
                 <input
                   class="fm-input"
                   type="text"
-                  id="mPrima"
-                  placeholder="1000"
-                  required
+                  id="mCuota"
+                  placeholder="—"
                   readonly
                 />
               </div>
@@ -1533,83 +1593,64 @@
               <label for="mChkRegalo">¿Aplica Regalo al Crédito?</label>
             </div>
 
-            <div class="form-section-label">Planes de Crédito</div>
+            <div class="form-section-label">Precios (cupón / liquidación)</div>
             <div class="fm-row">
               <div class="fm-group">
-                <label class="fm-label" for="mPlazo1">Plazo Primario</label>
-                <input
-                  class="fm-input"
-                  type="text"
-                  id="mPlazo1"
-                  value="12 MESES"
-                  required
-                />
-              </div>
-              <div class="fm-group">
-                <label class="fm-label" for="mCuotaPrimaria"
-                  >Cuota Primaria (L)</label
+                <label class="fm-label" for="mPrecioBase"
+                  >Precio base / lista (L)</label
                 >
                 <input
                   class="fm-input"
                   type="text"
-                  id="mCuotaPrimaria"
-                  placeholder="943"
-                  required
-                  readonly
-                />
-              </div>
-            </div>
-            <div class="fm-row">
-              <div class="fm-group">
-                <label class="fm-label" for="mPlazo2">Plazo Secundario</label>
-                <input
-                  class="fm-input"
-                  type="text"
-                  id="mPlazo2"
-                  value="24 MESES"
+                  id="mPrecioBase"
+                  placeholder="19759"
                   required
                 />
               </div>
               <div class="fm-group">
-                <label class="fm-label" for="mCuotaSecundaria"
-                  >Cuota Secundaria (L)</label
+                <label class="fm-label" for="mSuperPrecio"
+                  >Súper precio / cupón (L)</label
                 >
                 <input
                   class="fm-input"
                   type="text"
-                  id="mCuotaSecundaria"
-                  placeholder="1193"
+                  id="mSuperPrecio"
+                  placeholder="8834.78"
                   required
-                  readonly
                 />
               </div>
             </div>
-
-            <div class="form-section-label">Precio y Descuento</div>
             <div class="fm-row">
               <div class="fm-group">
                 <label class="fm-label" for="mPrecioNormal"
-                  >Precio Normal (L)</label
+                  >Precio Normal (suma) (L)</label
                 >
                 <input
                   class="fm-input"
                   type="text"
                   id="mPrecioNormal"
-                  placeholder="10000"
-                  required
+                  placeholder="28593.78"
+                  readonly
                 />
               </div>
               <div class="fm-group">
-                <label class="fm-label" for="mDescuento">% Descuento</label>
+                <label class="fm-label" for="mDescuento"
+                  >% Descuento (calculado)</label
+                >
                 <input
                   class="fm-input"
-                  type="number"
+                  type="text"
                   id="mDescuento"
-                  value="10"
-                  required
+                  value="—"
+                  readonly
                 />
               </div>
             </div>
+            <p style="font-size: 11px; color: #64748b; margin-top: -4px">
+              Precio normal = base + súper precio. % descuento = súper precio ÷
+              precio normal × 100. Molicuota = (súper × (1 − prima) × factor) ÷
+              divisor.
+            </p>
           </form>
         </div>
         <div class="form-modal-footer">
@@ -1625,23 +1666,47 @@
       <div class="form-modal-container">
         <div class="form-modal-header">
           <h3>📋 Agregar productos desde texto</h3>
-          <button class="close-modal" id="btnCloseBulkImport" aria-label="Cerrar">&times;</button>
+          <button
+            class="close-modal"
+            id="btnCloseBulkImport"
+            aria-label="Cerrar"
+          >
+            &times;
+          </button>
         </div>
         <div class="form-modal-body">
-          <label class="fm-label" for="bulkProductText">Filas de productos</label>
-          <p style="font-size: 12px; color: #64748b; line-height: 1.45;">
-            Acepta el formato simple existente o el CSV completo con encabezados. En el CSV se respetan primas y cuotas; los códigos existentes se actualizan.
+          <label class="fm-label" for="bulkProductText"
+            >Pegue filas (formato cupón / liquidación)</label
+          >
+          <p style="font-size: 12px; color: #64748b; line-height: 1.45">
+            Formato esperado (tabulaciones o espacios). Cada producto son
+            <strong>2 líneas</strong>:<br />
+            <code
+              >1&nbsp;&nbsp;13715&nbsp;&nbsp;REFRI ...&nbsp;&nbsp;19,759.00</code
+            ><br />
+            <code
+              >&nbsp;&nbsp;&nbsp;&nbsp;Aplica Cupón PROM | ...&nbsp;&nbsp;8,834.78</code
+            ><br />
+            Precio normal = 19,759 + 8,834.78 &nbsp;·&nbsp; Súper precio =
+            8,834.78 &nbsp;·&nbsp; % desc. = súper ÷ normal
           </p>
           <textarea
             class="fm-input"
             id="bulkProductText"
-            rows="10"
-            placeholder="Codigo,Descripcion,Prima,Regalo,Plazo1,CuotaPrimaria,Plazo2,CuotaSecundaria,PrecioNormal,Descuento&#10;12767,\"REFRI SAMSUNG 11FT 2P RT31DG5124S9AP S/D\",2000,SI,12 MESES,2499,24 MESES,1616,17899,10"
+            rows="12"
+            placeholder="1	13715	REFRI SXS FRIGIDAIRE 15FT/2P FRS15F3N5BI	19,759.00
+		Aplica Cupón PROM | LIQ LB-ELECTRO 31 OCT R	8,834.78
+1	12993	REFRI. MABE 14FT 2PTA RMC400FVCAE S/D SI	12,689.00
+		Aplica Cupón PROM | LIQ LB-ELECTRO 31 OCT R	2,200.00"
           ></textarea>
         </div>
         <div class="form-modal-footer">
-          <button class="btn-fm-cancel" id="btnCancelBulkImport">Cancelar</button>
-          <button class="btn-fm-save" id="btnImportBulkProducts">Agregar productos</button>
+          <button class="btn-fm-cancel" id="btnCancelBulkImport">
+            Cancelar
+          </button>
+          <button class="btn-fm-save" id="btnImportBulkProducts">
+            Agregar productos
+          </button>
         </div>
       </div>
     </div>
@@ -1651,17 +1716,19 @@
       const defaultConfig = {
         inpPageOrientation: "portrait",
         inpItemsPerPage: "4",
-        sliderHeaderHeight: "20",
-        sliderGarantiaSize: "20",
-        sTitleSize: "5.2",
+        inpValidUntil: "2026-10-31",
+        inpLegalNote: "",
+        sliderHeaderHeight: "18",
+        sliderGarantiaSize: "18",
+        sTitleSize: "5.0",
         sMetaSize: "3.2",
         sGiftSize: "2.8",
         chkShowGiftCredit: true,
         sMainCuotaTitleSize: "3.5",
         sliderCuotaSize: "13",
-        sSecondaryCuotaSize: "2.7",
         sliderSuperPrecioSize: "6.5",
         sNormalPriceSize: "2.2",
+        sLegalSize: "1.55",
         sGreenBoxWidth: "100",
         sGreenBoxHeight: "2",
         sGreenBoxBorder: "4",
@@ -1702,8 +1769,8 @@
       const bulkImportModal = document.getElementById("bulkImportModal");
       const bulkProductText = document.getElementById("bulkProductText");
       const primaPercentInput = document.getElementById("primaPercentInput");
-      const rate12Input = document.getElementById("rate12Input");
-      const rate24Input = document.getElementById("rate24Input");
+      const rateCuotaInput = document.getElementById("rateCuotaInput");
+      const weeklyDivInput = document.getElementById("weeklyDivInput");
       const btnCloseFormModal = document.getElementById("btnCloseFormModal");
       const modalProductForm = document.getElementById("modalProductForm");
       const productTableBody = document.getElementById("productTableBody");
@@ -1712,17 +1779,13 @@
       const btnResetConfig = document.getElementById("btnResetConfig");
       const prodSearchInput = document.getElementById("prodSearchInput");
       const prodCountBadge = document.getElementById("prodCountBadge");
-      const savedProductRates = JSON.parse(localStorage.getItem("preciador_product_rates") || "{}");
-      if (localStorage.getItem("preciador_product_rates_format") !== "decimal-v1") {
-        ["primaPercent", "rate12", "rate24"].forEach((key) => {
-          if (savedProductRates[key] !== undefined) savedProductRates[key] = Number(savedProductRates[key]) / 100;
-        });
-        localStorage.setItem("preciador_product_rates", JSON.stringify(savedProductRates));
-        localStorage.setItem("preciador_product_rates_format", "decimal-v1");
-      }
-      primaPercentInput.value = savedProductRates.primaPercent ?? "0.15";
-      rate12Input.value = savedProductRates.rate12 ?? "0.1035";
-      rate24Input.value = savedProductRates.rate24 ?? "0.0623";
+
+      const savedProductRates = JSON.parse(
+        localStorage.getItem("preciador_product_rates_v2") || "{}",
+      );
+      primaPercentInput.value = savedProductRates.primaPercent ?? "0.20";
+      rateCuotaInput.value = savedProductRates.rateCuota ?? "0.0712970795";
+      weeklyDivInput.value = savedProductRates.weeklyDiv ?? "4.59";
 
       // DRAWER CONFIGURACIONES
       function openConfigDrawer() {
@@ -1740,27 +1803,14 @@
       btnCloseConfigModal.addEventListener("click", closeConfigDrawer);
 
       let selectedProductIds = new Set();
-      let products = JSON.parse(
-        localStorage.getItem("preciador_products_list"),
-      ) || [
-        {
-          id: 1,
-          codigo: "12669",
-          descripcion: "LG 32 LR65",
-          prima: "1000",
-          aplicaRegalo: true,
-          plazo1: "12 MESES",
-          cuotaPrimaria: "943",
-          plazo2: "24 MESES",
-          cuotaSecundaria: "1193",
-          precioNormal: "1000",
-          descuento: 10,
-        },
-      ];
+      let products =
+        JSON.parse(localStorage.getItem("preciador_products_list_v2")) || [];
 
       btnOpenModal.addEventListener("click", () => {
         productModal.style.display = "flex";
-        selectedProductIds = new Set(products.map(p => p.id));
+        if (selectedProductIds.size === 0 && products.length > 0) {
+          selectedProductIds = new Set(products.map((p) => p.id));
+        }
         renderProductTable();
       });
       btnCloseModal.addEventListener(
@@ -1783,19 +1833,27 @@
         resetModalForm();
         openFormModal();
       });
-      document.getElementById("btnOpenBulkImport").addEventListener("click", () => {
-        bulkImportModal.style.display = "flex";
-        bulkProductText.focus();
-      });
+      document
+        .getElementById("btnOpenBulkImport")
+        .addEventListener("click", () => {
+          bulkImportModal.style.display = "flex";
+          bulkProductText.focus();
+        });
       function closeBulkImportModal() {
         bulkImportModal.style.display = "none";
       }
-      document.getElementById("btnCloseBulkImport").addEventListener("click", closeBulkImportModal);
-      document.getElementById("btnCancelBulkImport").addEventListener("click", closeBulkImportModal);
+      document
+        .getElementById("btnCloseBulkImport")
+        .addEventListener("click", closeBulkImportModal);
+      document
+        .getElementById("btnCancelBulkImport")
+        .addEventListener("click", closeBulkImportModal);
       bulkImportModal.addEventListener("click", (event) => {
         if (event.target === bulkImportModal) closeBulkImportModal();
       });
-      document.getElementById("btnImportBulkProducts").addEventListener("click", importBulkProducts);
+      document
+        .getElementById("btnImportBulkProducts")
+        .addEventListener("click", importBulkProducts);
       btnCloseFormModal.addEventListener("click", closeFormModal);
       productFormModal.addEventListener("click", (e) => {
         if (e.target === productFormModal) closeFormModal();
@@ -1813,17 +1871,18 @@
           const el = document.getElementById(id);
           if (el) uiConfig[id] = el.type === "checkbox" ? el.checked : el.value;
         });
-        localStorage.setItem("preciador_ui_config", JSON.stringify(uiConfig));
+        localStorage.setItem("preciador_ui_config_v2", JSON.stringify(uiConfig));
       }
 
       function loadUIConfig() {
         const saved =
-          JSON.parse(localStorage.getItem("preciador_ui_config")) ||
+          JSON.parse(localStorage.getItem("preciador_ui_config_v2")) ||
           defaultConfig;
         Object.keys(defaultConfig).forEach((id) => {
           const el = document.getElementById(id);
           if (el) {
-            const value = saved[id] !== undefined ? saved[id] : defaultConfig[id];
+            const value =
+              saved[id] !== undefined ? saved[id] : defaultConfig[id];
             if (el.type === "checkbox") {
               el.checked = Boolean(value);
             } else {
@@ -1835,38 +1894,30 @@
       }
 
       function updateLabelsAndPreview() {
-        document.getElementById("lblHeaderHeight").textContent =
-          document.getElementById("sliderHeaderHeight").value;
-        document.getElementById("lblGarantiaSize").textContent =
-          document.getElementById("sliderGarantiaSize").value;
-        document.getElementById("lblTitleSize").textContent =
-          document.getElementById("sTitleSize").value;
-        document.getElementById("lblMetaSize").textContent =
-          document.getElementById("sMetaSize").value;
-        document.getElementById("lblGiftSize").textContent =
-          document.getElementById("sGiftSize").value;
-        document.getElementById("lblMainCuotaTitleSize").textContent =
-          document.getElementById("sMainCuotaTitleSize").value;
-        document.getElementById("lblCuotaSize").textContent =
-          document.getElementById("sliderCuotaSize").value;
-        document.getElementById("lblSecondaryCuotaSize").textContent =
-          document.getElementById("sSecondaryCuotaSize").value;
-        document.getElementById("lblSuperPrecioSize").textContent =
-          document.getElementById("sliderSuperPrecioSize").value;
-        document.getElementById("lblNormalPriceSize").textContent =
-          document.getElementById("sNormalPriceSize").value;
-        document.getElementById("lblGreenBoxWidth").textContent =
-          document.getElementById("sGreenBoxWidth").value;
-        document.getElementById("lblGreenBoxHeight").textContent =
-          document.getElementById("sGreenBoxHeight").value;
-        document.getElementById("lblGreenBoxBorder").textContent =
-          document.getElementById("sGreenBoxBorder").value;
-        document.getElementById("lblGreenBoxRadius").textContent =
-          document.getElementById("sGreenBoxRadius").value;
+        const map = {
+          lblHeaderHeight: "sliderHeaderHeight",
+          lblGarantiaSize: "sliderGarantiaSize",
+          lblTitleSize: "sTitleSize",
+          lblMetaSize: "sMetaSize",
+          lblGiftSize: "sGiftSize",
+          lblMainCuotaTitleSize: "sMainCuotaTitleSize",
+          lblCuotaSize: "sliderCuotaSize",
+          lblSuperPrecioSize: "sliderSuperPrecioSize",
+          lblNormalPriceSize: "sNormalPriceSize",
+          lblLegalSize: "sLegalSize",
+          lblGreenBoxWidth: "sGreenBoxWidth",
+          lblGreenBoxHeight: "sGreenBoxHeight",
+          lblGreenBoxBorder: "sGreenBoxBorder",
+          lblGreenBoxRadius: "sGreenBoxRadius",
+        };
+        Object.entries(map).forEach(([lbl, inp]) => {
+          const l = document.getElementById(lbl);
+          const i = document.getElementById(inp);
+          if (l && i) l.textContent = i.value;
+        });
         updatePrintLayout();
       }
 
-      // EVENTOS PARA GUARDAR AUTOMÁTICAMENTE AL MOVER CONTROLES
       Object.keys(defaultConfig).forEach((id) => {
         const el = document.getElementById(id);
         if (el) {
@@ -1887,7 +1938,7 @@
             "¿Desea restablecer todas las configuraciones de diseño por defecto?",
           )
         ) {
-          localStorage.removeItem("preciador_ui_config");
+          localStorage.removeItem("preciador_ui_config_v2");
           loadUIConfig();
         }
       });
@@ -1922,9 +1973,9 @@
         });
 
       function parseAndFormat(val) {
-        if (!val) return "0";
-        const cleanVal = parseFloat(val.toString().replace(/,/g, ""));
-        if (isNaN(cleanVal)) return val;
+        if (val === null || val === undefined || val === "") return "0";
+        const cleanVal = parseFloat(String(val).replace(/,/g, ""));
+        if (isNaN(cleanVal)) return String(val);
         return new Intl.NumberFormat("en-US", {
           maximumFractionDigits: 0,
         }).format(Math.round(cleanVal));
@@ -1932,12 +1983,16 @@
 
       function parseImportedMoney(value) {
         let normalized = String(value || "")
-          .replace(/\s*=(?:codigo|descripci[oó]n|precio(?:\s+normal)?)\s*$/i, "")
+          .replace(
+            /\s*=(?:codigo|descripci[oó]n|precio(?:\s+normal)?)\s*$/i,
+            "",
+          )
           .replace(/[^\d,.-]/g, "");
         if (normalized.includes(",") && normalized.includes(".")) {
-          normalized = normalized.lastIndexOf(",") > normalized.lastIndexOf(".")
-            ? normalized.replace(/\./g, "").replace(",", ".")
-            : normalized.replace(/,/g, "");
+          normalized =
+            normalized.lastIndexOf(",") > normalized.lastIndexOf(".")
+              ? normalized.replace(/\./g, "").replace(",", ".")
+              : normalized.replace(/,/g, "");
         } else if (normalized.includes(",")) {
           normalized = /,\d{1,2}$/.test(normalized)
             ? normalized.replace(",", ".")
@@ -1948,261 +2003,313 @@
       }
 
       function getProductRateSettings() {
-        if ([primaPercentInput, rate12Input, rate24Input].some((input) => !input.value.trim())) return null;
         const settings = {
           primaPercent: Number(primaPercentInput.value),
-          rate12: Number(rate12Input.value),
-          rate24: Number(rate24Input.value),
+          rateCuota: Number(rateCuotaInput.value),
+          weeklyDiv: Number(weeklyDivInput.value),
         };
-        return Object.values(settings).every((value) => Number.isFinite(value) && value >= 0 && value <= 1)
-          ? settings
-          : null;
+        const ok =
+          Number.isFinite(settings.primaPercent) &&
+          settings.primaPercent >= 0 &&
+          settings.primaPercent <= 1 &&
+          Number.isFinite(settings.rateCuota) &&
+          settings.rateCuota >= 0 &&
+          Number.isFinite(settings.weeklyDiv) &&
+          settings.weeklyDiv > 0;
+        return ok ? settings : null;
       }
 
-      function calculateProductCredit(price, settings = getProductRateSettings()) {
-        const precioNormal = parseImportedMoney(price);
-        if (!settings || !Number.isFinite(precioNormal) || precioNormal <= 0) return null;
-        const prima = Math.round(precioNormal * settings.primaPercent * 100) / 100;
-        const saldoFinanciado = precioNormal - prima;
+      /**
+       * Cálculo de precios y molicuota
+       * precioNormal = base + super
+       * descuento%   = super / precioNormal * 100
+       * molicuota    = (super * (1 - prima%) * factor) / divisor
+       */
+      function calculateFromPrices(precioBase, superPrecio, settings) {
+        const base = parseImportedMoney(precioBase);
+        const superP = parseImportedMoney(superPrecio);
+        if (!Number.isFinite(base) || !Number.isFinite(superP) || superP < 0)
+          return null;
+        const precioNormal = base + superP;
+        if (precioNormal <= 0) return null;
+        const descuento = Math.round((superP / precioNormal) * 100);
+        let cuota = null;
+        if (settings) {
+          const financed = superP * (1 - settings.primaPercent);
+          cuota = Math.round(
+            (financed * settings.rateCuota) / settings.weeklyDiv,
+          );
+        }
         return {
-          prima: String(prima),
-          cuotaPrimaria: String(Math.round(saldoFinanciado * settings.rate12)),
-          cuotaSecundaria: String(Math.round(saldoFinanciado * settings.rate24)),
+          precioBase: String(base),
+          superPrecio: String(superP),
+          precioNormal: String(precioNormal),
+          descuento,
+          cuota: cuota !== null ? String(cuota) : null,
         };
       }
 
       function updateProductFormCalculations() {
-        const credit = calculateProductCredit(document.getElementById("mPrecioNormal").value);
-        if (!credit) return;
-        document.getElementById("mPrima").value = credit.prima;
-        document.getElementById("mCuotaPrimaria").value = credit.cuotaPrimaria;
-        document.getElementById("mCuotaSecundaria").value = credit.cuotaSecundaria;
+        const settings = getProductRateSettings();
+        const calc = calculateFromPrices(
+          document.getElementById("mPrecioBase").value,
+          document.getElementById("mSuperPrecio").value,
+          settings,
+        );
+        if (!calc) {
+          document.getElementById("mPrecioNormal").value = "";
+          document.getElementById("mDescuento").value = "—";
+          document.getElementById("mCuota").value = "";
+          return;
+        }
+        document.getElementById("mPrecioNormal").value = calc.precioNormal;
+        document.getElementById("mDescuento").value = calc.descuento + "%";
+        document.getElementById("mCuota").value = calc.cuota ?? "—";
       }
 
-      [primaPercentInput, rate12Input, rate24Input].forEach((input) => {
+      [primaPercentInput, rateCuotaInput, weeklyDivInput].forEach((input) => {
         input.addEventListener("change", () => {
           const settings = getProductRateSettings();
-          if (settings) localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
+          if (settings)
+            localStorage.setItem(
+              "preciador_product_rates_v2",
+              JSON.stringify(settings),
+            );
           updateProductFormCalculations();
         });
       });
 
-      document.getElementById("btnRecalculateProducts").addEventListener("click", () => {
-        const settings = getProductRateSettings();
-        if (!settings) {
-          alert("Ingrese tasas válidas entre 0 y 1.");
-          return;
-        }
-        const recalculatedProducts = products.map((product) => {
-          const credit = calculateProductCredit(product.precioNormal, settings);
-          return credit ? { ...product, ...credit } : null;
+      document
+        .getElementById("btnRecalculateProducts")
+        .addEventListener("click", () => {
+          const settings = getProductRateSettings();
+          if (!settings) {
+            alert("Ingrese tasas válidas (prima 0–1, factor y divisor > 0).");
+            return;
+          }
+          const recalculated = products.map((product) => {
+            const calc = calculateFromPrices(
+              product.precioBase ?? product.precioNormal,
+              product.superPrecio,
+              settings,
+            );
+            if (!calc) return null;
+            return {
+              ...product,
+              precioBase: calc.precioBase,
+              superPrecio: calc.superPrecio,
+              precioNormal: calc.precioNormal,
+              descuento: calc.descuento,
+              cuota: calc.cuota,
+            };
+          });
+          if (recalculated.some((p) => !p)) {
+            alert(
+              "No se recalculó: revise que todos los productos tengan precios válidos.",
+            );
+            return;
+          }
+          products = recalculated;
+          localStorage.setItem(
+            "preciador_product_rates_v2",
+            JSON.stringify(settings),
+          );
+          localStorage.setItem(
+            "preciador_products_list_v2",
+            JSON.stringify(products),
+          );
+          renderProductTable(prodSearchInput.value.trim().toLowerCase());
+          updatePrintLayout();
         });
-        if (recalculatedProducts.some((product) => !product)) {
-          alert("No se recalculó la lista: revise que todos los productos tengan un precio normal válido.");
-          return;
-        }
-        products = recalculatedProducts;
-        localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
-        localStorage.setItem("preciador_products_list", JSON.stringify(products));
-        renderProductTable(prodSearchInput.value.trim().toLowerCase());
-        updatePrintLayout();
+
+      ["mPrecioBase", "mSuperPrecio"].forEach((id) => {
+        document
+          .getElementById(id)
+          .addEventListener("input", updateProductFormCalculations);
       });
 
-      document.getElementById("mPrecioNormal").addEventListener("input", updateProductFormCalculations);
-
-      function cleanImportedCell(value) {
-        return value
-          .trim()
-          .replace(/\s*=(?:codigo|descripci[oó]n|precio(?:\s+normal)?)\s*$/i, "")
-          .trim();
+      function formatDateDDMMYYYY(isoOrDate) {
+        let d;
+        if (isoOrDate instanceof Date) d = isoOrDate;
+        else if (typeof isoOrDate === "string" && isoOrDate) {
+          // yyyy-mm-dd from input[type=date]
+          const parts = isoOrDate.split("-");
+          if (parts.length === 3) {
+            d = new Date(
+              Number(parts[0]),
+              Number(parts[1]) - 1,
+              Number(parts[2]),
+            );
+          } else d = new Date(isoOrDate);
+        } else d = new Date();
+        if (isNaN(d.getTime())) d = new Date();
+        const dd = String(d.getDate()).padStart(2, "0");
+        const mm = String(d.getMonth() + 1).padStart(2, "0");
+        const yyyy = d.getFullYear();
+        return `${dd}/${mm}/${yyyy}`;
       }
 
-      function parseImportedCsv(text) {
-        const rows = [];
-        let row = [];
-        let cell = "";
-        let insideQuotes = false;
+      function todayFormatted() {
+        return formatDateDDMMYYYY(new Date());
+      }
 
-        for (let index = 0; index < text.length; index++) {
-          const character = text[index];
-          if (character === '"') {
-            if (insideQuotes && text[index + 1] === '"') {
-              cell += '"';
-              index++;
-            } else if (!insideQuotes && !cell.trim()) {
-              insideQuotes = true;
-            } else if (insideQuotes && [",", "\r", "\n", undefined].includes(text[index + 1])) {
-              insideQuotes = false;
-            } else {
-              cell += character;
+      /**
+       * Parser del formato de pegado:
+       * 1	13715	REFRI ...	19,759.00
+       * 		Aplica Cupón PROM | ...	8,834.78
+       */
+      function parseCouponPasteText(text) {
+        const lines = text
+          .split(/\r?\n/)
+          .map((l) => l.trimEnd())
+          .filter((l) => l.trim().length > 0);
+
+        const productsOut = [];
+        const invalid = [];
+        let i = 0;
+
+        while (i < lines.length) {
+          const line = lines[i];
+          // Línea de producto: empieza con cantidad (número) + código
+          const mainMatch = line.match(
+            /^(\d+)\s+(\S+)\s+(.+?)\s+([\d,]+\.?\d*)\s*$/,
+          );
+          if (!mainMatch) {
+            // Puede ser solo código sin qty
+            const altMatch = line.match(
+              /^(\S+)\s+(.+?)\s+([\d,]+\.?\d*)\s*$/,
+            );
+            if (!altMatch) {
+              invalid.push(i + 1);
+              i++;
+              continue;
             }
-          } else if (character === "," && !insideQuotes) {
-            row.push(cell.trim());
-            cell = "";
-          } else if ((character === "\r" || character === "\n") && !insideQuotes) {
-            if (character === "\r" && text[index + 1] === "\n") index++;
-            row.push(cell.trim());
-            if (row.some((value) => value !== "")) rows.push(row);
-            row = [];
-            cell = "";
-          } else {
-            cell += character;
+            // sin qty
+            const codigo = altMatch[1];
+            const descripcion = altMatch[2].trim();
+            const precioBase = parseImportedMoney(altMatch[3]);
+            i++;
+            let superPrecio = NaN;
+            let nota = "";
+            if (i < lines.length) {
+              const couponLine = lines[i];
+              const cMatch = couponLine.match(
+                /^(.+?)\s+([\d,]+\.?\d*)\s*$/,
+              );
+              if (cMatch && !/^\d+\s+\S+\s+/.test(couponLine.trim())) {
+                nota = cMatch[1].trim();
+                superPrecio = parseImportedMoney(cMatch[2]);
+                i++;
+              }
+            }
+            if (
+              !Number.isFinite(precioBase) ||
+              !Number.isFinite(superPrecio)
+            ) {
+              invalid.push(i);
+              continue;
+            }
+            productsOut.push({
+              codigo,
+              descripcion,
+              precioBase,
+              superPrecio,
+              nota,
+            });
+            continue;
           }
+
+          const codigo = mainMatch[2];
+          const descripcion = mainMatch[3].trim();
+          const precioBase = parseImportedMoney(mainMatch[4]);
+          i++;
+
+          let superPrecio = NaN;
+          let nota = "";
+          if (i < lines.length) {
+            const couponLine = lines[i];
+            // Segunda línea: texto + monto (no empieza con qty+codigo)
+            const cMatch = couponLine.match(/^(.+?)\s+([\d,]+\.?\d*)\s*$/);
+            const looksLikeProduct = /^\d+\s+\S+\s+.+?\s+[\d,]+\.?\d*\s*$/.test(
+              couponLine.trim(),
+            );
+            if (cMatch && !looksLikeProduct) {
+              nota = cMatch[1].trim();
+              superPrecio = parseImportedMoney(cMatch[2]);
+              i++;
+            }
+          }
+
+          if (!Number.isFinite(precioBase) || !Number.isFinite(superPrecio)) {
+            invalid.push(i);
+            continue;
+          }
+          productsOut.push({
+            codigo,
+            descripcion,
+            precioBase,
+            superPrecio,
+            nota,
+          });
         }
 
-        row.push(cell.trim());
-        if (row.some((value) => value !== "")) rows.push(row);
-        return rows;
-      }
-
-      function normalizeImportHeader(value) {
-        return String(value || "")
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .trim()
-          .toLowerCase();
-      }
-
-      function parseImportedProductLine(line) {
-        let cells;
-        if (line.includes("\t")) {
-          cells = line.split("\t").map(cleanImportedCell).filter(Boolean);
-        } else {
-          const priceMatch = line.match(/((?:L\.?\s*)?[\d,]+(?:\.\d{1,2})?)(?:\s*=.*)?$/i);
-          if (!priceMatch) return null;
-          const productFields = line.slice(0, priceMatch.index).trim();
-          const withQuantity = productFields.match(/^(\d+)\s+(\d+)\s+(.+)$/);
-          const withoutQuantity = productFields.match(/^(\S+)\s+(.+)$/);
-          const match = withQuantity || withoutQuantity;
-          if (!match) return null;
-          return {
-            codigo: cleanImportedCell(withQuantity ? match[2] : match[1]),
-            descripcion: cleanImportedCell(withQuantity ? match[3] : match[2]),
-            precioNormal: parseImportedMoney(priceMatch[1]),
-          };
-        }
-
-        const hasQuantity = cells.length >= 4 && /^\d+$/.test(cells[0]);
-        const offset = hasQuantity ? 1 : 0;
-        if (cells.length < offset + 3) return null;
-        return {
-          codigo: cells[offset],
-          descripcion: cells[offset + 1],
-          precioNormal: parseImportedMoney(cells[offset + 2]),
-        };
+        return { productsOut, invalid };
       }
 
       function importBulkProducts() {
-        const lines = bulkProductText.value.split(/\r?\n/).filter((line) => line.trim());
-        if (!lines.length) {
+        const raw = bulkProductText.value;
+        if (!raw.trim()) {
           alert("Pegue las filas de productos para importarlas.");
           return;
         }
 
-        const parsedProducts = [];
-        const invalidLines = [];
-        const isTabDelimited = lines.some((line) => line.includes("\t"));
-        const csvRows = isTabDelimited ? [] : parseImportedCsv(bulkProductText.value);
-        const csvHeaders = csvRows[0]?.map(normalizeImportHeader) || [];
-        const requiredHeaders = [
-          "codigo", "descripcion", "prima", "regalo", "plazo1",
-          "cuotaprimaria", "plazo2", "cuotasecundaria", "precionormal", "descuento",
-        ];
-        const isDetailedCsv = !isTabDelimited && csvHeaders[0] === "codigo" && csvHeaders[1] === "descripcion";
         const settings = getProductRateSettings();
-
-        if (isDetailedCsv) {
-          const columnIndexes = Object.fromEntries(
-            requiredHeaders.map((header) => [header, csvHeaders.indexOf(header)]),
-          );
-          const missingHeaders = requiredHeaders.filter((header) => columnIndexes[header] < 0);
-          if (missingHeaders.length) {
-            alert(`Faltan encabezados del CSV: ${missingHeaders.join(", ")}.`);
-            return;
-          }
-
-          csvRows.slice(1).forEach((cells, index) => {
-            const value = (header) => cells[columnIndexes[header]] || "";
-            const prima = parseImportedMoney(value("prima"));
-            const cuotaPrimaria = parseImportedMoney(value("cuotaprimaria"));
-            const cuotaSecundaria = parseImportedMoney(value("cuotasecundaria"));
-            const precioNormal = parseImportedMoney(value("precionormal"));
-            const descuento = parseImportedMoney(value("descuento"));
-            const regalo = value("regalo").trim().toLowerCase();
-            const aplicaRegalo = /^(si|sí|true|1|yes)$/i.test(regalo);
-            const numericFields = ["prima", "cuotaprimaria", "cuotasecundaria", "precionormal", "descuento"];
-            const producto = {
-              codigo: value("codigo").trim(),
-              descripcion: value("descripcion").trim(),
-              prima: String(prima),
-              aplicaRegalo,
-              plazo1: value("plazo1").trim(),
-              cuotaPrimaria: String(cuotaPrimaria),
-              plazo2: value("plazo2").trim(),
-              cuotaSecundaria: String(cuotaSecundaria),
-              precioNormal: String(precioNormal),
-              descuento,
-            };
-            const valid = producto.codigo && producto.descripcion && producto.plazo1 && producto.plazo2
-              && numericFields.every((header) => value(header).trim() !== "")
-              && /^(si|sí|no|true|false|1|0|yes)$/i.test(regalo)
-              && Number.isFinite(prima) && prima >= 0
-              && Number.isFinite(cuotaPrimaria) && cuotaPrimaria > 0
-              && Number.isFinite(cuotaSecundaria) && cuotaSecundaria > 0
-              && Number.isFinite(precioNormal) && precioNormal > prima
-              && Number.isFinite(descuento) && descuento >= 0 && descuento <= 100;
-            if (!valid || cells.length < csvHeaders.length) {
-              invalidLines.push(index + 2);
-              return;
-            }
-            parsedProducts.push(producto);
-          });
-        } else {
-          if (!settings) {
-            alert("Ingrese porcentajes válidos entre 0 y 100.");
-            return;
-          }
-
-          lines.forEach((line, index) => {
-            const item = parseImportedProductLine(line.trim());
-            if (!item || !item.codigo || !item.descripcion || !calculateProductCredit(item.precioNormal, settings)) {
-              invalidLines.push(index + 1);
-              return;
-            }
-            parsedProducts.push(item);
-          });
+        if (!settings) {
+          alert("Configure prima, factor de cuota y divisor válidos.");
+          return;
         }
 
-        if (invalidLines.length) {
-          alert(`Revise las filas ${invalidLines.join(", ")}: el formato está incompleto o contiene valores inválidos. No se importó ningún producto.`);
+        const { productsOut, invalid } = parseCouponPasteText(raw);
+        if (invalid.length) {
+          alert(
+            `Revise las filas ${invalid.join(", ")}: formato incompleto. No se importó ningún producto.`,
+          );
+          return;
+        }
+        if (!productsOut.length) {
+          alert("No se detectaron productos en el texto pegado.");
           return;
         }
 
         const now = Date.now();
         let updatedCount = 0;
         let addedCount = 0;
-        parsedProducts.forEach((item, index) => {
-          const existingIndex = products.findIndex((product) => String(product.codigo) === String(item.codigo));
-          const existingProduct = existingIndex >= 0 ? products[existingIndex] : null;
-          const isDetailedProduct = Object.hasOwn(item, "prima");
-          let product;
 
-          if (isDetailedProduct) {
-            product = { ...item, id: existingProduct?.id ?? now + index };
-          } else {
-            const credit = calculateProductCredit(item.precioNormal, settings);
-            product = {
-              id: existingProduct?.id ?? now + index,
-              codigo: item.codigo,
-              descripcion: item.descripcion,
-              ...credit,
-              aplicaRegalo: true,
-              plazo1: "12 MESES",
-              plazo2: "24 MESES",
-              precioNormal: String(item.precioNormal),
-              descuento: 10,
-            };
-          }
+        productsOut.forEach((item, index) => {
+          const calc = calculateFromPrices(
+            item.precioBase,
+            item.superPrecio,
+            settings,
+          );
+          if (!calc) return;
+
+          const existingIndex = products.findIndex(
+            (p) => String(p.codigo) === String(item.codigo),
+          );
+          const existing = existingIndex >= 0 ? products[existingIndex] : null;
+
+          const product = {
+            id: existing?.id ?? now + index,
+            codigo: item.codigo,
+            descripcion: item.descripcion,
+            precioBase: calc.precioBase,
+            superPrecio: calc.superPrecio,
+            precioNormal: calc.precioNormal,
+            descuento: calc.descuento,
+            cuota: calc.cuota,
+            aplicaRegalo: true,
+            nota: item.nota || "",
+          };
 
           if (existingIndex >= 0) {
             products[existingIndex] = product;
@@ -2211,17 +2318,24 @@
             products.push(product);
             addedCount++;
           }
-          const id = product.id;
-          selectedProductIds.add(id);
+          selectedProductIds.add(product.id);
         });
 
-        if (settings) localStorage.setItem("preciador_product_rates", JSON.stringify(settings));
-        localStorage.setItem("preciador_products_list", JSON.stringify(products));
+        localStorage.setItem(
+          "preciador_product_rates_v2",
+          JSON.stringify(settings),
+        );
+        localStorage.setItem(
+          "preciador_products_list_v2",
+          JSON.stringify(products),
+        );
         bulkProductText.value = "";
         closeBulkImportModal();
         renderProductTable(prodSearchInput.value.trim().toLowerCase());
         updatePrintLayout();
-        alert(`Se importaron ${parsedProducts.length} productos: ${addedCount} nuevos y ${updatedCount} actualizados.`);
+        alert(
+          `Se importaron ${productsOut.length} productos: ${addedCount} nuevos y ${updatedCount} actualizados.`,
+        );
       }
 
       function createCardHTML(product) {
@@ -2230,24 +2344,25 @@
 
         const producto = product.descripcion || "---";
         const codigo = product.codigo || "---";
-        const prima = parseAndFormat(product.prima);
         const chkRegalo = product.aplicaRegalo !== false;
-        const showGiftCredit = document.getElementById("chkShowGiftCredit").checked;
+        const showGiftCredit = document.getElementById("chkShowGiftCredit")
+          .checked;
         const showGreenBox = document.getElementById("chkShowGreenBox").checked;
-        const plazo1Val = product.plazo1 || "12 MESES";
-        const plazo2Val = product.plazo2 || "24 MESES";
-        const cuotaPromo = parseAndFormat(product.cuotaPrimaria);
-        const cuotaNormal = parseAndFormat(product.cuotaSecundaria);
 
-        const rawPrice = (product.precioNormal || "0")
-          .toString()
-          .replace(/,/g, "");
-        const pNormal = parseFloat(rawPrice) || 0;
-        const descPct = parseFloat(product.descuento) || 0;
-        const superPrecioCalculado = parseAndFormat(
-          pNormal - pNormal * (descPct / 100),
-        );
-        const precioNormalFormat = parseAndFormat(pNormal);
+        const cuotaVal = parseAndFormat(product.cuota);
+        const superPrecioFormat = parseAndFormat(product.superPrecio);
+        const precioNormalFormat = parseAndFormat(product.precioNormal);
+        const descPct = Math.round(parseFloat(product.descuento) || 0);
+
+        const validUntilIso =
+          document.getElementById("inpValidUntil").value || "2026-10-31";
+        const validUntilStr = formatDateDDMMYYYY(validUntilIso);
+        const printDateStr = todayFormatted();
+        const extraNote = (
+          document.getElementById("inpLegalNote").value || ""
+        ).trim();
+
+        const legalText = `Válido hasta: ${validUntilStr} o hasta agotar existencias. Cuotas calculadas a 36 meses con 20% de prima. Regalos, precios y promociones sujetos a disponibilidad y a cambio sin previo aviso. Consulte al vendedor por esta promoción. Garantía extendida no aplica a todos los artículos. Fecha de impresión: ${printDateStr}.${extraNote ? " " + extraNote : ""}`;
 
         const savedHeader = localStorage.getItem("preciador_header_img");
         const savedGarantia = localStorage.getItem("preciador_garantia_img");
@@ -2275,7 +2390,6 @@
                 <div class="meta-container">
                     <div class="meta-info" style="font-size: ${document.getElementById("sMetaSize").value}cqw;">
                         <div class="item">CODIGO: <span class="outCodigo">${codigo}</span></div>
-                        <div class="item">PRIMA: L <span class="outPrima">${prima}</span></div>
                     </div>
 
                     <div class="gift-box outGiftBox" style="display: ${chkRegalo && showGiftCredit ? "flex" : "none"};">
@@ -2285,30 +2399,27 @@
                 </div>
 
                 <div class="green-box-container" style="width: ${document.getElementById("sGreenBoxWidth").value}%; padding: ${document.getElementById("sGreenBoxHeight").value}% 3%; border-width: ${document.getElementById("sGreenBoxBorder").value}px; border-color: ${showGreenBox ? "#009746" : "transparent"}; border-radius: ${document.getElementById("sGreenBoxRadius").value}px;">
-                    <div class="main-cuota-title" style="font-size: ${document.getElementById("sMainCuotaTitleSize").value}cqw;">Molicuota: <span class="outPlazo1">${plazo1Val}</span></div>
+                    <div class="main-cuota-title" style="font-size: ${document.getElementById("sMainCuotaTitleSize").value}cqw;">MOLICUOTA</div>
                     
                     <div class="main-price" style="font-size: ${document.getElementById("sliderCuotaSize").value}cqw;">
-                        <span class="currency">L</span><span class="outCuotaPromo">${cuotaPromo}</span>
+                        <span class="currency">L</span><span class="outCuotaPromo">${cuotaVal}</span>
                     </div>
 
                     <div class="cuota-bottom-row">
-                        <div class="secondary-cuota-line" style="font-size: ${document.getElementById("sSecondaryCuotaSize").value}cqw;">
-                            CUOTA <span class="outPlazo2">${plazo2Val}</span> L <span class="outCuotaNormal">${cuotaNormal}</span>
-                        </div>
                         <div class="cuota-normal-label">CUOTA NORMAL</div>
                     </div>
                 </div>
 
                 <div class="tag-footer">
                     <div class="discount-badge">
-                        <div class="percent outDescuento">${Math.round(descPct)}%</div>
+                        <div class="percent outDescuento">${descPct}%</div>
                         <div class="text">DESCUENTO EN PROMOCIÓN DE CONTADO</div>
                     </div>
 
                     <div class="super-precio-box">
                         <div class="super-precio-label">SUPER PRECIO</div>
                         <div class="super-precio-val" style="font-size: ${document.getElementById("sliderSuperPrecioSize").value}cqw;">
-                            <span>L </span><span class="outSuperPrecio">${superPrecioCalculado}</span>
+                            <span>L </span><span class="outSuperPrecio">${superPrecioFormat}</span>
                         </div>
                         <div class="precio-normal-line" style="font-size: ${document.getElementById("sNormalPriceSize").value}cqw;">
                             PRECIO NORMAL: L <span class="strike outPrecioNormal">${precioNormalFormat}</span>
@@ -2318,6 +2429,10 @@
                     <div class="guarantee-box" style="width: ${document.getElementById("sliderGarantiaSize").value}%;">
                         <img class="imgGarantiaPreview" ${garantiaImgStyle} alt="Garantía">
                     </div>
+                </div>
+
+                <div class="legal-footer" style="font-size: ${document.getElementById("sLegalSize").value}cqw;">
+                  ${legalText}
                 </div>
             </div>
 
@@ -2330,10 +2445,13 @@
           document.getElementById("inpItemsPerPage").value,
           10,
         );
-        const orientation = document.getElementById("inpPageOrientation").value;
+        const orientation = document.getElementById("inpPageOrientation")
+          .value;
 
         pagesContainer.innerHTML = "";
-        const activePrints = products.filter(p => selectedProductIds.has(p.id));
+        const activePrints = products.filter((p) =>
+          selectedProductIds.has(p.id),
+        );
         const listToPrint = activePrints.length > 0 ? activePrints : [null];
         const totalPages = Math.ceil(listToPrint.length / countPerPage);
 
@@ -2462,19 +2580,33 @@
           };
         });
 
-      document.getElementById('btnNuevaLista').addEventListener('click', () => {
-        if (products.length === 0) { alert('La lista actual ya está vacía.'); return; }
-        const nombre = prompt('Nombre para guardar la lista actual antes de limpiar\n(Dejar vacío para no guardar, Cancelar para abortar):');
+      document.getElementById("btnNuevaLista").addEventListener("click", () => {
+        if (products.length === 0) {
+          alert("La lista actual ya está vacía.");
+          return;
+        }
+        const nombre = prompt(
+          "Nombre para guardar la lista actual antes de limpiar\n(Dejar vacío para no guardar, Cancelar para abortar):",
+        );
         if (nombre === null) return;
         if (nombre !== null && nombre.trim() && db) {
-          const tx = db.transaction('price_lists', 'readwrite');
-          const store = tx.objectStore('price_lists');
-          store.add({ name: nombre.trim(), date: new Date().toLocaleString(), items: products });
-          tx.oncomplete = () => { loadHistoryDropdown(); };
+          const tx = db.transaction("price_lists", "readwrite");
+          const store = tx.objectStore("price_lists");
+          store.add({
+            name: nombre.trim(),
+            date: new Date().toLocaleString(),
+            items: products,
+          });
+          tx.oncomplete = () => {
+            loadHistoryDropdown();
+          };
         }
         products = [];
         selectedProductIds = new Set();
-        localStorage.setItem('preciador_products_list', JSON.stringify(products));
+        localStorage.setItem(
+          "preciador_products_list_v2",
+          JSON.stringify(products),
+        );
         renderProductTable();
         updatePrintLayout();
       });
@@ -2518,9 +2650,10 @@
             if (request.result) {
               products = request.result.items;
               localStorage.setItem(
-                "preciador_products_list",
+                "preciador_products_list_v2",
                 JSON.stringify(products),
               );
+              selectedProductIds = new Set(products.map((p) => p.id));
               renderProductTable();
               updatePrintLayout();
               alert(`Lista "${request.result.name}" cargada correctamente.`);
@@ -2557,9 +2690,14 @@
             return;
           }
 
-          const credit = calculateProductCredit(document.getElementById("mPrecioNormal").value);
-          if (!credit) {
-            alert("Ingrese un precio normal válido y porcentajes entre 0 y 100.");
+          const settings = getProductRateSettings();
+          const calc = calculateFromPrices(
+            document.getElementById("mPrecioBase").value,
+            document.getElementById("mSuperPrecio").value,
+            settings,
+          );
+          if (!calc) {
+            alert("Ingrese precios base y súper precio válidos.");
             return;
           }
 
@@ -2567,22 +2705,26 @@
             id: editId ? parseInt(editId, 10) : Date.now(),
             descripcion: document.getElementById("mDescripcion").value,
             codigo: document.getElementById("mCodigo").value,
-            ...credit,
+            precioBase: calc.precioBase,
+            superPrecio: calc.superPrecio,
+            precioNormal: calc.precioNormal,
+            descuento: calc.descuento,
+            cuota: calc.cuota,
             aplicaRegalo: document.getElementById("mChkRegalo").checked,
-            plazo1: document.getElementById("mPlazo1").value,
-            plazo2: document.getElementById("mPlazo2").value,
-            precioNormal: document.getElementById("mPrecioNormal").value,
-            descuento: document.getElementById("mDescuento").value || 10,
+            nota: "",
           };
 
           if (editId) {
-            products = products.map((p) => (p.id === newProd.id ? newProd : p));
+            products = products.map((p) =>
+              p.id === newProd.id ? newProd : p,
+            );
           } else {
             products.push(newProd);
+            selectedProductIds.add(newProd.id);
           }
 
           localStorage.setItem(
-            "preciador_products_list",
+            "preciador_products_list_v2",
             JSON.stringify(products),
           );
           closeFormModal();
@@ -2593,12 +2735,14 @@
       function resetModalForm() {
         modalProductForm.reset();
         document.getElementById("mEditId").value = "";
-        document.getElementById("mDescuento").value = 10;
-        document.getElementById("mPlazo1").value = "12 MESES";
-        document.getElementById("mPlazo2").value = "24 MESES";
+        document.getElementById("mDescuento").value = "—";
+        document.getElementById("mCuota").value = "";
+        document.getElementById("mPrecioNormal").value = "";
         document.getElementById("mChkRegalo").checked = true;
-        document.getElementById("formModalTitle").textContent = "➕ Nuevo Producto";
-        document.getElementById("btnSaveProduct").textContent = "💾 Guardar Producto";
+        document.getElementById("formModalTitle").textContent =
+          "➕ Nuevo Producto";
+        document.getElementById("btnSaveProduct").textContent =
+          "💾 Guardar Producto";
       }
 
       document
@@ -2608,19 +2752,23 @@
       function updateSelectAllCheckbox() {
         const chkAll = document.getElementById("chkSelectAll");
         if (!chkAll) return;
-        const allIds = products.map(p => p.id);
-        const allSelected = allIds.length > 0 && allIds.every(id => selectedProductIds.has(id));
+        const allIds = products.map((p) => p.id);
+        const allSelected =
+          allIds.length > 0 && allIds.every((id) => selectedProductIds.has(id));
         chkAll.checked = allSelected;
-        chkAll.indeterminate = !allSelected && allIds.some(id => selectedProductIds.has(id));
+        chkAll.indeterminate =
+          !allSelected && allIds.some((id) => selectedProductIds.has(id));
       }
 
       function updateSelBadge() {
         const sel = selectedProductIds.size;
         const total = products.length;
-        prodCountBadge.textContent = sel === total
-          ? `${total} producto${total !== 1 ? "s" : ""}`
-          : `${sel} / ${total} seleccionados`;
-        prodCountBadge.style.background = sel < total ? "rgba(255,200,0,0.3)" : "rgba(255,255,255,0.22)";
+        prodCountBadge.textContent =
+          sel === total
+            ? `${total} producto${total !== 1 ? "s" : ""}`
+            : `${sel} / ${total} seleccionados`;
+        prodCountBadge.style.background =
+          sel < total ? "rgba(255,200,0,0.3)" : "rgba(255,255,255,0.22)";
         updatePrintLayout();
       }
 
@@ -2631,12 +2779,12 @@
             )
           : products;
 
-        prodCountBadge.textContent = `${products.length} producto${products.length !== 1 ? "s" : ""}`;
         productTableBody.innerHTML = "";
 
         if (filtered.length === 0) {
-          productTableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
+          productTableBody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:28px;color:#94a3b8;">No se encontraron productos</td></tr>`;
           updateSelectAllCheckbox();
+          updateSelBadge();
           return;
         }
 
@@ -2653,9 +2801,10 @@
             <td><span class="prod-code-badge">${prod.codigo}</span></td>
             <td>
               <div class="prod-name">${prod.descripcion}</div>
-              <div class="prod-sub">Prima: L ${parseAndFormat(prod.prima)} &bull; ${prod.plazo1}</div>
+              <div class="prod-sub">${prod.nota ? prod.nota.slice(0, 40) : ""}</div>
             </td>
-            <td><span class="cuota-pill">L ${parseAndFormat(prod.cuotaPrimaria)}</span></td>
+            <td><span class="cuota-pill">L ${parseAndFormat(prod.cuota)}</span></td>
+            <td style="font-weight:600;color:#009746;">L ${parseAndFormat(prod.superPrecio)}</td>
             <td style="font-weight:600;">L ${parseAndFormat(prod.precioNormal)}</td>
             <td style="color:#dc2626;font-weight:700;">${prod.descuento}%</td>
             <td><div class="actions-cell">
@@ -2667,10 +2816,9 @@
           productTableBody.appendChild(tr);
         });
 
-        // Checkboxes individuales
-        document.querySelectorAll(".prod-row-chk").forEach(chk => {
+        document.querySelectorAll(".prod-row-chk").forEach((chk) => {
           chk.addEventListener("change", () => {
-            const id = parseInt(chk.dataset.id);
+            const id = parseInt(chk.dataset.id, 10);
             if (chk.checked) selectedProductIds.add(id);
             else selectedProductIds.delete(id);
             const row = chk.closest("tr");
@@ -2684,15 +2832,16 @@
         updateSelBadge();
       }
 
-      // Select all / deselect all
-      document.getElementById("chkSelectAll").addEventListener("change", function() {
-        if (this.checked) {
-          products.forEach(p => selectedProductIds.add(p.id));
-        } else {
-          selectedProductIds.clear();
-        }
-        renderProductTable(prodSearchInput.value.trim().toLowerCase());
-      });
+      document
+        .getElementById("chkSelectAll")
+        .addEventListener("change", function () {
+          if (this.checked) {
+            products.forEach((p) => selectedProductIds.add(p.id));
+          } else {
+            selectedProductIds.clear();
+          }
+          renderProductTable(prodSearchInput.value.trim().toLowerCase());
+        });
 
       window.editProduct = function (id) {
         const prod = products.find((p) => p.id === id);
@@ -2700,15 +2849,18 @@
           document.getElementById("mEditId").value = prod.id;
           document.getElementById("mDescripcion").value = prod.descripcion;
           document.getElementById("mCodigo").value = prod.codigo;
-          document.getElementById("mChkRegalo").checked = prod.aplicaRegalo !== false;
-          document.getElementById("mPlazo1").value = prod.plazo1 || "12 MESES";
-          document.getElementById("mPlazo2").value = prod.plazo2 || "24 MESES";
-          document.getElementById("mPrecioNormal").value = prod.precioNormal;
+          document.getElementById("mChkRegalo").checked =
+            prod.aplicaRegalo !== false;
+          document.getElementById("mPrecioBase").value =
+            prod.precioBase ?? "";
+          document.getElementById("mSuperPrecio").value =
+            prod.superPrecio ?? "";
           updateProductFormCalculations();
-          document.getElementById("mDescuento").value = prod.descuento;
 
-          document.getElementById("formModalTitle").textContent = "✏️ Editar Producto";
-          document.getElementById("btnSaveProduct").textContent = "💾 Actualizar Producto";
+          document.getElementById("formModalTitle").textContent =
+            "✏️ Editar Producto";
+          document.getElementById("btnSaveProduct").textContent =
+            "💾 Actualizar Producto";
           openFormModal();
         }
       };
@@ -2720,7 +2872,7 @@
           products.push({ ...prod, id: dupId });
           selectedProductIds.add(dupId);
           localStorage.setItem(
-            "preciador_products_list",
+            "preciador_products_list_v2",
             JSON.stringify(products),
           );
           renderProductTable();
@@ -2732,7 +2884,7 @@
           selectedProductIds.delete(id);
           products = products.filter((p) => p.id !== id);
           localStorage.setItem(
-            "preciador_products_list",
+            "preciador_products_list_v2",
             JSON.stringify(products),
           );
           renderProductTable();
@@ -2746,14 +2898,13 @@
         const headers = [
           "Codigo",
           "Descripcion",
-          "Prima",
-          "Regalo",
-          "Plazo1",
-          "CuotaPrimaria",
-          "Plazo2",
-          "CuotaSecundaria",
+          "PrecioBase",
+          "SuperPrecio",
           "PrecioNormal",
           "Descuento",
+          "Cuota",
+          "Regalo",
+          "Nota",
         ];
         const csvRows = [headers.join(",")];
 
@@ -2761,15 +2912,14 @@
           csvRows.push(
             [
               `"${p.codigo || ""}"`,
-              `"${p.descripcion || ""}"`,
-              `"${p.prima || ""}"`,
-              p.aplicaRegalo ? "SI" : "NO",
-              `"${p.plazo1 || "12 MESES"}"`,
-              `"${p.cuotaPrimaria || ""}"`,
-              `"${p.plazo2 || "24 MESES"}"`,
-              `"${p.cuotaSecundaria || ""}"`,
+              `"${(p.descripcion || "").replace(/"/g, '""')}"`,
+              `"${p.precioBase || ""}"`,
+              `"${p.superPrecio || ""}"`,
               `"${p.precioNormal || ""}"`,
-              p.descuento || 10,
+              p.descuento || 0,
+              `"${p.cuota || ""}"`,
+              p.aplicaRegalo ? "SI" : "NO",
+              `"${(p.nota || "").replace(/"/g, '""')}"`,
             ].join(","),
           );
         });
@@ -2794,34 +2944,57 @@
             const lines = evt.target.result.split("\n");
             if (lines.length <= 1) return;
 
+            const settings = getProductRateSettings();
             const importedProducts = [];
             for (let i = 1; i < lines.length; i++) {
               const line = lines[i].trim();
               if (!line) continue;
-              const cols = line
-                .split(",")
-                .map((c) => c.replace(/^"|"$/g, "").trim());
-              if (cols.length >= 8) {
+              // simple CSV split respecting quotes roughly
+              const cols = [];
+              let cur = "";
+              let inQ = false;
+              for (let c = 0; c < line.length; c++) {
+                const ch = line[c];
+                if (ch === '"') {
+                  inQ = !inQ;
+                } else if (ch === "," && !inQ) {
+                  cols.push(cur.trim());
+                  cur = "";
+                } else cur += ch;
+              }
+              cols.push(cur.trim());
+
+              if (cols.length >= 5) {
+                const precioBase = cols[2];
+                const superPrecio = cols[3];
+                const calc = calculateFromPrices(
+                  precioBase,
+                  superPrecio,
+                  settings,
+                );
+                if (!calc) continue;
                 importedProducts.push({
                   id: Date.now() + i,
                   codigo: cols[0] || "S/C",
                   descripcion: cols[1] || "Producto Sin Nombre",
-                  prima: cols[2] || "0",
-                  aplicaRegalo: cols[3] ? cols[3].toUpperCase() === "SI" : true,
-                  plazo1: cols[4] || "12 MESES",
-                  cuotaPrimaria: cols[5] || "0",
-                  plazo2: cols[6] || "24 MESES",
-                  cuotaSecundaria: cols[7] || "0",
-                  precioNormal: cols[8] || "0",
-                  descuento: parseFloat(cols[9]) || 10,
+                  precioBase: calc.precioBase,
+                  superPrecio: calc.superPrecio,
+                  precioNormal: calc.precioNormal,
+                  descuento: calc.descuento,
+                  cuota: calc.cuota,
+                  aplicaRegalo: cols[7]
+                    ? cols[7].toUpperCase() === "SI"
+                    : true,
+                  nota: cols[8] || "",
                 });
               }
             }
 
             if (importedProducts.length > 0) {
               products = [...products, ...importedProducts];
+              importedProducts.forEach((p) => selectedProductIds.add(p.id));
               localStorage.setItem(
-                "preciador_products_list",
+                "preciador_products_list_v2",
                 JSON.stringify(products),
               );
               renderProductTable();
@@ -2832,6 +3005,7 @@
             }
           };
           reader.readAsText(file);
+          e.target.value = "";
         });
 
       // INICIALIZACIÓN AL CARGAR PÁGINA
@@ -2840,6 +3014,7 @@
         loadUIConfig();
         selectedProductIds = new Set(products.map((p) => p.id));
         renderProductTable();
+        updatePrintLayout();
       });
     </script>
   </body>
