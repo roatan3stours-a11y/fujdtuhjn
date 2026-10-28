@@ -13,14 +13,12 @@
         margin: 0;
         padding: 0;
       }
-
       body {
         font-family: "Segoe UI", Arial, sans-serif;
         background: #eef1f7;
         display: flex;
         min-height: 100vh;
       }
-
       /* ===== SIDEBAR ===== */
       .sidebar {
         width: 380px;
@@ -32,7 +30,6 @@
         overflow-y: auto;
         box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
       }
-
       .sidebar-header {
         background: #2c2c2c;
         color: #ffffff;
@@ -42,12 +39,10 @@
         letter-spacing: 0.5px;
         text-transform: uppercase;
       }
-
       .sidebar-body {
         padding: 16px 18px;
         flex: 1;
       }
-
       .section-badge {
         font-size: 10px;
         font-weight: 700;
@@ -60,11 +55,9 @@
         margin: 14px 0 10px;
         display: block;
       }
-
       .form-group {
         margin-bottom: 10px;
       }
-
       .form-group label {
         display: block;
         font-size: 10px;
@@ -74,7 +67,6 @@
         color: #444;
         margin-bottom: 4px;
       }
-
       .form-group input,
       .form-group textarea {
         width: 100%;
@@ -89,26 +81,22 @@
           box-shadow 0.2s;
         resize: none;
       }
-
       .form-group input:focus,
       .form-group textarea:focus {
         border-color: #555;
         outline: none;
         box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
       }
-
       /* ===== TABLA PRODUCTOS EN SIDEBAR ===== */
       .product-table-wrapper {
         overflow-x: auto;
         margin-top: 6px;
       }
-
       table.product-input-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 11.5px;
       }
-
       table.product-input-table th {
         background: #2c2c2c;
         color: #fff;
@@ -119,13 +107,11 @@
         letter-spacing: 0.4px;
         white-space: nowrap;
       }
-
       table.product-input-table td {
         padding: 4px 3px;
         border-bottom: 1px solid #e9ecef;
         vertical-align: middle;
       }
-
       table.product-input-table input {
         width: 100%;
         padding: 5px 6px;
@@ -134,12 +120,10 @@
         font-size: 11.5px;
         background: #fff;
       }
-
       table.product-input-table input:focus {
         border-color: #555;
         outline: none;
       }
-
       .col-sku {
         width: 70px;
       }
@@ -159,7 +143,6 @@
         width: 28px;
         text-align: center;
       }
-
       .btn-del-row {
         background: #555;
         border: none;
@@ -179,7 +162,6 @@
       .btn-del-row:hover {
         background: #222;
       }
-
       .btn-add-row {
         width: 100%;
         margin-top: 10px;
@@ -196,7 +178,6 @@
       .btn-add-row:hover {
         background: #ebebeb;
       }
-
       .import-list-panel {
         margin-top: 10px;
         padding: 10px 10px 8px;
@@ -204,7 +185,6 @@
         border: 1px solid #dfe3ea;
         border-radius: 6px;
       }
-
       .import-list-panel label {
         display: block;
         margin-bottom: 6px;
@@ -214,7 +194,6 @@
         letter-spacing: 0.4px;
         color: #444;
       }
-
       .import-list-panel textarea {
         width: 100%;
         min-height: 120px;
@@ -226,13 +205,11 @@
         color: #212529;
         background: #fff;
       }
-
       .import-list-panel textarea:focus {
         border-color: #555;
         outline: none;
         box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.08);
       }
-
       .btn-import-list {
         width: 100%;
         margin-top: 8px;
@@ -247,11 +224,9 @@
         letter-spacing: 0.5px;
         text-transform: uppercase;
       }
-
       .btn-import-list:hover {
         background: #111;
       }
-
       .hint-text {
         display: block;
         margin-top: 6px;
@@ -259,7 +234,31 @@
         color: #666;
         line-height: 1.5;
       }
-
+      .tax-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 11px 10px;
+        margin: 12px 0 4px;
+        background: #fff;
+        border: 1px solid #dfe3ea;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #333;
+      }
+      .tax-option input {
+        width: 16px;
+        height: 16px;
+        margin-top: 1px;
+        accent-color: #2c2c2c;
+        flex-shrink: 0;
+      }
+      .tax-option strong {
+        display: block;
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
       /* ===== BOTON IMPRIMIR ===== */
       .btn-print {
         width: 100%;
@@ -278,7 +277,6 @@
       .btn-print:hover {
         background: #111;
       }
-
       /* ===== CONTENT / DOCUMENTO ===== */
       .content {
         flex: 1;
@@ -288,7 +286,6 @@
         align-items: flex-start;
         overflow-y: auto;
       }
-
       .document {
         background: #fff;
         width: 210mm;
@@ -299,7 +296,6 @@
         font-size: 13px;
         color: #000;
       }
-
       /* ===== ENCABEZADO DOCUMENTO ===== */
       .doc-header {
         display: flex;
@@ -309,41 +305,34 @@
         border-bottom: 2px solid #1a1a1a;
         padding-bottom: 14px;
       }
-
       .doc-header-left {
         display: flex;
         flex-direction: column;
         gap: 6px;
       }
-
       .doc-logo {
         display: block;
         max-height: 75px;
         max-width: 220px;
         object-fit: contain;
       }
-
       .doc-address {
         font-size: 11.5px;
         font-weight: 700;
         color: #000;
         line-height: 1.5;
       }
-
       .doc-address strong {
         display: block;
       }
-
       .company-rtn {
         margin-top: 2px;
         color: #000;
       }
-
       .doc-meta {
         text-align: right;
         font-size: 12px;
       }
-
       .doc-meta .doc-title {
         font-size: 22px;
         font-weight: 700;
@@ -370,7 +359,6 @@
       .doc-meta table td:last-child {
         color: #000;
       }
-
       /* ===== DATOS CLIENTE ===== */
       .client-section {
         background: #f8f9fa;
@@ -406,7 +394,6 @@
       .client-section .cs-val {
         color: #000;
       }
-
       /* ===== TABLA DE PRODUCTOS (DOCUMENTO) ===== */
       .products-title {
         font-size: 10.5px;
@@ -416,18 +403,15 @@
         letter-spacing: 0.7px;
         margin-bottom: 7px;
       }
-
       table.doc-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 12px;
         margin-bottom: 0;
       }
-
       table.doc-table thead tr {
         background: #1a1a1a;
       }
-
       table.doc-table thead th {
         padding: 9px 10px;
         text-align: center;
@@ -437,20 +421,17 @@
         font-weight: 600;
         color: #ffffff;
       }
-
       table.doc-table tbody tr:nth-child(even) {
         background: #f5f5f5;
       }
       table.doc-table tbody tr:nth-child(odd) {
         background: #fff;
       }
-
       table.doc-table tbody td {
         padding: 8px 10px;
         border-bottom: 1px solid #e0e5f2;
         vertical-align: middle;
       }
-
       .td-sku {
         text-align: center;
         font-weight: 700;
@@ -477,7 +458,6 @@
         width: 90px;
         font-weight: 700;
       }
-
       .promo-tag {
         display: inline-block;
         border: 1px solid #333;
@@ -490,14 +470,12 @@
         vertical-align: middle;
         letter-spacing: 0.5px;
       }
-
       /* ===== TOTALES ===== */
       .totals-wrapper {
         display: flex;
         justify-content: flex-end;
         margin-top: 10px;
       }
-
       .totals-box {
         width: 260px;
         border: 1px solid #e0e5f2;
@@ -505,7 +483,6 @@
         overflow: hidden;
         font-size: 12.5px;
       }
-
       .totals-box table {
         width: 100%;
         border-collapse: collapse;
@@ -537,7 +514,6 @@
         font-weight: 700;
         font-size: 14px;
       }
-
       /* ===== NOTAS ===== */
       .notes-section {
         margin-top: 22px;
@@ -558,7 +534,6 @@
         line-height: 1.6;
         white-space: pre-wrap;
       }
-
       /* ===== FOOTER DOCUMENTO ===== */
       .doc-footer {
         margin-top: 30px;
@@ -568,7 +543,6 @@
         border-top: 1px solid #e0e5f2;
         padding-top: 10px;
       }
-
       /* ===== IMPRESIÓN ===== */
       @media print {
         @page {
@@ -601,7 +575,6 @@
       <div class="sidebar-header">Datos de la Cotizacion</div>
       <div class="sidebar-body">
         <span class="section-badge">Informacion del Documento</span>
-
         <div class="form-group">
           <label>N° de Cotización</label>
           <input type="text" id="in-cotNum" placeholder="COT-2026-001" />
@@ -631,9 +604,7 @@
             readonly
           />
         </div>
-
         <span class="section-badge">Datos del Vendedor</span>
-
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
           <div class="form-group">
             <label>Nombre del Vendedor</label>
@@ -644,9 +615,7 @@
             <input type="text" id="in-vendedorPhone" placeholder="+504 0000-0000" />
           </div>
         </div>
-
         <span class="section-badge">Datos del Cliente</span>
-
         <div class="form-group">
           <label>Nombre / Empresa</label>
           <input
@@ -677,9 +646,7 @@
             placeholder="Ciudad, Departamento"
           />
         </div>
-
         <span class="section-badge">Productos y Servicios</span>
-
         <div class="product-table-wrapper">
           <table class="product-input-table" id="product-input-table">
             <thead>
@@ -700,7 +667,6 @@
         <button class="btn-add-row" onclick="agregarFila()">
           + Agregar producto
         </button>
-
         <div class="import-list-panel">
           <label for="lista-productos-input">Agregar desde lista</label>
           <textarea
@@ -714,7 +680,15 @@
             Formato sugerido: cantidad, SKU, descripción, precio promo y luego la línea con el cupón.
           </span>
         </div>
-
+        <span class="section-badge">Impuesto de Venta</span>
+        <label class="tax-option" for="in-incluirISV">
+          <input type="checkbox" id="in-incluirISV" />
+          <span>
+            <strong>Mostrar ISV (15%) en los totales</strong>
+            Si seleccionas Sí, los subtotales se muestran sin ISV y el total conserva el impuesto incluido.
+          </span>
+        </label>
+        <span class="hint-text">Sí: separa el ISV incluido en los precios. No: mantiene los importes originales sin cambios.</span>
         <span class="section-badge">Notas y Condiciones</span>
         <div class="form-group">
           <textarea
@@ -723,7 +697,6 @@
             placeholder="Condiciones de pago, garantía, tiempo de entrega..."
           ></textarea>
         </div>
-
         <button class="btn-print" onclick="window.print()">
           IMPRIMIR COTIZACION
         </button>
@@ -737,7 +710,6 @@
         </button>
       </div>
     </div>
-
     <!-- ===================== DOCUMENTO ===================== -->
     <div class="content">
       <div class="document">
@@ -783,7 +755,6 @@
             </table>
           </div>
         </div>
-
         <!-- Datos cliente -->
         <div class="client-section">
           <div class="cs-title">Datos del Cliente</div>
@@ -804,7 +775,6 @@
             ><span class="cs-val" id="out-clientAddress">—</span>
           </div>
         </div>
-
         <!-- Tabla productos -->
         <div class="products-title">Detalle de Productos / Servicios</div>
         <table class="doc-table">
@@ -834,22 +804,25 @@
             </tr>
           </tbody>
         </table>
-
         <!-- Totales -->
         <div class="totals-wrapper">
           <div class="totals-box">
             <table>
               <tr>
-                <td class="t-label">Subtotal (precio normal):</td>
+                <td class="t-label" id="label-subtotalNormal">Subtotal (precio normal):</td>
                 <td class="t-val" id="out-subtotalNormal">L. 0.00</td>
               </tr>
               <tr>
-                <td class="t-label">Subtotal (precio promo):</td>
+                <td class="t-label" id="label-subtotalPromo">Subtotal (precio promo):</td>
                 <td class="t-val" id="out-subtotalPromo">L. 0.00</td>
               </tr>
               <tr class="t-savings">
                 <td class="t-label">Ahorro total:</td>
                 <td class="t-val" id="out-savings">L. 0.00</td>
+              </tr>
+              <tr id="row-isv" style="display: none;">
+                <td class="t-label">ISV (15%):</td>
+                <td class="t-val" id="out-isv">L. 0.00</td>
               </tr>
               <tr class="t-total">
                 <td class="t-label">TOTAL A PAGAR:</td>
@@ -858,13 +831,11 @@
             </table>
           </div>
         </div>
-
         <!-- Notas -->
         <div class="notes-section">
           <div class="notes-title">Notas y Condiciones</div>
           <p id="out-notes">—</p>
         </div>
-
         <!-- Firma -->
         <div style="margin-top: 50px; display: flex; justify-content: center;">
           <div style="width: 260px; text-align: center;">
@@ -873,7 +844,6 @@
             <div style="font-size: 11px; color: #444; margin-top: 3px;">Firma y Sello</div>
           </div>
         </div>
-
         <!-- Footer -->
         <div class="doc-footer">
           Esta cotizacion fue generada el <span id="out-fecha-foot"></span>.
@@ -881,18 +851,15 @@
         </div>
       </div>
     </div>
-
     <script>
       // ===== LOCAL STORAGE =====
       const LS_KEY = 'cotizacion_data';
-
       const allFields = [
         'in-cotNum','in-diasVigencia','in-validez',
         'in-vendedor','in-vendedorPhone',
         'in-clientName','in-clientRTN','in-clientPhone','in-clientAddress',
         'in-notes'
       ];
-
       function guardarLS() {
         const data = {};
         allFields.forEach(id => {
@@ -907,13 +874,17 @@
           rows.push([inputs[0].value, inputs[1].value, inputs[2].value, inputs[3].value, inputs[4].value]);
         });
         data['_rows'] = rows;
+        data['_incluirISV'] = document.getElementById('in-incluirISV').checked;
         localStorage.setItem(LS_KEY, JSON.stringify(data));
       }
-
       function cargarLS() {
         const raw = localStorage.getItem(LS_KEY);
         if (!raw) return;
         const data = JSON.parse(raw);
+        const checkboxISV = document.getElementById('in-incluirISV');
+        if (checkboxISV && data['_incluirISV'] !== undefined) {
+          checkboxISV.checked = Boolean(data['_incluirISV']);
+        }
         allFields.forEach(id => {
           const el = document.getElementById(id);
           if (el && data[id] !== undefined && id !== 'in-fecha') {
@@ -944,8 +915,8 @@
           });
           renderDoc();
         }
+        renderDoc();
       }
-
       function resetearTodo() {
         if (!confirm('¿Desea borrar todos los datos del formulario?')) return;
         localStorage.removeItem(LS_KEY);
@@ -955,10 +926,10 @@
           if (el && id !== 'in-fecha') el.dispatchEvent(new Event('input'));
         });
         document.getElementById('product-rows').innerHTML = '';
+        document.getElementById('in-incluirISV').checked = false;
         rowCount = 0;
         agregarFila();
       }
-
       // ===== FECHA AUTOMATICA =====
       const today = new Date();
       const pad = (n) => (n < 10 ? "0" + n : n);
@@ -966,7 +937,6 @@
       document.getElementById("in-fecha").value = fechaStr;
       document.getElementById("out-fecha").textContent = fechaStr;
       document.getElementById("out-fecha-foot").textContent = fechaStr;
-
       // ===== DIAS DE VIGENCIA -> CALCULO FECHA LIMITE =====
       document
         .getElementById("in-diasVigencia")
@@ -988,7 +958,6 @@
             outDias.textContent = "—";
           }
         });
-
       // ===== SYNC CAMPOS SIMPLES =====
       const simpleMap = {
         "in-cotNum": "out-cotNum",
@@ -1000,19 +969,21 @@
         "in-clientAddress": "out-clientAddress",
         "in-notes": "out-notes",
       };
-
       for (const [inId, outId] of Object.entries(simpleMap)) {
         document.getElementById(inId).addEventListener("input", function () {
           document.getElementById(outId).textContent = this.value.trim() || "—";
           guardarLS();
         });
       }
-
       document.getElementById('in-diasVigencia').addEventListener('change', guardarLS);
+      // ===== OPCION ISV =====
+      document.getElementById('in-incluirISV').addEventListener('change', function () {
+        renderDoc();
+        guardarLS();
+      });
 
       // ===== TABLA DE PRODUCTOS =====
       let rowCount = 0;
-
       function parseMoney(value) {
         if (value === null || value === undefined || value === '') return 0;
         const normalized = String(value)
@@ -1033,7 +1004,6 @@
         }
         return Number(normalized) || 0;
       }
-
       function calcularPrecioNormal(precioPromo, cupo) {
         const promo = Number(precioPromo) || 0;
         const cupon = Number(cupo) || 0;
@@ -1041,7 +1011,6 @@
         const aumento = Math.round((cupon * 0.15) * 100) / 100;
         return Number((promo + cupon + aumento).toFixed(2));
       }
-
       function agregarFilaConValores({ sku = '', desc = '', qty = 1, price = '', promo = '' } = {}) {
         rowCount++;
         const id = rowCount;
@@ -1059,11 +1028,9 @@
         tbody.appendChild(tr);
         renderDoc();
       }
-
       function agregarFila() {
         agregarFilaConValores();
       }
-
       function agregarDesdeLista() {
         const input = document.getElementById('lista-productos-input');
         const texto = input.value.trim();
@@ -1071,19 +1038,15 @@
           alert('Pegue la lista de productos para importarla.');
           return;
         }
-
         const lineas = texto.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
         const productos = [];
         let productoActual = null;
-
         lineas.forEach((linea) => {
           const productoMatch = linea.match(/^(\d+(?:[.,]\d+)?)\s+(\d+)\s+(.+?)\s+([0-9,]+(?:\.\d+)?)\s*$/);
-
           if (productoMatch) {
             if (productoActual) {
               productos.push(productoActual);
             }
-
             productoActual = {
               qty: parseFloat(productoMatch[1]) || 1,
               sku: String(productoMatch[2]).trim(),
@@ -1093,7 +1056,6 @@
             };
             return;
           }
-
           const esCupon = /cup[oó]n|aplica/i.test(linea);
           if (productoActual && esCupon) {
             const ultimoNumero = linea.match(/([0-9][0-9,]*(?:\.\d+)?)/g);
@@ -1101,16 +1063,13 @@
             productoActual.cupo = parseMoney(valor);
           }
         });
-
         if (productoActual) {
           productos.push(productoActual);
         }
-
         if (!productos.length) {
           alert('No se detectaron productos válidos en el texto.');
           return;
         }
-
         productos.forEach((p) => {
           const precioNormal = calcularPrecioNormal(p.promo, p.cupo);
           agregarFilaConValores({
@@ -1121,17 +1080,14 @@
             promo: p.promo,
           });
         });
-
         input.value = '';
         renderDoc();
       }
-
       function eliminarFila(id) {
         const row = document.getElementById(`input-row-${id}`);
         if (row) row.remove();
         renderDoc();
       }
-
       function getProductData() {
         const rows = document.querySelectorAll("#product-rows tr");
         const products = [];
@@ -1147,37 +1103,35 @@
         });
         return products;
       }
-
       const fmt = (n) =>
         "L. " +
         n.toLocaleString("es-HN", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
         });
-
       function renderDoc() {
         const products = getProductData();
         const tbody = document.getElementById("out-product-rows");
+        const incluirISV = document.getElementById("in-incluirISV").checked;
+        const labelNormal = document.getElementById("label-subtotalNormal");
+        const labelPromo = document.getElementById("label-subtotalPromo");
+
+        labelNormal.textContent = incluirISV
+          ? "Subtotal precio normal (sin ISV):"
+          : "Subtotal (precio normal):";
+        labelPromo.textContent = incluirISV
+          ? "Subtotal precio promo (sin ISV):"
+          : "Subtotal (precio promo):";
+
         tbody.innerHTML = "";
+        let totalNormal = 0;
+        let totalPromo = 0;
 
-        if (products.length === 0) {
-          tbody.innerHTML = `<tr id="empty-row"><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Agrega productos desde el panel izquierdo</td></tr>`;
-          document.getElementById("out-subtotalNormal").textContent = fmt(0);
-          document.getElementById("out-subtotalPromo").textContent = fmt(0);
-          document.getElementById("out-savings").textContent = fmt(0);
-          document.getElementById("out-total").textContent = fmt(0);
-          return;
-        }
-
-        let totalNormal = 0,
-          totalPromo = 0;
-
-        products.forEach((p, i) => {
+        products.forEach((p) => {
           const usePromo = p.promo > 0 && p.promo < p.price;
           const unitPrice = usePromo ? p.promo : p.price;
           const subtotal = unitPrice * p.qty;
           const subNormal = p.price * p.qty;
-
           totalNormal += subNormal;
           totalPromo += subtotal;
 
@@ -1189,22 +1143,30 @@
                 <td class="td-price">${p.price > 0 ? fmt(p.price) : "—"}</td>
                 <td class="td-promo">${p.promo > 0 ? fmt(p.promo) : "—"}</td>
                 <td class="td-sub">${fmt(subtotal)}</td>
-            `;
+          `;
           tbody.appendChild(tr);
         });
 
-        const savings = totalNormal - totalPromo;
+        if (products.length === 0) {
+          tbody.innerHTML = `<tr id="empty-row"><td colspan="6" style="text-align:center;color:#aaa;padding:20px;font-style:italic">Agrega productos desde el panel izquierdo</td></tr>`;
+        }
 
-        document.getElementById("out-subtotalNormal").textContent =
-          fmt(totalNormal);
-        document.getElementById("out-subtotalPromo").textContent =
-          fmt(totalPromo);
-        document.getElementById("out-savings").textContent = fmt(
-          savings > 0 ? savings : 0,
-        );
+        // Cuando se activa ISV, los precios ingresados se consideran ISV-incluido.
+        // Se muestra el subtotal neto, se desglosa el impuesto y el total bruto no cambia.
+        const subtotalNormalMostrar = incluirISV ? totalNormal / 1.15 : totalNormal;
+        const subtotalPromoMostrar = incluirISV ? totalPromo / 1.15 : totalPromo;
+        const montoISV = incluirISV ? totalPromo - subtotalPromoMostrar : 0;
+        const savings = totalNormal - totalPromo;
+        const ahorroMostrar = incluirISV ? savings / 1.15 : savings;
+
+        document.getElementById("out-subtotalNormal").textContent = fmt(subtotalNormalMostrar);
+        document.getElementById("out-subtotalPromo").textContent = fmt(subtotalPromoMostrar);
+        document.getElementById("out-savings").textContent = fmt(ahorroMostrar > 0 ? ahorroMostrar : 0);
+        document.getElementById("row-isv").style.display = incluirISV ? "" : "none";
+        document.getElementById("out-isv").textContent = fmt(montoISV);
+        // El total conserva el precio original, que ya incluye el ISV cuando se activa la opción.
         document.getElementById("out-total").textContent = fmt(totalPromo);
       }
-
       // Fila inicial vacía al cargar
       agregarFila();
       // Cargar datos guardados
