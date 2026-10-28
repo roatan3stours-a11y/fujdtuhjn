@@ -27,7 +27,17 @@
         --gold: #c8873a;
       }
 
+      html {
+        width: 100%;
+        min-height: 100%;
+        overflow-x: clip;
+        scroll-behavior: smooth;
+      }
+
       body {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
         font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
         background: var(--canvas);
         color: var(--ink);
@@ -37,7 +47,7 @@
         align-items: center;
         padding: 0;
         position: relative;
-        overflow-x: hidden;
+        overflow-x: clip;
       }
 
       /* Franja decorativa superior */
@@ -310,13 +320,48 @@
       #app-frame {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
+        inset: 0;
         width: 100%;
-        height: 100%;
-        border: none;
+        max-width: 100%;
+        height: 100dvh;
+        height: 100vh;
+        border: 0;
+        margin: 0;
+        padding: 0;
         z-index: 100;
         background: #fff;
+        overflow: auto;
+        overscroll-behavior: contain;
+      }
+
+      body.app-open {
+        overflow: hidden;
+        height: 100%;
+      }
+
+      #menu-view,
+      .brand,
+      .menu-toolbar,
+      .menu,
+      .footer-text,
+      .empty-state {
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      .brand {
+        min-width: 0;
+      }
+
+      .brand-copy {
+        min-width: 0;
+      }
+
+      .brand h1,
+      .brand p,
+      .card-title,
+      .card-desc {
+        overflow-wrap: anywhere;
       }
 
       #btn-back {
@@ -335,8 +380,9 @@
         cursor: pointer;
         letter-spacing: 0.5px;
         box-shadow: 0 4px 14px rgba(8, 126, 112, 0.25);
-        transition: background 0.2s, box-shadow 0.2s;
+        transition: background 0.2s, box-shadow 0.2s, transform 0.2s;
         font-family: "DM Sans", "Segoe UI", Arial, sans-serif;
+        max-width: calc(100vw - 28px);
       }
 
       #btn-back:hover {
@@ -352,6 +398,7 @@
 
       @media (max-width: 640px) {
         .brand {
+          align-items: center;
           padding: 14px 16px;
           gap: 14px;
           margin-bottom: 24px;
@@ -540,6 +587,11 @@
       const menuSearch = document.getElementById("menu-search");
       const menuCards = [...document.querySelectorAll(".menu-card")];
       const emptyState = document.getElementById("empty-state");
+      const frame = document.getElementById("app-frame");
+      const btnBack = document.getElementById("btn-back");
+      const menuView = document.getElementById("menu-view");
+      let appAbierta = false;
+      let urlActual = "";
 
       menuSearch.addEventListener("input", () => {
         const query = menuSearch.value.trim().toLocaleLowerCase("es");
@@ -554,28 +606,68 @@
         emptyState.style.display = visibleCards ? "none" : "block";
       });
 
-      function abrirApp(url) {
-        const frame = document.getElementById("app-frame");
-        const btnBack = document.getElementById("btn-back");
-        const menuView = document.getElementById("menu-view");
+      function mostrarMenu() {
+        appAbierta = false;
+        frame.style.display = "none";
+        frame.removeAttribute("src");
+        btnBack.style.display = "none";
+        menuView.style.display = "flex";
+        document.body.classList.remove("app-open");
+        urlActual = "";
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+      }
 
+      function abrirApp(url) {
+        if (!url) return false;
+
+        urlActual = url;
+        appAbierta = true;
         frame.src = url;
         frame.style.display = "block";
         btnBack.style.display = "block";
         menuView.style.display = "none";
+        document.body.classList.add("app-open");
+
+        // Registra la apertura para que el botón Atrás del navegador
+        // vuelva al menú en lugar de dejar la página en un estado desplazado.
+        if (!history.state || history.state.portalApp !== url) {
+          history.pushState({ portalApp: url }, "", "#" + encodeURIComponent(url));
+        }
         return false;
       }
 
       function volverMenu() {
-        const frame = document.getElementById("app-frame");
-        const btnBack = document.getElementById("btn-back");
-        const menuView = document.getElementById("menu-view");
-
-        frame.style.display = "none";
-        frame.src = "";
-        btnBack.style.display = "none";
-        menuView.style.display = "block";
+        if (history.state && history.state.portalApp) {
+          history.back();
+        } else {
+          mostrarMenu();
+        }
       }
+
+      window.addEventListener("popstate", (event) => {
+        if (event.state && event.state.portalApp) {
+          // Si se navega entre estados de aplicaciones, conserva el marco estable.
+          const nuevaUrl = event.state.portalApp;
+          if (nuevaUrl !== urlActual) {
+            urlActual = nuevaUrl;
+            frame.src = nuevaUrl;
+          }
+          appAbierta = true;
+          frame.style.display = "block";
+          btnBack.style.display = "block";
+          menuView.style.display = "none";
+          document.body.classList.add("app-open");
+        } else {
+          mostrarMenu();
+        }
+      });
+
+      // Evita restauraciones de scroll horizontal que desplazan el portal.
+      window.addEventListener("pageshow", () => {
+        if (!appAbierta) {
+          window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        }
+      });
     </script>
   </body>
 </html>
