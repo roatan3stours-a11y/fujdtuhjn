@@ -108,6 +108,12 @@
       .toolbar-btn.btn-blue:hover {
         background-color: #003d80;
       }
+      .toolbar-btn.btn-print {
+        background-color: #0056b3;
+      }
+      .toolbar-btn.btn-print:hover {
+        background-color: #003d80;
+      }
 
       .app-container {
         display: flex;
@@ -429,6 +435,13 @@
         margin-top: 1%;
       }
 
+      .tag-validity {
+        color: #333;
+        font-size: 1.5cqw;
+        font-weight: 700;
+        text-align: right;
+      }
+
       .discount-badge {
         background-color: #e30613;
         color: white;
@@ -453,6 +466,23 @@
         font-weight: 800;
         text-transform: uppercase;
         line-height: 1.1;
+      }
+
+      .discount-badge.text-only {
+        width: auto;
+        aspect-ratio: auto;
+        padding: 0 2%;
+        background: transparent;
+        color: #000;
+        flex: 0 0 auto;
+      }
+
+      .discount-badge.text-only .text {
+        display: none;
+      }
+
+      .discount-badge.hidden {
+        display: none;
       }
 
       .super-precio-box {
@@ -1040,7 +1070,8 @@
           margin: 0 !important;
           padding: 0 !important;
           width: 100% !important;
-          height: 100% !important;
+          height: auto !important;
+          min-height: 0 !important;
           overflow: visible !important;
         }
         .top-toolbar,
@@ -1056,6 +1087,10 @@
           max-height: none !important;
           overflow: visible !important;
         }
+        .app-container {
+          min-height: 0 !important;
+          padding-top: 0 !important;
+        }
         .pages-container {
           gap: 0 !important;
           margin: 0 !important;
@@ -1064,11 +1099,14 @@
         .letter-page-wrapper {
           box-shadow: none !important;
           margin: 0 !important;
-          padding: 4mm !important;
           box-sizing: border-box !important;
           overflow: hidden !important;
           page-break-after: always !important;
           break-after: page !important;
+        }
+        .letter-page-wrapper:last-child {
+          page-break-after: auto !important;
+          break-after: auto !important;
         }
         .letter-page-wrapper.portrait {
           width: 215.9mm !important;
@@ -1087,6 +1125,9 @@
       <span class="toolbar-title">🏷️ Preciador Molineros</span>
       <button class="toolbar-btn" id="btnOpenConfigModal">
         ⚙️ Configuraciones
+      </button>
+      <button class="toolbar-btn btn-print" id="btnPrint">
+        🖨️ Imprimir Preciador
       </button>
       <button class="toolbar-btn btn-blue" id="btnOpenModal">
         📦 Productos
@@ -1132,8 +1173,10 @@
 
             <div class="section-title">2. Vigencia y texto legal</div>
             <div class="form-group">
-              <label for="inpValidUntil">Válido hasta (fecha)</label>
-              <input type="date" id="inpValidUntil" value="2026-10-31" />
+              <p style="font-size: 12px; color: #64748b">
+                La vigencia se calcula automáticamente hasta el último día del
+                mes actual.
+              </p>
             </div>
             <div class="form-group">
               <label for="inpLegalNote">Nota legal extra (opcional)</label>
@@ -1248,8 +1291,8 @@
               <input
                 type="range"
                 id="sliderCuotaSize"
-                min="6"
-                max="22"
+                min="3"
+                max="28"
                 step="0.5"
                 value="13"
               />
@@ -1356,9 +1399,43 @@
               />
             </div>
 
-            <button type="button" class="btn" onclick="window.print()">
-              🖨️ Imprimir Preciador
-            </button>
+            <div class="section-title">5. Impresión y recorte</div>
+            <div class="form-group">
+              <label for="sPageMargin">
+                Margen al borde de la hoja
+                (<span id="lblPageMargin">4</span> mm)
+              </label>
+              <input
+                type="range"
+                id="sPageMargin"
+                min="0"
+                max="15"
+                step="0.5"
+                value="4"
+              />
+            </div>
+            <div class="form-group">
+              <label for="sLabelGap">
+                Separación entre etiquetas
+                (<span id="lblLabelGap">2</span> mm)
+              </label>
+              <input
+                type="range"
+                id="sLabelGap"
+                min="0"
+                max="10"
+                step="0.5"
+                value="2"
+              />
+            </div>
+            <div class="form-group">
+              <label for="selDiscountStyle">Presentación del descuento</label>
+              <select id="selDiscountStyle">
+                <option value="badge">Cuadro rojo</option>
+                <option value="text">Solo porcentaje en negro</option>
+                <option value="hidden">Ocultar descuento</option>
+              </select>
+            </div>
             <button
               type="button"
               class="btn btn-secondary"
@@ -1719,7 +1796,6 @@
       const defaultConfig = {
         inpPageOrientation: "portrait",
         inpItemsPerPage: "4",
-        inpValidUntil: "2026-10-31",
         inpLegalNote: "",
         sliderHeaderHeight: "18",
         sliderGarantiaSize: "18",
@@ -1737,6 +1813,9 @@
         sGreenBoxBorder: "4",
         sGreenBoxRadius: "12",
         chkShowGreenBox: true,
+        sPageMargin: "4",
+        sLabelGap: "2",
+        selDiscountStyle: "badge",
       };
 
       // INDEXEDDB DATABASE HELPER
@@ -1761,6 +1840,7 @@
 
       const configModal = document.getElementById("configModal");
       const btnOpenConfigModal = document.getElementById("btnOpenConfigModal");
+      document.getElementById("btnPrint").addEventListener("click", () => window.print());
       const btnCloseConfigModal = document.getElementById(
         "btnCloseConfigModal",
       );
@@ -1912,6 +1992,8 @@
           lblGreenBoxHeight: "sGreenBoxHeight",
           lblGreenBoxBorder: "sGreenBoxBorder",
           lblGreenBoxRadius: "sGreenBoxRadius",
+          lblPageMargin: "sPageMargin",
+          lblLabelGap: "sLabelGap",
         };
         Object.entries(map).forEach(([lbl, inp]) => {
           const l = document.getElementById(lbl);
@@ -1982,6 +2064,14 @@
         return new Intl.NumberFormat("en-US", {
           maximumFractionDigits: 0,
         }).format(Math.round(cleanVal));
+      }
+
+      function getCurrentMonthExpirationDate() {
+        const now = new Date();
+        const expiration = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        const day = String(expiration.getDate()).padStart(2, "0");
+        const month = String(expiration.getMonth() + 1).padStart(2, "0");
+        return `${day}/${month}/${expiration.getFullYear()}`;
       }
 
       function parseImportedMoney(value) {
@@ -2369,15 +2459,14 @@
         const precioNormalFormat = parseAndFormat(product.precioNormal);
         const descPct = Math.round(parseFloat(product.descuento) || 0);
 
-        const validUntilIso =
-          document.getElementById("inpValidUntil").value || "2026-10-31";
-        const validUntilStr = formatDateDDMMYYYY(validUntilIso);
+        const validUntilStr = getCurrentMonthExpirationDate();
         const printDateStr = todayFormatted();
         const extraNote = (
           document.getElementById("inpLegalNote").value || ""
         ).trim();
 
         const legalText = `Válido hasta: ${validUntilStr} o hasta agotar existencias. Cuotas calculadas a 36 meses con 20% de prima. Regalos, precios y promociones sujetos a disponibilidad y a cambio sin previo aviso. Consulte al vendedor por esta promoción. Garantía extendida no aplica a todos los artículos. Fecha de impresión: ${printDateStr}.${extraNote ? " " + extraNote : ""}`;
+        const discountStyle = document.getElementById("selDiscountStyle").value;
 
         const savedHeader = localStorage.getItem("preciador_header_img");
         const savedGarantia = localStorage.getItem("preciador_garantia_img");
@@ -2426,8 +2515,8 @@
                 </div>
 
                 <div class="tag-footer">
-                    <div class="discount-badge">
-                        <div class="percent outDescuento">${descPct}%</div>
+                    <div class="discount-badge ${discountStyle === "text" ? "text-only" : discountStyle === "hidden" ? "hidden" : ""}">
+                        <div class="percent outDescuento">${Math.round(descPct)}%</div>
                         <div class="text">DESCUENTO EN PROMOCIÓN DE CONTADO</div>
                     </div>
 
@@ -2445,7 +2534,6 @@
                         <img class="imgGarantiaPreview" ${garantiaImgStyle} alt="Garantía">
                     </div>
                 </div>
-
                 <div class="legal-footer" style="font-size: ${document.getElementById("sLegalSize").value}cqw;">
                   ${legalText}
                 </div>
@@ -2462,6 +2550,8 @@
         );
         const orientation = document.getElementById("inpPageOrientation")
           .value;
+        const pageMargin = document.getElementById("sPageMargin").value;
+        const labelGap = document.getElementById("sLabelGap").value;
 
         pagesContainer.innerHTML = "";
         const activePrints = products.filter((p) =>
@@ -2523,11 +2613,13 @@
         for (let p = 0; p < totalPages; p++) {
           const pageWrapper = document.createElement("div");
           pageWrapper.className = `letter-page-wrapper ${orientation}`;
+          pageWrapper.style.padding = `${pageMargin}mm`;
 
           const gridContainer = document.createElement("div");
           gridContainer.className = "print-grid-container";
           gridContainer.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
           gridContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+          gridContainer.style.gap = `${labelGap}mm`;
 
           const startIndex = p * countPerPage;
           for (let i = 0; i < countPerPage; i++) {
@@ -2552,7 +2644,7 @@
                     grid-template-rows: repeat(${rows}, 1fr) !important;
                     width: 100% !important;
                     height: 100% !important;
-                    gap: 2mm !important;
+                    gap: ${labelGap}mm !important;
                     box-sizing: border-box !important;
                 }
                 .tag-card {
@@ -2565,6 +2657,7 @@
             }
         `;
       }
+      window.addEventListener("beforeprint", updatePrintLayout);
 
       // GESTIÓN HISTORIAL INDEXEDDB
       document
